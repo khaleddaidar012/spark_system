@@ -18,9 +18,9 @@
 - [x] Create shared assets folders
 
 ## Design System
-- [ ] Create CSS variables (colors / themes)
-- [ ] Create base & reset styles
-- [ ] Create typography styles
+- [x] Create CSS variables (colors / themes)
+- [x] Create base & reset styles
+- [x] Create typography styles
 - [ ] Create component styles (buttons, cards, forms, badges)
 
 ## Login Page

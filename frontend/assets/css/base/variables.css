@@ -1,0 +1,121 @@
+/* ============================================
+   Spark ERP — Design Tokens (CSS Variables)
+   ============================================ */
+
+:root {
+  /* Fonts */
+  --font-family: "Segoe UI", Tahoma, "Noto Kufi Arabic", "Cairo", system-ui,
+    -apple-system, "Helvetica Neue", Arial, sans-serif;
+  --font-size-base: 15px;
+  --font-size-sm: 0.85rem;
+  --font-size-xs: 0.75rem;
+  --font-size-md: 1rem;
+  --font-size-lg: 1.15rem;
+  --font-size-xl: 1.5rem;
+  --font-size-2xl: 2rem;
+
+  /* Spacing */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+
+  /* Radius */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.06);
+  --shadow-md: 0 4px 12px rgba(15, 23, 42, 0.08);
+  --shadow-lg: 0 12px 32px rgba(15, 23, 42, 0.12);
+
+  /* Motion */
+  --transition-fast: 200ms;
+  --transition-normal: 250ms;
+  --transition-slow: 300ms;
+  --ease: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Layout */
+  --sidebar-width: 250px;
+  --sidebar-collapsed-width: 76px;
+  --navbar-height: 64px;
+
+  /* Color palette */
+  --primary: #2563eb;
+  --primary-hover: #1d4ed8;
+  --primary-soft: rgba(37, 99, 235, 0.1);
+  --primary-contrast: #ffffff;
+  --accent: #f97316;
+  --accent-hover: #ea580c;
+  --accent-soft: rgba(249, 115, 22, 0.12);
+  --success: #16a34a;
+  --success-soft: rgba(22, 163, 74, 0.12);
+  --warning: #d97706;
+  --warning-soft: rgba(217, 119, 6, 0.14);
+  --danger: #dc2626;
+  --danger-soft: rgba(220, 38, 38, 0.12);
+  --info: #0891b2;
+  --info-soft: rgba(8, 145, 178, 0.12);
+
+  /* Surface colors — Light Mode (default) */
+  --bg: #f1f5f9;
+  --surface: #ffffff;
+  --surface-2: #f8fafc;
+  --surface-3: #eef2f7;
+  --border: #e2e8f0;
+  --border-strong: #cbd5e1;
+  --text: #0f172a;
+  --text-muted: #64748b;
+  --text-inverse: #f8fafc;
+  --hover: rgba(15, 23, 42, 0.05);
+  --overlay: rgba(15, 23, 42, 0.5);
+}
+
+/* ============================================
+   Dark Mode
+   ============================================ */
+
+[data-theme="dark"] {
+  --bg: #0b1220;
+  --surface: #141d30;
+  --surface-2: #1a2438;
+  --surface-3: #223049;
+  --border: #263247;
+  --border-strong: #35425c;
+  --text: #e6ebf4;
+  --text-muted: #94a3b8;
+  --text-inverse: #0b1220;
+  --hover: rgba(255, 255, 255, 0.05);
+  --overlay: rgba(0, 0, 0, 0.6);
+
+  --primary: #60a5fa;
+  --primary-hover: #3b82f6;
+  --primary-soft: rgba(96, 165, 250, 0.15);
+  --accent: #fb923c;
+  --accent-hover: #f97316;
+  --accent-soft: rgba(251, 146, 60, 0.15);
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.5);
+}
+
+/* ============================================
+   RTL — logical direction helpers
+   ============================================ */
+
+:root {
+  --dir-start: left;
+  --dir-end: right;
+}
+
+[dir="rtl"] {
+  --dir-start: right;
+  --dir-end: left;
+}
