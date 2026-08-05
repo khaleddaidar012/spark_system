@@ -43,8 +43,8 @@
   --ease: cubic-bezier(0.4, 0, 0.2, 1);
 
   /* Layout */
-  --sidebar-width: 250px;
-  --sidebar-collapsed-width: 76px;
+  --sidebar-width: 220px;
+  --sidebar-collapsed-width: 72px;
   --navbar-height: 64px;
 
   /* Color palette */
