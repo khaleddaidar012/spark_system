@@ -100,8 +100,8 @@ document.addEventListener("DOMContentLoaded", () => {
     loginBtn.disabled = true;
     loginBtn.textContent = "Signing in…";
     setTimeout(() => {
-      loginBtn.disabled = false;
-      loginBtn.textContent = "Sign In";
-    }, 1200);
+      // UI only — no real authentication yet. Redirect to the dashboard.
+      window.location.href = "./dashboard.html";
+    }, 800);
   });
 });

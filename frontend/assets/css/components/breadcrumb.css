@@ -1,6 +1,5 @@
 /* ============================================
-   Spark ERP — Breadcrumb (placeholder)
-   Expanded in the Dashboard phase.
+   Spark ERP — Breadcrumb
    ============================================ */
 
 .breadcrumb {
@@ -9,4 +8,28 @@
   gap: var(--space-2);
   font-size: var(--font-size-sm);
   color: var(--text-muted);
+  min-width: 0;
+}
+
+.breadcrumb-item {
+  white-space: nowrap;
+}
+
+.breadcrumb-item + .breadcrumb-item::before {
+  content: "/";
+  margin-inline-end: var(--space-2);
+  color: var(--border-strong);
+}
+
+.breadcrumb-item a {
+  color: var(--text-muted);
+}
+
+.breadcrumb-item a:hover {
+  color: var(--primary);
+}
+
+.breadcrumb-item.is-current {
+  color: var(--text);
+  font-weight: 600;
 }

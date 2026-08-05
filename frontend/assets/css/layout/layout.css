@@ -1,15 +1,33 @@
 /* ============================================
-   Spark ERP — App layout shell (placeholder)
-   Sidebar + content grid. Expanded in Dashboard phase.
+   Spark ERP — App layout shell
    ============================================ */
 
 .app-layout {
   min-height: 100vh;
-  display: grid;
-  grid-template-columns: var(--sidebar-width) 1fr;
 }
 
 .app-main {
   min-width: 0;
+  min-height: 100vh;
+  margin-inline-start: var(--sidebar-width);
+  transition: margin-inline-start var(--transition-normal) var(--ease);
+}
+
+body.sidebar-collapsed .app-main {
+  margin-inline-start: var(--sidebar-collapsed-width);
+}
+
+.app-content {
   padding: var(--space-6);
+}
+
+@media (max-width: 900px) {
+  .app-main,
+  body.sidebar-collapsed .app-main {
+    margin-inline-start: 0;
+  }
+
+  .app-content {
+    padding: var(--space-4);
+  }
 }

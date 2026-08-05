@@ -1,10 +1,108 @@
 /* ============================================
-   Spark ERP — Charts (placeholder)
-   Expanded in the Dashboard phase.
+   Spark ERP — Charts
+   Demo bar charts rendered by the dashboard module.
    ============================================ */
 
 .chart {
   position: relative;
   width: 100%;
   min-height: 240px;
+}
+
+/* Vertical bar chart */
+.chart-bars {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--space-2);
+  height: 220px;
+}
+
+.chart-bar {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: var(--space-1);
+}
+
+.chart-bar-fill {
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+  background: linear-gradient(180deg, var(--primary), var(--primary-hover));
+  min-height: 2px;
+  transition: height 0.6s var(--ease);
+}
+
+.chart-bar-label,
+.chart-bar-value {
+  text-align: center;
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.chart-bar-value {
+  font-weight: 600;
+  color: var(--text);
+}
+
+/* Horizontal bar chart */
+.chart-rows {
+  display: grid;
+  gap: var(--space-4);
+  padding-top: var(--space-2);
+}
+
+.chart-row {
+  display: grid;
+  grid-template-columns: 90px 1fr 70px;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.chart-row-label {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.chart-row-track {
+  height: 10px;
+  border-radius: var(--radius-full);
+  background: var(--surface-3);
+  overflow: hidden;
+}
+
+.chart-row-fill {
+  height: 100%;
+  width: 0;
+  border-radius: var(--radius-full);
+  background: linear-gradient(90deg, var(--primary), var(--primary-hover));
+  transition: width 0.6s var(--ease);
+}
+
+.chart-row-value {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  text-align: end;
+  white-space: nowrap;
+}
+
+/* Fill color variants */
+.fill-success { background: linear-gradient(180deg, #22c55e, var(--success)); }
+.fill-danger { background: linear-gradient(180deg, #ef4444, var(--danger)); }
+.fill-accent { background: linear-gradient(180deg, #fb923c, var(--accent-hover)); }
+.fill-info { background: linear-gradient(180deg, #06b6d4, var(--info)); }
+.fill-warning { background: linear-gradient(180deg, #f59e0b, var(--warning)); }
+
+.chart-rows .fill-accent {
+  background: linear-gradient(90deg, var(--accent), var(--accent-hover));
+}
+
+.chart-rows .fill-info {
+  background: linear-gradient(90deg, var(--info), #06b6d4);
 }
