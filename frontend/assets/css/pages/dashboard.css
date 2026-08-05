@@ -1,16 +1,9 @@
 /* ============================================
-   Spark ERP — Dashboard
+   Spark ERP — Dashboard (module cards)
    ============================================ */
 
-/* ---------- Page header ---------- */
-
 .page-header {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: var(--space-4);
-  flex-wrap: wrap;
-  margin-bottom: var(--space-8);
+  margin-bottom: var(--space-6);
 }
 
 .page-title {
@@ -22,69 +15,45 @@
   margin-top: var(--space-1);
 }
 
-.page-actions {
-  display: flex;
-  gap: var(--space-3);
-  flex-wrap: wrap;
-}
+/* ---------- Module cards ---------- */
 
-/* ---------- Statistics ---------- */
-
-.dashboard-stats {
+.dashboard-modules {
+  flex: 1;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: var(--space-5);
+  align-content: start;
 }
 
-/* ---------- Statistic cards ---------- */
-
-.stat-card {
-  position: relative;
+.module-card {
   display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
+  align-items: flex-start;
+  gap: var(--space-4);
   padding: var(--space-6);
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-sm);
-  overflow: hidden;
+  color: var(--text);
+  min-height: 180px;
   transition: transform var(--transition-fast) var(--ease),
     box-shadow var(--transition-fast) var(--ease),
     border-color var(--transition-fast) var(--ease);
 }
 
-/* Accent top bar */
-.stat-card::before {
-  content: "";
-  position: absolute;
-  inset-inline: 0;
-  top: 0;
-  height: 3px;
-  background: var(--card-accent, var(--primary));
-}
-
-.stat-card.is-primary { --card-accent: var(--primary); }
-.stat-card.is-success { --card-accent: var(--success); }
-.stat-card.is-danger { --card-accent: var(--danger); }
-.stat-card.is-accent { --card-accent: var(--accent); }
-
-.stat-card:hover {
-  transform: translateY(-3px);
-  box-shadow: var(--shadow-md);
+.module-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
   border-color: var(--border-strong);
 }
 
-.stat-card-top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-3);
+.module-card:active {
+  transform: translateY(-2px) scale(0.98);
 }
 
-.stat-icon {
-  width: 46px;
-  height: 46px;
+.module-card-icon {
+  width: 52px;
+  height: 52px;
   flex-shrink: 0;
   display: flex;
   align-items: center;
@@ -92,60 +61,62 @@
   border-radius: var(--radius-md);
 }
 
-.stat-icon .icon {
-  width: 24px;
-  height: 24px;
+.module-card-icon .icon {
+  width: 26px;
+  height: 26px;
 }
 
-.stat-value {
-  font-size: var(--font-size-2xl);
+.module-card-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.module-card-title {
+  font-size: var(--font-size-xl);
   font-weight: 700;
-  line-height: 1.15;
-  color: var(--text);
+  margin-bottom: var(--space-2);
 }
 
-.stat-label {
+.module-card-desc {
   font-size: var(--font-size-sm);
   color: var(--text-muted);
+  line-height: 1.6;
 }
 
-.stat-trend {
-  display: inline-flex;
-  align-items: center;
-  gap: 2px;
-  font-size: var(--font-size-xs);
-  font-weight: 700;
-  padding: 3px 10px;
-  border-radius: var(--radius-full);
-  white-space: nowrap;
+.module-card-arrow {
+  align-self: center;
+  flex-shrink: 0;
+  color: var(--text-muted);
+  opacity: 0;
+  transform: translateX(4px);
+  transition: opacity var(--transition-fast) var(--ease),
+    transform var(--transition-fast) var(--ease);
 }
 
-.stat-trend .icon {
-  width: 14px;
-  height: 14px;
+.module-card-arrow .icon {
+  width: 20px;
+  height: 20px;
 }
 
-.stat-trend.up {
-  color: var(--success);
-  background: var(--success-soft);
+.module-card:hover .module-card-arrow {
+  opacity: 1;
+  transform: translateX(0);
 }
 
-.stat-trend.down {
-  color: var(--danger);
-  background: var(--danger-soft);
+/* Flip arrow for RTL */
+[dir="rtl"] .module-card-arrow [data-lucide] {
+  transform: rotate(180deg);
 }
 
 /* ---------- Responsive ---------- */
 
 @media (max-width: 640px) {
-  .page-header {
-    align-items: flex-start;
-    flex-direction: column;
-    margin-bottom: var(--space-6);
-  }
-
-  .dashboard-stats {
+  .dashboard-modules {
     grid-template-columns: 1fr;
     gap: var(--space-4);
+  }
+
+  .module-card {
+    min-height: 150px;
   }
 }

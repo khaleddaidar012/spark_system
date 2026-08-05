@@ -1,63 +1,72 @@
-# TASKS2 — UI Improvements & Task Breakdown
+# TASKS2 — Dashboard Redesign & UI Improvements
 
-> Working list of small UI improvement tasks.
+> Working list of small tasks.
 > One task at a time. Mark `- [x]` as soon as a task is done.
 > Commit + push after each completed logical group.
 
 ---
 
-## Dashboard Improvements
-- [x] Simplify dashboard layout
-- [x] Remove unnecessary sections (charts, lists)
-- [x] Keep only essential summary cards
-- [x] Improve card spacing
-- [x] Improve typography
-- [x] Improve card hover animation
-- [x] Improve mobile layout
-
-## Dashboard Cards
-- [x] Redesign summary cards
-- [x] Add accent color icons
-- [x] Ensure equal card height
-- [x] Improve shadow & radius
-- [x] Improve trend readability
-- [x] Responsive grid for mobile
+## Layout
+- [x] Redesign main layout (top navbar + right sidebar + content)
+- [x] Right sidebar placement (RTL friendly)
+- [x] Remove unnecessary sections
 
 ## Sidebar
-- [x] Fix spacing
-- [x] Fix alignment
-- [x] Fix RTL layout
-- [x] Improve active state
-- [x] Improve collapse animation
-- [x] Improve mobile sidebar
-- [x] Fixed navigation behavior
+- [x] Only main modules (Dashboard, Projects, Suppliers, Financial Accounts, Contractors, Reports)
+- [x] Lucide icons
+- [x] Active page highlighting
+- [x] Hover effects
+- [x] Smooth collapse animation
+- [x] Mobile slide drawer
+- [x] Tablet + desktop support
 
-## Icons
-- [x] Add Lucide icon library
-- [x] Replace sidebar icons
-- [x] Replace navbar icons
-- [x] Replace dashboard icons
-- [x] Replace login icons
-- [x] Keep icon sizes consistent
+## Dashboard
+- [x] Large module cards only (no charts / activities / stats)
+- [x] Modern icon + title + description per card
+- [x] Hover + click animation
+- [x] Equal card sizes, auto responsive grid
+- [x] Clean and spacious
 
-## Arabic
-- [x] Add Arabic font
-- [x] Fix RTL spacing
-- [x] Fix text alignment
-- [x] Fix RTL sidebar
-- [x] Verify language switching
+## Navbar
+- [x] Company logo + name
+- [x] Language switcher
+- [x] Theme switcher
+- [x] User avatar
+- [x] No unnecessary buttons
 
-## UI Polish
-- [x] Improve shadows
-- [x] Improve border radius
-- [x] Improve colors
-- [x] Improve transitions
-- [x] Improve responsive layout
+## Theme
+- [x] Dark mode
+- [x] Light mode
+- [x] CSS variables
+- [x] Save theme in Local Storage
+- [x] Smooth transitions
 
-## Testing
-- [x] Test desktop
-- [x] Test tablet
-- [x] Test mobile
-- [x] Test theme switching
-- [x] Test language switching
-- [ ] Push final version to GitHub
+## Languages (i18n)
+- [x] English (LTR) translation file
+- [x] Arabic (RTL) translation file
+- [x] No hardcoded text (data-i18n driven)
+- [x] Correct Arabic RTL layout, spacing, fonts
+- [x] Language switcher works
+
+## Responsive
+- [x] Mobile
+- [x] Tablet
+- [x] Laptop
+- [x] Desktop
+- [x] Cards rearrange on screen size
+- [x] Sidebar becomes drawer on mobile
+- [x] Large touch targets
+
+## UI Style
+- [x] Minimal & premium
+- [x] Soft shadows
+- [x] Rounded corners
+- [x] Smooth transitions
+- [x] Balanced spacing
+- [x] Modern typography
+
+## Final
+- [x] No backend / CRUD / API / MongoDB (frontend only)
+- [x] Code verification passed
+- [ ] Commit changes
+- [ ] Push to GitHub

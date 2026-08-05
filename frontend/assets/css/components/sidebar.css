@@ -1,77 +1,20 @@
 /* ============================================
-   Spark ERP — Sidebar
+   Spark ERP — Sidebar (right side, RTL friendly)
    ============================================ */
 
 .sidebar {
   position: fixed;
-  top: 0;
-  inset-inline-start: 0;
+  top: var(--navbar-height);
+  right: 0;
   width: var(--sidebar-width);
-  height: 100vh;
+  height: calc(100vh - var(--navbar-height));
   display: flex;
   flex-direction: column;
   background: var(--surface);
-  border-inline-end: 1px solid var(--border);
+  border-left: 1px solid var(--border);
   z-index: 30;
   transition: width var(--transition-normal) var(--ease),
     transform var(--transition-normal) var(--ease);
-}
-
-/* ---------- Header ---------- */
-
-.sidebar-header {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-  height: var(--navbar-height);
-  flex-shrink: 0;
-  padding: 0 var(--space-4);
-  border-bottom: 1px solid var(--border);
-}
-
-.sidebar-brand {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-  min-width: 0;
-  color: var(--text);
-}
-
-.sidebar-brand:hover {
-  color: var(--text);
-}
-
-.sidebar-logo {
-  width: 38px;
-  height: 38px;
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: var(--radius-md);
-  background: linear-gradient(135deg, var(--primary), var(--primary-hover));
-  color: var(--primary-contrast);
-  box-shadow: 0 4px 12px var(--primary-soft);
-}
-
-.sidebar-logo svg {
-  width: 22px;
-  height: 22px;
-}
-
-.sidebar-brand-text {
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  font-size: var(--font-size-lg);
-  font-weight: 700;
-  transition: opacity var(--transition-fast) var(--ease),
-    width var(--transition-normal) var(--ease);
-}
-
-.sidebar-close {
-  display: none;
-  margin-inline-start: auto;
 }
 
 /* ---------- Navigation ---------- */
@@ -83,27 +26,9 @@
   padding: var(--space-4) var(--space-3);
 }
 
-.sidebar-section-label {
-  padding: 0 var(--space-3);
-  margin: var(--space-4) 0 var(--space-2);
-  font-size: var(--font-size-xs);
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--text-muted);
-  overflow: hidden;
-  white-space: nowrap;
-  transition: opacity var(--transition-fast) var(--ease),
-    width var(--transition-normal) var(--ease);
-}
-
-.sidebar-section-label:first-child {
-  margin-top: 0;
-}
-
 .sidebar-menu {
   display: grid;
-  gap: 2px;
+  gap: 4px;
 }
 
 .sidebar-link {
@@ -111,7 +36,7 @@
   display: flex;
   align-items: center;
   gap: var(--space-3);
-  padding: 10px var(--space-3);
+  padding: 11px var(--space-3);
   border-radius: var(--radius-md);
   font-weight: 600;
   font-size: var(--font-size-md);
@@ -140,7 +65,7 @@
   color: var(--text);
 }
 
-/* Active page: soft background + side indicator bar */
+/* Active page: soft background + indicator bar on the inner edge */
 .sidebar-link.is-active {
   background: var(--primary-soft);
   color: var(--primary);
@@ -149,7 +74,7 @@
 .sidebar-link.is-active::before {
   content: "";
   position: absolute;
-  inset-inline-start: 0;
+  left: 0;
   top: 50%;
   transform: translateY(-50%);
   width: 3px;
@@ -162,7 +87,7 @@
 
 .sidebar-footer {
   display: grid;
-  gap: 2px;
+  gap: 4px;
   flex-shrink: 0;
   padding: var(--space-3);
   border-top: 1px solid var(--border);
@@ -178,30 +103,14 @@ body.sidebar-collapsed .sidebar {
   width: var(--sidebar-collapsed-width);
 }
 
-body.sidebar-collapsed .sidebar-brand-text,
-body.sidebar-collapsed .sidebar-section-label,
 body.sidebar-collapsed .sidebar-link span {
   opacity: 0;
   width: 0;
 }
 
-body.sidebar-collapsed .sidebar-brand {
-  justify-content: center;
-}
-
 body.sidebar-collapsed .sidebar-link {
   justify-content: center;
   padding-inline: 0;
-}
-
-/* RTL: flip collapse icon direction */
-[dir="rtl"] .sidebar-collapse [data-lucide] {
-  transform: rotate(180deg);
-}
-
-/* Arabic: no letter-spacing on uppercase-style labels */
-[dir="rtl"] .sidebar-section-label {
-  letter-spacing: 0;
 }
 
 /* ---------- Backdrop (mobile) ---------- */
@@ -221,40 +130,25 @@ body.sidebar-collapsed .sidebar-link {
   pointer-events: auto;
 }
 
-/* ---------- Mobile ---------- */
+/* ---------- Mobile drawer ---------- */
 
 @media (max-width: 900px) {
   .sidebar {
-    transform: translateX(-100%);
+    transform: translateX(100%);
     box-shadow: var(--shadow-lg);
   }
 
-  [dir="rtl"] .sidebar {
-    transform: translateX(100%);
-  }
-
-  .sidebar.is-open,
-  [dir="rtl"] .sidebar.is-open {
+  .sidebar.is-open {
     transform: translateX(0);
-  }
-
-  .sidebar-close {
-    display: inline-flex;
   }
 
   body.sidebar-collapsed .sidebar {
     width: var(--sidebar-width);
   }
 
-  body.sidebar-collapsed .sidebar-brand-text,
-  body.sidebar-collapsed .sidebar-section-label,
   body.sidebar-collapsed .sidebar-link span {
     opacity: 1;
     width: auto;
-  }
-
-  body.sidebar-collapsed .sidebar-brand {
-    justify-content: flex-start;
   }
 
   body.sidebar-collapsed .sidebar-link {

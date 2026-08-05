@@ -13,85 +13,79 @@
     <!-- Reusable sidebar injected by layout module -->
     <div id="sidebar-root"></div>
 
-    <div class="app-main">
+    <div class="app-body">
       <!-- Reusable navbar injected by layout module -->
       <div id="navbar-root"></div>
 
-      <main class="app-content">
-        <!-- Page header -->
-        <div class="page-header">
-          <div>
+      <main class="app-main">
+        <div class="app-content">
+          <header class="page-header">
             <h1 class="page-title" data-i18n="dashboard.title">Dashboard</h1>
-            <p class="page-subtitle text-muted" data-i18n="dashboard.welcome">
-              Welcome back — here's what's happening today.
-            </p>
-          </div>
-          <div class="page-actions">
-            <button class="btn btn-outline" type="button">
-              <i data-lucide="folder-plus" class="icon"></i>
-              <span data-i18n="dashboard.newProject">New Project</span>
-            </button>
-            <button class="btn btn-primary" type="button">
-              <i data-lucide="circle-plus" class="icon"></i>
-              <span data-i18n="dashboard.quickEntry">Quick Entry</span>
-            </button>
-          </div>
-        </div>
+            <p class="page-subtitle text-muted" data-i18n="dashboard.welcome">Welcome back</p>
+          </header>
 
-        <!-- Statistics -->
-        <section class="dashboard-stats" aria-label="Statistics">
-          <article class="card stat-card is-primary">
-            <div class="stat-card-top">
-              <span class="stat-icon icon-primary" aria-hidden="true">
+          <section class="dashboard-modules" aria-label="Modules">
+            <a class="module-card" href="./projects.html">
+              <span class="module-card-icon icon-primary" aria-hidden="true">
                 <i data-lucide="folder" class="icon"></i>
               </span>
-              <span class="stat-trend up">
-                <i data-lucide="arrow-up-right" class="icon"></i>+12%
+              <div class="module-card-body">
+                <h2 class="module-card-title" data-i18n="dashboard.projectsTitle">Projects</h2>
+                <p class="module-card-desc" data-i18n="dashboard.projectsDesc">
+                  Plan, track and deliver engineering projects.
+                </p>
+              </div>
+              <span class="module-card-arrow" aria-hidden="true">
+                <i data-lucide="arrow-right" class="icon"></i>
               </span>
-            </div>
-            <p class="stat-value" data-stat="projects" data-i18n="dashboard.stats.totalProjects">0</p>
-            <p class="stat-label" data-i18n="dashboard.stats.totalProjectsLabel">Total Projects</p>
-          </article>
+            </a>
 
-          <article class="card stat-card is-success">
-            <div class="stat-card-top">
-              <span class="stat-icon icon-success" aria-hidden="true">
-                <i data-lucide="dollar-sign" class="icon"></i>
+            <a class="module-card" href="./suppliers.html">
+              <span class="module-card-icon icon-success" aria-hidden="true">
+                <i data-lucide="truck" class="icon"></i>
               </span>
-              <span class="stat-trend up">
-                <i data-lucide="arrow-up-right" class="icon"></i>+8%
+              <div class="module-card-body">
+                <h2 class="module-card-title" data-i18n="dashboard.suppliersTitle">Suppliers</h2>
+                <p class="module-card-desc" data-i18n="dashboard.suppliersDesc">
+                  Manage suppliers and material purchases.
+                </p>
+              </div>
+              <span class="module-card-arrow" aria-hidden="true">
+                <i data-lucide="arrow-right" class="icon"></i>
               </span>
-            </div>
-            <p class="stat-value" data-stat="income" data-prefix="$" data-i18n="dashboard.stats.totalIncome">0</p>
-            <p class="stat-label" data-i18n="dashboard.stats.totalIncomeLabel">Total Income</p>
-          </article>
+            </a>
 
-          <article class="card stat-card is-danger">
-            <div class="stat-card-top">
-              <span class="stat-icon icon-danger" aria-hidden="true">
-                <i data-lucide="credit-card" class="icon"></i>
+            <a class="module-card" href="./finance.html">
+              <span class="module-card-icon icon-accent" aria-hidden="true">
+                <i data-lucide="wallet" class="icon"></i>
               </span>
-              <span class="stat-trend down">
-                <i data-lucide="arrow-down-right" class="icon"></i>-4%
+              <div class="module-card-body">
+                <h2 class="module-card-title" data-i18n="dashboard.financeTitle">Financial Accounts</h2>
+                <p class="module-card-desc" data-i18n="dashboard.financeDesc">
+                  Monitor income, expenses and cash flow.
+                </p>
+              </div>
+              <span class="module-card-arrow" aria-hidden="true">
+                <i data-lucide="arrow-right" class="icon"></i>
               </span>
-            </div>
-            <p class="stat-value" data-stat="expenses" data-prefix="$" data-i18n="dashboard.stats.totalExpenses">0</p>
-            <p class="stat-label" data-i18n="dashboard.stats.totalExpensesLabel">Total Expenses</p>
-          </article>
+            </a>
 
-          <article class="card stat-card is-accent">
-            <div class="stat-card-top">
-              <span class="stat-icon icon-accent" aria-hidden="true">
-                <i data-lucide="trending-up" class="icon"></i>
+            <a class="module-card" href="./contractors.html">
+              <span class="module-card-icon icon-info" aria-hidden="true">
+                <i data-lucide="hard-hat" class="icon"></i>
               </span>
-              <span class="stat-trend up">
-                <i data-lucide="arrow-up-right" class="icon"></i>+15%
+              <div class="module-card-body">
+                <h2 class="module-card-title" data-i18n="dashboard.contractorsTitle">Contractors</h2>
+                <p class="module-card-desc" data-i18n="dashboard.contractorsDesc">
+                  Manage contractors and track their payments.
+                </p>
+              </div>
+              <span class="module-card-arrow" aria-hidden="true">
+                <i data-lucide="arrow-right" class="icon"></i>
               </span>
-            </div>
-            <p class="stat-value" data-stat="profit" data-prefix="$" data-i18n="dashboard.stats.netProfit">0</p>
-            <p class="stat-label" data-i18n="dashboard.stats.netProfitLabel">Net Profit</p>
-          </article>
-        </section>
+            </a>
+          </section>
+        </div>
       </main>
     </div>
   </div>

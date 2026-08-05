@@ -3,30 +3,26 @@
     <button class="btn btn-icon navbar-burger" id="sidebarToggle" type="button" aria-label="Toggle menu" title="Toggle menu">
       <i data-lucide="menu" class="icon"></i>
     </button>
-    <nav class="breadcrumb" id="breadcrumb" aria-label="Breadcrumb"></nav>
+    <a class="navbar-brand" href="./dashboard.html">
+      <span class="navbar-logo" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+        </svg>
+      </span>
+      <span class="navbar-brand-name" data-i18n="appName">Spark Engineering</span>
+    </a>
   </div>
 
   <div class="navbar-end">
-    <div class="navbar-search" role="search">
-      <i data-lucide="search" class="icon"></i>
-      <input type="search" class="navbar-search-input" placeholder="Search…" data-i18n-ph="nav.search" aria-label="Search" />
-    </div>
+    <button class="btn btn-icon" id="navLangToggle" type="button" aria-label="Switch language" title="العربية">ع</button>
 
     <button class="btn btn-icon" id="navThemeToggle" type="button" aria-label="Toggle theme" title="Toggle theme">
       <i data-lucide="moon" class="icon" data-theme-icon="dark"></i>
       <i data-lucide="sun" class="icon" data-theme-icon="light" style="display:none;"></i>
     </button>
 
-    <button class="btn btn-icon" id="navLangToggle" type="button" aria-label="Switch language" title="العربية">ع</button>
-
-    <button class="btn btn-icon navbar-notif" id="navNotifications" type="button" aria-label="Notifications" title="Notifications">
-      <i data-lucide="bell" class="icon"></i>
-      <span class="notif-dot" aria-hidden="true"></span>
-    </button>
-
-    <button class="navbar-user" id="navUser" type="button" aria-label="User menu">
+    <button class="navbar-user" id="navUser" type="button" aria-label="User menu" title="User menu">
       <span class="navbar-avatar">KD</span>
-      <span class="navbar-user-name">Khaled Daidar</span>
     </button>
   </div>
 </header>

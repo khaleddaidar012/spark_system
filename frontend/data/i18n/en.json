@@ -1,0 +1,34 @@
+{
+  "appName": "Spark Engineering",
+  "nav": {
+    "dashboard": "Dashboard",
+    "projects": "Projects",
+    "suppliers": "Suppliers",
+    "finance": "Financial Accounts",
+    "contractors": "Contractors",
+    "reports": "Reports",
+    "logout": "Logout",
+    "collapse": "Collapse"
+  },
+  "navbar": {
+    "toggleMenu": "Toggle menu",
+    "theme": "Toggle theme",
+    "lang": "Switch language",
+    "userMenu": "User menu"
+  },
+  "breadcrumb": {
+    "home": "Home"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "welcome": "Welcome back",
+    "projectsTitle": "Projects",
+    "projectsDesc": "Plan, track and deliver engineering projects.",
+    "suppliersTitle": "Suppliers",
+    "suppliersDesc": "Manage suppliers and material purchases.",
+    "financeTitle": "Financial Accounts",
+    "financeDesc": "Monitor income, expenses and cash flow.",
+    "contractorsTitle": "Contractors",
+    "contractorsDesc": "Manage contractors and track their payments."
+  }
+}

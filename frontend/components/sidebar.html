@@ -1,20 +1,5 @@
 <aside class="sidebar" id="sidebar" aria-label="Main navigation">
-  <div class="sidebar-header">
-    <a class="sidebar-brand" href="./dashboard.html">
-      <span class="sidebar-logo" aria-hidden="true">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
-        </svg>
-      </span>
-      <span class="sidebar-brand-text" data-i18n="appName">Spark Engineering</span>
-    </a>
-    <button class="btn btn-icon sidebar-close" id="sidebarClose" type="button" aria-label="Close menu">
-      <i data-lucide="x" class="icon"></i>
-    </button>
-  </div>
-
   <nav class="sidebar-nav">
-    <p class="sidebar-section-label" data-i18n="nav.main">Main</p>
     <ul class="sidebar-menu">
       <li>
         <a class="sidebar-link" href="./dashboard.html" data-page="dashboard">
@@ -29,49 +14,27 @@
         </a>
       </li>
       <li>
-        <a class="sidebar-link" href="./materials.html" data-page="materials">
-          <i data-lucide="package" class="icon"></i>
-          <span data-i18n="nav.materials">Materials</span>
-        </a>
-      </li>
-      <li>
-        <a class="sidebar-link" href="./finance.html" data-page="finance">
-          <i data-lucide="dollar-sign" class="icon"></i>
-          <span data-i18n="nav.finance">Finance</span>
-        </a>
-      </li>
-      <li>
-        <a class="sidebar-link" href="./clients.html" data-page="clients">
-          <i data-lucide="users" class="icon"></i>
-          <span data-i18n="nav.clients">Clients</span>
-        </a>
-      </li>
-      <li>
         <a class="sidebar-link" href="./suppliers.html" data-page="suppliers">
           <i data-lucide="truck" class="icon"></i>
           <span data-i18n="nav.suppliers">Suppliers</span>
         </a>
       </li>
       <li>
-        <a class="sidebar-link" href="./workers.html" data-page="workers">
-          <i data-lucide="hard-hat" class="icon"></i>
-          <span data-i18n="nav.workers">Workers</span>
+        <a class="sidebar-link" href="./finance.html" data-page="finance">
+          <i data-lucide="wallet" class="icon"></i>
+          <span data-i18n="nav.finance">Financial Accounts</span>
         </a>
       </li>
-    </ul>
-
-    <p class="sidebar-section-label" data-i18n="nav.insights">Insights</p>
-    <ul class="sidebar-menu">
+      <li>
+        <a class="sidebar-link" href="./contractors.html" data-page="contractors">
+          <i data-lucide="hard-hat" class="icon"></i>
+          <span data-i18n="nav.contractors">Contractors</span>
+        </a>
+      </li>
       <li>
         <a class="sidebar-link" href="./reports.html" data-page="reports">
           <i data-lucide="bar-chart-3" class="icon"></i>
           <span data-i18n="nav.reports">Reports</span>
-        </a>
-      </li>
-      <li>
-        <a class="sidebar-link" href="./settings.html" data-page="settings">
-          <i data-lucide="settings" class="icon"></i>
-          <span data-i18n="nav.settings">Settings</span>
         </a>
       </li>
     </ul>
@@ -79,10 +42,10 @@
 
   <div class="sidebar-footer">
     <button class="sidebar-link sidebar-collapse" id="sidebarCollapse" type="button">
-      <i data-lucide="panel-left-close" class="icon"></i>
+      <i data-lucide="panel-right-close" class="icon"></i>
       <span data-i18n="nav.collapse">Collapse</span>
     </button>
-    <a class="sidebar-link sidebar-logout" href="./login.html" data-i18n="nav.logout">
+    <a class="sidebar-link sidebar-logout" href="./login.html">
       <i data-lucide="log-out" class="icon"></i>
       <span data-i18n="nav.logout">Logout</span>
     </a>

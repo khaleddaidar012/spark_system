@@ -6,20 +6,17 @@
    ============================================ */
 
 import { initTheme, toggleTheme } from "./theme.js";
+import { initI18n, getLang, toggleLanguage } from "./i18n.js";
 
-const LANG_KEY = "spark_lang";
 const SIDEBAR_KEY = "spark_sidebar_collapsed";
 
 const PAGE_META = {
-  dashboard: { title: "Dashboard", file: "./dashboard.html" },
-  projects: { title: "Projects", file: "./projects.html" },
-  materials: { title: "Materials", file: "./materials.html" },
-  finance: { title: "Finance", file: "./finance.html" },
-  clients: { title: "Clients", file: "./clients.html" },
-  suppliers: { title: "Suppliers", file: "./suppliers.html" },
-  workers: { title: "Workers", file: "./workers.html" },
-  reports: { title: "Reports", file: "./reports.html" },
-  settings: { title: "Settings", file: "./settings.html" },
+  dashboard: { title: "Dashboard" },
+  projects: { title: "Projects" },
+  suppliers: { title: "Suppliers" },
+  finance: { title: "Financial Accounts" },
+  contractors: { title: "Contractors" },
+  reports: { title: "Reports" },
 };
 
 async function loadComponent(id, url) {
@@ -34,35 +31,20 @@ async function loadComponent(id, url) {
   }
 }
 
-function applyLang(lang) {
-  const html = document.documentElement;
-  html.lang = lang;
-  html.dir = lang === "ar" ? "rtl" : "ltr";
-  const btn = document.getElementById("navLangToggle");
-  if (btn) btn.textContent = lang === "ar" ? "EN" : "ع";
-}
-
 function initThemeToggle() {
-  const btn = document.getElementById("navThemeToggle");
-  btn?.addEventListener("click", toggleTheme);
+  document.getElementById("navThemeToggle")?.addEventListener("click", toggleTheme);
 }
 
 function initLangToggle() {
-  let lang;
-  try {
-    lang = localStorage.getItem(LANG_KEY) || "en";
-  } catch {
-    lang = "en";
-  }
-  applyLang(lang);
-  document.getElementById("navLangToggle")?.addEventListener("click", () => {
-    const next = document.documentElement.lang === "ar" ? "en" : "ar";
-    try {
-      localStorage.setItem(LANG_KEY, next);
-    } catch {
-      /* storage unavailable */
-    }
-    applyLang(next);
+  const btn = document.getElementById("navLangToggle");
+  if (!btn) return;
+  const applyLabel = () => {
+    btn.textContent = document.documentElement.lang === "ar" ? "EN" : "ع";
+  };
+  applyLabel();
+  btn.addEventListener("click", async () => {
+    await toggleLanguage();
+    applyLabel();
   });
 }
 
@@ -124,33 +106,24 @@ function renderBreadcrumb() {
   const crumb = document.getElementById("breadcrumb");
   if (!crumb) return;
   const current = document.body.dataset.page || "dashboard";
-  const meta = PAGE_META[current] || { title: "Dashboard", file: "./dashboard.html" };
+  const meta = PAGE_META[current] || PAGE_META.dashboard;
   crumb.innerHTML = `
-    <span class="breadcrumb-item"><a href="./dashboard.html">Home</a></span>
-    <span class="breadcrumb-item is-current">${meta.title}</span>
+    <span class="breadcrumb-item"><a href="./dashboard.html" data-i18n="breadcrumb.home">Home</a></span>
+    <span class="breadcrumb-item is-current" data-i18n="nav.${current}">${meta.title}</span>
   `;
 }
 
-function initSearch() {
-  const input = document.querySelector(".navbar-search-input");
-  input?.addEventListener("keydown", (e) => {
-    if (e.key === "Enter" && input.value.trim()) {
-      // Global search is implemented in a later phase.
-      input.blur();
-    }
-  });
-}
-
 export async function initLayout() {
-  initTheme();
   await loadComponent("sidebar-root", "../components/sidebar.html");
   await loadComponent("navbar-root", "../components/navbar.html");
   window.lucide?.createIcons();
-  initTheme(); // re-apply theme visibility to injected navbar icons
+  initTheme();
   initSidebar();
   initThemeToggle();
   initLangToggle();
   highlightActiveMenu();
   renderBreadcrumb();
-  initSearch();
+  await initI18n();
 }
+
+export { getLang };

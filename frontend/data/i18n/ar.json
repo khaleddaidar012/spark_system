@@ -1,0 +1,34 @@
+{
+  "appName": "سبارك للهندسة",
+  "nav": {
+    "dashboard": "لوحة التحكم",
+    "projects": "المشاريع",
+    "suppliers": "الموردون",
+    "finance": "الحسابات المالية",
+    "contractors": "المقاولون",
+    "reports": "التقارير",
+    "logout": "تسجيل الخروج",
+    "collapse": "طي"
+  },
+  "navbar": {
+    "toggleMenu": "فتح القائمة",
+    "theme": "تبديل المظهر",
+    "lang": "تغيير اللغة",
+    "userMenu": "قائمة المستخدم"
+  },
+  "breadcrumb": {
+    "home": "الرئيسية"
+  },
+  "dashboard": {
+    "title": "لوحة التحكم",
+    "welcome": "مرحباً بعودتك",
+    "projectsTitle": "المشاريع",
+    "projectsDesc": "خطط وتابع وسلم المشاريع الهندسية.",
+    "suppliersTitle": "الموردون",
+    "suppliersDesc": "إدارة الموردين ومشتريات الخامات.",
+    "financeTitle": "الحسابات المالية",
+    "financeDesc": "متابعة الإيرادات والمصروفات والتدفقات النقدية.",
+    "contractorsTitle": "المقاولون",
+    "contractorsDesc": "إدارة المقاولين ومتابعة مستحقاتهم."
+  }
+}
