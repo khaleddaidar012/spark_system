@@ -6,15 +6,6 @@
 
 ---
 
-## Icons
-- [x] Add Lucide icon library
-
-> Working list of small UI improvement tasks.
-> One task at a time. Mark `- [x]` as soon as a task is done.
-> Commit + push after each completed logical group.
-
----
-
 ## Dashboard Improvements
 - [x] Simplify dashboard layout
 - [x] Remove unnecessary sections (charts, lists)
@@ -63,4 +54,10 @@
 - [x] Improve transitions
 - [x] Improve responsive layout
 
-
+## Testing
+- [x] Test desktop
+- [x] Test tablet
+- [x] Test mobile
+- [x] Test theme switching
+- [x] Test language switching
+- [ ] Push final version to GitHub
