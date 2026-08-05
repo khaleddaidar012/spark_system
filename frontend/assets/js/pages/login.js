@@ -10,6 +10,10 @@ const LANG_KEY = "spark_lang";
 document.addEventListener("DOMContentLoaded", () => {
   initTheme();
 
+  /* Lucide replaces <i data-lucide> with inline SVGs.
+     Run after initTheme so the theme icon visibility carries over. */
+  window.lucide?.createIcons();
+
   /* ---------- Theme toggle ---------- */
   const themeToggle = document.getElementById("themeToggle");
   themeToggle?.addEventListener("click", toggleTheme);

@@ -13,13 +13,8 @@
   <!-- Theme & Language switchers (top corner) -->
   <div class="auth-toolbar">
     <button class="btn btn-icon" id="themeToggle" type="button" aria-label="Toggle theme" title="Toggle theme">
-      <svg class="icon" data-theme-icon="dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
-      </svg>
-      <svg class="icon" data-theme-icon="light" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display:none;">
-        <circle cx="12" cy="12" r="4"/>
-        <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>
-      </svg>
+      <i data-lucide="moon" class="icon" data-theme-icon="dark"></i>
+      <i data-lucide="sun" class="icon" data-theme-icon="light" style="display:none;"></i>
     </button>
     <button class="btn btn-icon" id="langToggle" type="button" aria-label="Switch language" title="العربية">ع</button>
   </div>
@@ -69,14 +64,8 @@
               aria-label="Show password"
               data-i18n-aria="login.showPassword"
             >
-              <svg class="icon" id="iconEye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                <circle cx="12" cy="12" r="3"/>
-              </svg>
-              <svg class="icon" id="iconEyeOff" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display:none;">
-                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
-                <line x1="1" y1="1" x2="23" y2="23"/>
-              </svg>
+              <i data-lucide="eye" class="icon" id="iconEye"></i>
+              <i data-lucide="eye-off" class="icon" id="iconEyeOff" style="display:none;"></i>
             </button>
           </div>
         </div>
@@ -100,6 +89,7 @@
     </div>
   </main>
 
+  <script src="../assets/vendor/lucide/lucide.min.js"></script>
   <script type="module" src="../assets/js/pages/login.js"></script>
 </body>
 </html>

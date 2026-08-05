@@ -74,8 +74,7 @@ function initSidebar() {
 
   const open = () => {
     sidebar?.classList.add("is-open");
-    backdrop?.classList.remove("hidden");
-    requestAnimationFrame(() => backdrop?.classList.add("is-visible"));
+    backdrop?.classList.add("is-visible");
   };
 
   const close = () => {
@@ -147,6 +146,7 @@ export async function initLayout() {
   await loadComponent("sidebar-root", "../components/sidebar.html");
   await loadComponent("navbar-root", "../components/navbar.html");
   window.lucide?.createIcons();
+  initTheme(); // re-apply theme visibility to injected navbar icons
   initSidebar();
   initThemeToggle();
   initLangToggle();
