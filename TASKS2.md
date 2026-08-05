@@ -50,17 +50,17 @@
 - [x] Keep icon sizes consistent
 
 ## Arabic
-- [ ] Add Arabic font
-- [ ] Fix RTL spacing
-- [ ] Fix text alignment
-- [ ] Fix RTL sidebar
-- [ ] Verify language switching
+- [x] Add Arabic font
+- [x] Fix RTL spacing
+- [x] Fix text alignment
+- [x] Fix RTL sidebar
+- [x] Verify language switching
 
 ## UI Polish
-- [ ] Improve shadows
-- [ ] Improve border radius
-- [ ] Improve colors
-- [ ] Improve transitions
-- [ ] Improve responsive layout
+- [x] Improve shadows
+- [x] Improve border radius
+- [x] Improve colors
+- [x] Improve transitions
+- [x] Improve responsive layout
 
 

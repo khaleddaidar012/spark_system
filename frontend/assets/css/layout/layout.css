@@ -19,6 +19,18 @@ body.sidebar-collapsed .app-main {
 
 .app-content {
   padding: var(--space-6);
+  animation: appFadeIn var(--transition-slow) var(--ease);
+}
+
+@keyframes appFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @media (max-width: 900px) {

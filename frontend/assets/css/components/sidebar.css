@@ -199,6 +199,11 @@ body.sidebar-collapsed .sidebar-link {
   transform: rotate(180deg);
 }
 
+/* Arabic: no letter-spacing on uppercase-style labels */
+[dir="rtl"] .sidebar-section-label {
+  letter-spacing: 0;
+}
+
 /* ---------- Backdrop (mobile) ---------- */
 
 .sidebar-backdrop {

@@ -3,6 +3,8 @@
    Imports all layers in cascade order.
    ============================================ */
 
+@import url("https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&display=swap");
+
 @import url("./base/variables.css");
 @import url("./base/reset.css");
 @import url("./base/typography.css");

@@ -4,7 +4,7 @@
 
 :root {
   /* Fonts */
-  --font-family: "Segoe UI", Tahoma, "Noto Kufi Arabic", "Cairo", system-ui,
+  --font-family: "Cairo", "Segoe UI", Tahoma, "Noto Kufi Arabic", system-ui,
     -apple-system, "Helvetica Neue", Arial, sans-serif;
   --font-size-base: 15px;
   --font-size-sm: 0.85rem;
@@ -31,9 +31,10 @@
   --radius-full: 9999px;
 
   /* Shadows */
-  --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.06);
-  --shadow-md: 0 4px 12px rgba(15, 23, 42, 0.08);
-  --shadow-lg: 0 12px 32px rgba(15, 23, 42, 0.12);
+  --shadow-xs: 0 1px 2px rgba(15, 23, 42, 0.05);
+  --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.07), 0 1px 2px rgba(15, 23, 42, 0.04);
+  --shadow-md: 0 6px 16px rgba(15, 23, 42, 0.09), 0 2px 6px rgba(15, 23, 42, 0.05);
+  --shadow-lg: 0 16px 40px rgba(15, 23, 42, 0.14), 0 4px 12px rgba(15, 23, 42, 0.08);
 
   /* Motion */
   --transition-fast: 200ms;
@@ -101,9 +102,10 @@
   --accent-hover: #f97316;
   --accent-soft: rgba(251, 146, 60, 0.15);
 
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
-  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
-  --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.5);
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.35);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.35);
+  --shadow-md: 0 6px 16px rgba(0, 0, 0, 0.35);
+  --shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.45);
 }
 
 /* ============================================
@@ -118,4 +120,9 @@
 [dir="rtl"] {
   --dir-start: right;
   --dir-end: left;
+}
+
+/* Cairo renders larger than Latin fonts — slightly reduce base size in RTL */
+[dir="rtl"] {
+  --font-size-base: 14px;
 }
