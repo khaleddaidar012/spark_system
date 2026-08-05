@@ -6,22 +6,31 @@
 
 ---
 
+## Icons
+- [x] Add Lucide icon library
+
+> Working list of small UI improvement tasks.
+> One task at a time. Mark `- [x]` as soon as a task is done.
+> Commit + push after each completed logical group.
+
+---
+
 ## Dashboard Improvements
-- [ ] Simplify dashboard layout
-- [ ] Remove unnecessary sections (charts, lists)
-- [ ] Keep only essential summary cards
-- [ ] Improve card spacing
-- [ ] Improve typography
-- [ ] Improve card hover animation
-- [ ] Improve mobile layout
+- [x] Simplify dashboard layout
+- [x] Remove unnecessary sections (charts, lists)
+- [x] Keep only essential summary cards
+- [x] Improve card spacing
+- [x] Improve typography
+- [x] Improve card hover animation
+- [x] Improve mobile layout
 
 ## Dashboard Cards
-- [ ] Redesign summary cards
-- [ ] Add accent color icons
-- [ ] Ensure equal card height
-- [ ] Improve shadow & radius
-- [ ] Improve trend readability
-- [ ] Responsive grid for mobile
+- [x] Redesign summary cards
+- [x] Add accent color icons
+- [x] Ensure equal card height
+- [x] Improve shadow & radius
+- [x] Improve trend readability
+- [x] Responsive grid for mobile
 
 ## Sidebar
 - [ ] Fix spacing

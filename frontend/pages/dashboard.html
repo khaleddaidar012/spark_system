@@ -28,17 +28,11 @@
           </div>
           <div class="page-actions">
             <button class="btn btn-outline" type="button">
-              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <line x1="12" y1="5" x2="12" y2="19"/>
-                <line x1="5" y1="12" x2="19" y2="12"/>
-              </svg>
+              <i data-lucide="folder-plus" class="icon"></i>
               <span data-i18n="dashboard.newProject">New Project</span>
             </button>
             <button class="btn btn-primary" type="button">
-              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <line x1="12" y1="5" x2="12" y2="19"/>
-                <line x1="5" y1="12" x2="19" y2="12"/>
-              </svg>
+              <i data-lucide="circle-plus" class="icon"></i>
               <span data-i18n="dashboard.quickEntry">Quick Entry</span>
             </button>
           </div>
@@ -46,247 +40,63 @@
 
         <!-- Statistics -->
         <section class="dashboard-stats" aria-label="Statistics">
-          <article class="card card-hover stat-card">
-            <span class="stat-icon icon-primary" aria-hidden="true">
-              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
-              </svg>
-            </span>
-            <div class="stat-info">
-              <p class="stat-value" data-stat="projects" data-i18n="dashboard.stats.totalProjects">0</p>
-              <p class="stat-label" data-i18n="dashboard.stats.totalProjectsLabel">Total Projects</p>
-              <p class="stat-trend up">
-                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                  <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
-                  <polyline points="17 6 23 6 23 12"/>
-                </svg>
-                +12% this month
-              </p>
+          <article class="card stat-card is-primary">
+            <div class="stat-card-top">
+              <span class="stat-icon icon-primary" aria-hidden="true">
+                <i data-lucide="folder" class="icon"></i>
+              </span>
+              <span class="stat-trend up">
+                <i data-lucide="arrow-up-right" class="icon"></i>+12%
+              </span>
             </div>
+            <p class="stat-value" data-stat="projects" data-i18n="dashboard.stats.totalProjects">0</p>
+            <p class="stat-label" data-i18n="dashboard.stats.totalProjectsLabel">Total Projects</p>
           </article>
 
-          <article class="card card-hover stat-card">
-            <span class="stat-icon icon-success" aria-hidden="true">
-              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-                <polyline points="22 4 12 14.01 9 11.01"/>
-              </svg>
-            </span>
-            <div class="stat-info">
-              <p class="stat-value" data-stat="active" data-i18n="dashboard.stats.activeProjects">0</p>
-              <p class="stat-label" data-i18n="dashboard.stats.activeProjectsLabel">Active Projects</p>
-              <p class="stat-trend up">+3 this week</p>
+          <article class="card stat-card is-success">
+            <div class="stat-card-top">
+              <span class="stat-icon icon-success" aria-hidden="true">
+                <i data-lucide="dollar-sign" class="icon"></i>
+              </span>
+              <span class="stat-trend up">
+                <i data-lucide="arrow-up-right" class="icon"></i>+8%
+              </span>
             </div>
+            <p class="stat-value" data-stat="income" data-prefix="$" data-i18n="dashboard.stats.totalIncome">0</p>
+            <p class="stat-label" data-i18n="dashboard.stats.totalIncomeLabel">Total Income</p>
           </article>
 
-          <article class="card card-hover stat-card">
-            <span class="stat-icon icon-info" aria-hidden="true">
-              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="9 11 12 14 22 4"/>
-                <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
-              </svg>
-            </span>
-            <div class="stat-info">
-              <p class="stat-value" data-stat="finished" data-i18n="dashboard.stats.finishedProjects">0</p>
-              <p class="stat-label" data-i18n="dashboard.stats.finishedProjectsLabel">Finished Projects</p>
-              <p class="stat-trend up">+5 this month</p>
+          <article class="card stat-card is-danger">
+            <div class="stat-card-top">
+              <span class="stat-icon icon-danger" aria-hidden="true">
+                <i data-lucide="credit-card" class="icon"></i>
+              </span>
+              <span class="stat-trend down">
+                <i data-lucide="arrow-down-right" class="icon"></i>-4%
+              </span>
             </div>
+            <p class="stat-value" data-stat="expenses" data-prefix="$" data-i18n="dashboard.stats.totalExpenses">0</p>
+            <p class="stat-label" data-i18n="dashboard.stats.totalExpensesLabel">Total Expenses</p>
           </article>
 
-          <article class="card card-hover stat-card">
-            <span class="stat-icon icon-success" aria-hidden="true">
-              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <line x1="12" y1="1" x2="12" y2="23"/>
-                <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
-              </svg>
-            </span>
-            <div class="stat-info">
-              <p class="stat-value" data-stat="income" data-prefix="$" data-i18n="dashboard.stats.totalIncome">0</p>
-              <p class="stat-label" data-i18n="dashboard.stats.totalIncomeLabel">Total Income</p>
-              <p class="stat-trend up">+8% this month</p>
+          <article class="card stat-card is-accent">
+            <div class="stat-card-top">
+              <span class="stat-icon icon-accent" aria-hidden="true">
+                <i data-lucide="trending-up" class="icon"></i>
+              </span>
+              <span class="stat-trend up">
+                <i data-lucide="arrow-up-right" class="icon"></i>+15%
+              </span>
             </div>
+            <p class="stat-value" data-stat="profit" data-prefix="$" data-i18n="dashboard.stats.netProfit">0</p>
+            <p class="stat-label" data-i18n="dashboard.stats.netProfitLabel">Net Profit</p>
           </article>
-
-          <article class="card card-hover stat-card">
-            <span class="stat-icon icon-danger" aria-hidden="true">
-              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <rect x="1" y="4" width="22" height="16" rx="2"/>
-                <line x1="1" y1="10" x2="23" y2="10"/>
-              </svg>
-            </span>
-            <div class="stat-info">
-              <p class="stat-value" data-stat="expenses" data-prefix="$" data-i18n="dashboard.stats.totalExpenses">0</p>
-              <p class="stat-label" data-i18n="dashboard.stats.totalExpensesLabel">Total Expenses</p>
-              <p class="stat-trend down">-4% this month</p>
-            </div>
-          </article>
-
-          <article class="card card-hover stat-card">
-            <span class="stat-icon icon-accent" aria-hidden="true">
-              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
-                <polyline points="17 6 23 6 23 12"/>
-              </svg>
-            </span>
-            <div class="stat-info">
-              <p class="stat-value" data-stat="profit" data-prefix="$" data-i18n="dashboard.stats.netProfit">0</p>
-              <p class="stat-label" data-i18n="dashboard.stats.netProfitLabel">Net Profit</p>
-              <p class="stat-trend up">+$18.2k this month</p>
-            </div>
-          </article>
-
-          <article class="card card-hover stat-card">
-            <span class="stat-icon icon-primary" aria-hidden="true">
-              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
-                <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
-                <line x1="12" y1="22.08" x2="12" y2="12"/>
-              </svg>
-            </span>
-            <div class="stat-info">
-              <p class="stat-value" data-stat="inventory" data-prefix="$" data-i18n="dashboard.stats.inventoryValue">0</p>
-              <p class="stat-label" data-i18n="dashboard.stats.inventoryValueLabel">Inventory Value</p>
-              <p class="stat-trend down">-2% this month</p>
-            </div>
-          </article>
-
-          <article class="card card-hover stat-card">
-            <span class="stat-icon icon-warning" aria-hidden="true">
-              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
-                <line x1="12" y1="9" x2="12" y2="13"/>
-                <line x1="12" y1="17" x2="12.01" y2="17"/>
-              </svg>
-            </span>
-            <div class="stat-info">
-              <p class="stat-value" data-stat="lowstock" data-i18n="dashboard.stats.lowStock">0</p>
-              <p class="stat-label" data-i18n="dashboard.stats.lowStockLabel">Materials Running Low</p>
-              <p class="stat-trend down">Needs attention</p>
-            </div>
-          </article>
-        </section>
-
-        <!-- Charts -->
-        <section class="dashboard-charts" aria-label="Charts">
-          <div class="card">
-            <div class="card-header">
-              <h2 class="card-title" data-i18n="dashboard.charts.income">Monthly Income</h2>
-              <span class="badge badge-success" data-i18n="dashboard.demo">Demo</span>
-            </div>
-            <div class="card-body">
-              <div class="chart" data-chart="income"></div>
-            </div>
-          </div>
-
-          <div class="card">
-            <div class="card-header">
-              <h2 class="card-title" data-i18n="dashboard.charts.expenses">Monthly Expenses</h2>
-              <span class="badge badge-danger" data-i18n="dashboard.demo">Demo</span>
-            </div>
-            <div class="card-body">
-              <div class="chart" data-chart="expenses"></div>
-            </div>
-          </div>
-
-          <div class="card">
-            <div class="card-header">
-              <h2 class="card-title" data-i18n="dashboard.charts.costs">Project Cost Comparison</h2>
-              <span class="badge badge-primary" data-i18n="dashboard.demo">Demo</span>
-            </div>
-            <div class="card-body">
-              <div class="chart" data-chart="costs"></div>
-            </div>
-          </div>
-
-          <div class="card">
-            <div class="card-header">
-              <h2 class="card-title" data-i18n="dashboard.charts.materials">Most Consumed Materials</h2>
-              <span class="badge badge-accent" data-i18n="dashboard.demo">Demo</span>
-            </div>
-            <div class="card-body">
-              <div class="chart" data-chart="materials"></div>
-            </div>
-          </div>
-        </section>
-
-        <!-- Quick actions + recent lists -->
-        <section class="dashboard-lower" aria-label="Quick access">
-          <div class="card">
-            <div class="card-header">
-              <h2 class="card-title" data-i18n="dashboard.quickActions">Quick Actions</h2>
-            </div>
-            <div class="card-body">
-              <div class="quick-actions">
-                <button class="quick-action" type="button">
-                  <svg class="icon icon-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                    <line x1="12" y1="5" x2="12" y2="19"/>
-                    <line x1="5" y1="12" x2="19" y2="12"/>
-                  </svg>
-                  <span class="quick-action-label" data-i18n="dashboard.addIncome">Add Income</span>
-                  <span class="quick-action-hint" data-i18n="dashboard.addIncomeHint">Record incoming payment</span>
-                </button>
-                <button class="quick-action" type="button">
-                  <svg class="icon icon-danger" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                    <line x1="12" y1="5" x2="12" y2="19"/>
-                    <line x1="5" y1="12" x2="19" y2="12"/>
-                  </svg>
-                  <span class="quick-action-label" data-i18n="dashboard.addExpense">Add Expense</span>
-                  <span class="quick-action-hint" data-i18n="dashboard.addExpenseHint">Record outgoing money</span>
-                </button>
-                <button class="quick-action" type="button">
-                  <svg class="icon icon-accent" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                    <line x1="12" y1="5" x2="12" y2="19"/>
-                    <line x1="5" y1="12" x2="19" y2="12"/>
-                  </svg>
-                  <span class="quick-action-label" data-i18n="dashboard.addMaterial">Add Material</span>
-                  <span class="quick-action-hint" data-i18n="dashboard.addMaterialHint">Restock inventory</span>
-                </button>
-                <button class="quick-action" type="button">
-                  <svg class="icon icon-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                    <line x1="12" y1="5" x2="12" y2="19"/>
-                    <line x1="5" y1="12" x2="19" y2="12"/>
-                  </svg>
-                  <span class="quick-action-label" data-i18n="dashboard.newProject">Create Project</span>
-                  <span class="quick-action-hint" data-i18n="dashboard.newProjectHint">Start a new project</span>
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <div class="card">
-            <div class="card-header">
-              <h2 class="card-title" data-i18n="dashboard.recentActivities">Recent Activities</h2>
-              <a href="#" class="text-sm" data-i18n="dashboard.viewAll">View all</a>
-            </div>
-            <div class="card-body">
-              <div class="list-group" data-activities></div>
-            </div>
-          </div>
-
-          <div class="card">
-            <div class="card-header">
-              <h2 class="card-title" data-i18n="dashboard.recentPayments">Recent Payments</h2>
-              <a href="#" class="text-sm" data-i18n="dashboard.viewAll">View all</a>
-            </div>
-            <div class="card-body">
-              <div class="list-group" data-payments></div>
-            </div>
-          </div>
-
-          <div class="card">
-            <div class="card-header">
-              <h2 class="card-title" data-i18n="dashboard.recentExpenses">Recent Expenses</h2>
-              <a href="#" class="text-sm" data-i18n="dashboard.viewAll">View all</a>
-            </div>
-            <div class="card-body">
-              <div class="list-group" data-expenses></div>
-            </div>
-          </div>
         </section>
       </main>
     </div>
   </div>
 
+  <script src="../assets/vendor/lucide/lucide.min.js"></script>
   <script type="module" src="../assets/js/pages/dashboard.js"></script>
 </body>
 </html>

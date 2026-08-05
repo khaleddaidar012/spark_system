@@ -146,6 +146,7 @@ export async function initLayout() {
   initTheme();
   await loadComponent("sidebar-root", "../components/sidebar.html");
   await loadComponent("navbar-root", "../components/navbar.html");
+  window.lucide?.createIcons();
   initSidebar();
   initThemeToggle();
   initLangToggle();
