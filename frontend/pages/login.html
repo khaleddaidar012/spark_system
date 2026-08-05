@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Spark Engineering ERP System — Login" />
+  <title>Login | Spark ERP</title>
+  <link rel="icon" type="image/svg+xml" href="../assets/icons/favicon.svg" />
+  <link rel="stylesheet" href="../assets/css/main.css" />
+</head>
+<body class="auth-page">
+
+  <!-- Theme & Language switchers (top corner) -->
+  <div class="auth-toolbar">
+    <button class="btn btn-icon" id="themeToggle" type="button" aria-label="Toggle theme" title="Toggle theme">
+      <svg class="icon" data-theme-icon="dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+      </svg>
+      <svg class="icon" data-theme-icon="light" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display:none;">
+        <circle cx="12" cy="12" r="4"/>
+        <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>
+      </svg>
+    </button>
+    <button class="btn btn-icon" id="langToggle" type="button" aria-label="Switch language" title="العربية">ع</button>
+  </div>
+
+  <main class="auth-layout">
+    <div class="auth-card">
+      <!-- Company logo placeholder -->
+      <div class="auth-logo" aria-hidden="true">
+        <svg class="auth-logo-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+        </svg>
+      </div>
+
+      <h1 class="auth-title" data-i18n="appName">Spark Engineering</h1>
+      <p class="auth-subtitle" data-i18n="login.subtitle">Sign in to your account</p>
+
+      <form class="auth-form" id="loginForm" novalidate>
+        <div class="form-group">
+          <label class="form-label" for="username" data-i18n="login.username">Username</label>
+          <input
+            class="form-input"
+            type="text"
+            id="username"
+            name="username"
+            placeholder="Enter your username"
+            autocomplete="username"
+            required
+          />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="password" data-i18n="login.password">Password</label>
+          <div class="form-input-wrapper">
+            <input
+              class="form-input"
+              type="password"
+              id="password"
+              name="password"
+              placeholder="Enter your password"
+              autocomplete="current-password"
+              required
+            />
+            <button
+              class="input-toggle"
+              type="button"
+              id="togglePassword"
+              aria-label="Show password"
+              data-i18n-aria="login.showPassword"
+            >
+              <svg class="icon" id="iconEye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                <circle cx="12" cy="12" r="3"/>
+              </svg>
+              <svg class="icon" id="iconEyeOff" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display:none;">
+                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
+                <line x1="1" y1="1" x2="23" y2="23"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="auth-options">
+          <label class="form-check">
+            <input type="checkbox" id="rememberMe" name="rememberMe" />
+            <span class="form-check-label" data-i18n="login.rememberMe">Remember me</span>
+          </label>
+          <a href="#" class="auth-forgot" data-i18n="login.forgot">Forgot password?</a>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block btn-lg" id="loginBtn" data-i18n="login.button">
+          Sign In
+        </button>
+      </form>
+
+      <p class="auth-error" id="loginError" role="alert" hidden></p>
+
+      <p class="auth-footer" data-i18n="login.footer">© Spark Engineering Company</p>
+    </div>
+  </main>
+
+  <script type="module" src="../assets/js/pages/login.js"></script>
+</body>
+</html>

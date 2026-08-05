@@ -1,0 +1,51 @@
+/* ============================================
+   Spark ERP — Auth Layout (login / register)
+   ============================================ */
+
+.auth-page {
+  min-height: 100vh;
+  position: relative;
+}
+
+.auth-layout {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-6);
+  background:
+    radial-gradient(60% 60% at 80% 10%, var(--primary-soft) 0%, transparent 60%),
+    radial-gradient(50% 50% at 10% 90%, var(--accent-soft) 0%, transparent 55%),
+    var(--bg);
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 400px;
+  padding: var(--space-8) var(--space-8) var(--space-6);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  animation: authFadeIn var(--transition-slow) var(--ease);
+}
+
+@keyframes authFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.auth-toolbar {
+  position: fixed;
+  top: var(--space-4);
+  inset-inline-end: var(--space-4);
+  display: flex;
+  gap: var(--space-2);
+  z-index: 10;
+}

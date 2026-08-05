@@ -1,0 +1,10 @@
+/* ============================================
+   Spark ERP — Charts (placeholder)
+   Expanded in the Dashboard phase.
+   ============================================ */
+
+.chart {
+  position: relative;
+  width: 100%;
+  min-height: 240px;
+}

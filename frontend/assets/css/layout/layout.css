@@ -1,0 +1,15 @@
+/* ============================================
+   Spark ERP — App layout shell (placeholder)
+   Sidebar + content grid. Expanded in Dashboard phase.
+   ============================================ */
+
+.app-layout {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: var(--sidebar-width) 1fr;
+}
+
+.app-main {
+  min-width: 0;
+  padding: var(--space-6);
+}

@@ -21,19 +21,19 @@
 - [x] Create CSS variables (colors / themes)
 - [x] Create base & reset styles
 - [x] Create typography styles
-- [ ] Create component styles (buttons, cards, forms, badges)
+- [x] Create component styles (buttons, cards, forms, badges)
 
 ## Login Page
-- [ ] Create login layout
-- [ ] Add responsive design
-- [ ] Add company logo placeholder
-- [ ] Create username input
-- [ ] Create password input
-- [ ] Add show/hide password
-- [ ] Add Remember Me checkbox
-- [ ] Add Login button
-- [ ] Add Forgot Password link
-- [ ] Mobile optimization
+- [x] Create login layout
+- [x] Add responsive design
+- [x] Add company logo placeholder
+- [x] Create username input
+- [x] Create password input
+- [x] Add show/hide password
+- [x] Add Remember Me checkbox
+- [x] Add Login button
+- [x] Add Forgot Password link
+- [x] Mobile optimization
 
 ## Dashboard
 - [ ] Create sidebar
