@@ -1,0 +1,249 @@
+/* ============================================
+   Spark ERP — Quick Add (FAB + flows)
+   ============================================ */
+
+.quick-add {
+  position: fixed;
+  bottom: var(--space-6);
+  inset-inline-end: var(--space-6);
+  z-index: 250;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--space-4);
+}
+
+.fab {
+  width: 62px;
+  height: 62px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  cursor: pointer;
+  background: linear-gradient(135deg, var(--primary), var(--primary-hover));
+  color: var(--primary-contrast);
+  box-shadow: 0 8px 24px var(--primary-soft);
+  transition: transform var(--transition-fast) var(--ease),
+    box-shadow var(--transition-fast) var(--ease);
+  position: relative;
+}
+
+.fab:hover {
+  transform: translateY(-2px) scale(1.04);
+  box-shadow: 0 12px 30px var(--primary-soft);
+}
+
+.fab:active {
+  transform: scale(0.96);
+}
+
+.fab .icon {
+  width: 26px;
+  height: 26px;
+  position: absolute;
+  transition: opacity var(--transition-fast) var(--ease),
+    transform var(--transition-fast) var(--ease);
+}
+
+.fab-icon-close {
+  opacity: 0;
+  transform: rotate(-90deg);
+}
+
+.quick-add.is-open .fab-icon-open {
+  opacity: 0;
+  transform: rotate(90deg);
+}
+
+.quick-add.is-open .fab-icon-close {
+  opacity: 1;
+  transform: rotate(0);
+}
+
+.quick-add.is-open .fab {
+  background: var(--danger);
+  box-shadow: 0 8px 24px var(--danger-soft);
+}
+
+/* ---------- Menu ---------- */
+
+.fab-menu {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  animation: fab-menu-in var(--transition-normal) var(--ease);
+  transform-origin: bottom end;
+}
+
+@keyframes fab-menu-in {
+  from { opacity: 0; transform: translateY(12px) scale(0.95); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.fab-menu-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: 12px 16px;
+  min-width: 230px;
+  text-align: start;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+  box-shadow: var(--shadow-md);
+  transition: transform var(--transition-fast) var(--ease),
+    border-color var(--transition-fast) var(--ease),
+    box-shadow var(--transition-fast) var(--ease);
+}
+
+.fab-menu-item:hover {
+  transform: translateY(-2px);
+  border-color: var(--primary);
+  box-shadow: var(--shadow-lg);
+}
+
+.fab-menu-item:active {
+  transform: scale(0.98);
+}
+
+.fab-menu-icon {
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-md);
+}
+
+.fab-money .fab-menu-icon {
+  background: var(--success-soft);
+  color: var(--success);
+}
+
+.fab-materials .fab-menu-icon {
+  background: var(--primary-soft);
+  color: var(--primary);
+}
+
+.fab-menu-icon .icon {
+  width: 22px;
+  height: 22px;
+}
+
+.fab-menu-label {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.fab-menu-label small {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+}
+
+/* ---------- Small modal ---------- */
+
+.modal-sm {
+  max-width: 420px;
+}
+
+/* ---------- Segmented control ---------- */
+
+.segmented {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-2);
+  padding: 4px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--space-5);
+}
+
+.segmented-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: 10px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-muted);
+  font-weight: 600;
+  font-size: var(--font-size-md);
+  cursor: pointer;
+  transition: background-color var(--transition-fast) var(--ease),
+    color var(--transition-fast) var(--ease);
+}
+
+.segmented-btn .icon {
+  width: 18px;
+  height: 18px;
+}
+
+.segmented-btn.is-active {
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: var(--shadow-sm);
+}
+
+.segmented[data-value-state="in"] .segmented-btn[data-value="in"].is-active {
+  background: var(--success-soft);
+  color: var(--success);
+}
+
+.segmented[data-value-state="out"] .segmented-btn[data-value="out"].is-active {
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
+/* ---------- Chips (person type) ---------- */
+
+.chip-row {
+  display: flex;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+  margin-bottom: var(--space-5);
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-full);
+  background: var(--surface);
+  color: var(--text-muted);
+  font-weight: 600;
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  transition: background-color var(--transition-fast) var(--ease),
+    color var(--transition-fast) var(--ease),
+    border-color var(--transition-fast) var(--ease);
+}
+
+.chip .icon {
+  width: 15px;
+  height: 15px;
+}
+
+.chip.is-active {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: var(--primary-contrast);
+}
+
+/* Hide FAB on very small heights to avoid covering content */
+@media (max-height: 480px) {
+  .fab {
+    width: 54px;
+    height: 54px;
+  }
+}

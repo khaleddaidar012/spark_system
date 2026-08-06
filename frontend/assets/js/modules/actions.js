@@ -50,6 +50,15 @@ export function recordMoney({ direction, personType, personId, personName, amoun
 
 /* ---------- Project materials ---------- */
 
+function stockOut(name, quantity) {
+  const item = all("materials").find((m) => m.name === name);
+  if (item) {
+    item.qty = num(item.qty) - num(quantity);
+    if (item.qty < 0) item.qty = 0;
+    save("materials", item);
+  }
+}
+
 function stockIn(name, quantity, unit) {
   const item = all("materials").find((m) => m.name === name);
   if (item) {
@@ -108,6 +117,43 @@ export function addMaterialToProject(projectId, { name, supplierId, quantity, un
     unit: item.unit,
     unitPrice: price,
     total,
+    date: item.date,
+  });
+
+  return item;
+}
+
+export function consumeMaterial(projectId, { name, quantity, unit, date }) {
+  const project = get("projects", projectId);
+  if (!project) return null;
+  const qty = num(quantity);
+  const item = {
+    id: uid(),
+    name: String(name || "").trim(),
+    supplierId: null,
+    supplierName: "",
+    quantity: qty,
+    unit: unit || "",
+    unitPrice: 0,
+    total: 0,
+    date: date || today(),
+  };
+
+  project.materials = project.materials || [];
+  project.materials.push(item);
+  save("projects", project);
+  stockOut(item.name, qty);
+
+  save("materialTransactions", {
+    id: uid(),
+    direction: "out",
+    projectId: project.id,
+    supplierId: null,
+    materialName: item.name,
+    quantity: qty,
+    unit: item.unit,
+    unitPrice: 0,
+    total: 0,
     date: item.date,
   });
 

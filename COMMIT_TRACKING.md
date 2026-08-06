@@ -87,6 +87,18 @@
 
 ---
 
+## Commit 018
+- Commit: `bb7c5e6` Add project details page with contractors, materials, cost summary and analytics
+- Description: Project detail page with general info, contractors (paid/remaining/total), materials (supplier/qty/price/date), auto-calculated cost summary and per-m² analytics. Added business actions module that auto-updates project cost, inventory and supplier accounts.
+- Rollback: `git reset --hard bb7c5e6`
+
+## Commit 017
+- Commit: `42b4978` Update commit tracking
+- Description: Updated COMMIT_TRACKING.md with recent commits.
+- Rollback: `git reset --hard 42b4978`
+
+---
+
 ## Next Commit
 - Commit: `PENDING`
 - Description: TBA

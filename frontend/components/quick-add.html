@@ -1,0 +1,137 @@
+<!-- Quick Add — floating action button + menu + flows -->
+<div class="quick-add" id="quickAdd">
+  <button class="fab" id="fab" type="button" aria-label="Quick Add" title="Quick Add">
+    <i data-lucide="plus" class="icon fab-icon-open"></i>
+    <i data-lucide="x" class="icon fab-icon-close"></i>
+  </button>
+
+  <div class="fab-menu" id="fabMenu" hidden>
+    <button class="fab-menu-item fab-money" id="fabMoney" type="button">
+      <span class="fab-menu-icon" aria-hidden="true"><i data-lucide="banknote" class="icon"></i></span>
+      <span class="fab-menu-label">
+        <strong data-i18n="quick.money">Quick Money</strong>
+        <small data-i18n="quick.moneyDesc">Incoming / outgoing payment</small>
+      </span>
+    </button>
+    <button class="fab-menu-item fab-materials" id="fabMaterials" type="button">
+      <span class="fab-menu-icon" aria-hidden="true"><i data-lucide="package" class="icon"></i></span>
+      <span class="fab-menu-label">
+        <strong data-i18n="quick.materials">Quick Materials</strong>
+        <small data-i18n="quick.materialsDesc">Incoming / outgoing materials</small>
+      </span>
+    </button>
+  </div>
+</div>
+
+<!-- Quick Money modal -->
+<div class="modal-overlay" id="quickMoneyModal" hidden>
+  <div class="modal modal-sm" role="dialog" aria-modal="true" aria-labelledby="quickMoneyTitle">
+    <div class="modal-header">
+      <h2 class="modal-title" id="quickMoneyTitle" data-i18n="quick.money">Quick Money</h2>
+      <button class="btn btn-icon modal-close" id="quickMoneyClose" type="button" aria-label="Close">
+        <i data-lucide="x" class="icon"></i>
+      </button>
+    </div>
+    <form id="quickMoneyForm" class="modal-body form-stack" novalidate>
+      <div class="segmented" id="moneyDirection" role="group" aria-label="Direction">
+        <button class="segmented-btn is-active" type="button" data-value="in">
+          <i data-lucide="arrow-down-circle" class="icon"></i>
+          <span data-i18n="quick.incoming">Incoming</span>
+        </button>
+        <button class="segmented-btn" type="button" data-value="out">
+          <i data-lucide="arrow-up-circle" class="icon"></i>
+          <span data-i18n="quick.outgoing">Outgoing</span>
+        </button>
+      </div>
+
+      <div class="chip-row" id="moneyPersonType" role="group" aria-label="Person type">
+        <button class="chip is-active" type="button" data-value="supplier"><i data-lucide="truck" class="icon"></i><span data-i18n="quick.supplier">Supplier</span></button>
+        <button class="chip" type="button" data-value="contractor"><i data-lucide="hard-hat" class="icon"></i><span data-i18n="quick.contractor">Contractor</span></button>
+        <button class="chip" type="button" data-value="client"><i data-lucide="user" class="icon"></i><span data-i18n="quick.client">Client</span></button>
+        <button class="chip" type="button" data-value="other"><i data-lucide="more-horizontal" class="icon"></i><span data-i18n="quick.other">Other</span></button>
+      </div>
+
+      <div class="form-field" id="moneyPersonField">
+        <label class="form-label" data-i18n="quick.person">Person</label>
+        <select class="form-input" id="moneyPersonSelect"></select>
+        <input class="form-input" id="moneyPersonName" type="text" hidden data-i18n-ph="quick.personNamePh" placeholder="Person name" />
+      </div>
+
+      <div class="form-field">
+        <label class="form-label" for="moneyAmount" data-i18n="quick.amount">Amount</label>
+        <input class="form-input" id="moneyAmount" name="amount" type="number" min="0" step="0.01" required data-i18n-ph="quick.amountPh" placeholder="0" />
+      </div>
+
+      <div class="form-field">
+        <label class="form-label" for="moneyNote" data-i18n="quick.note">Note (optional)</label>
+        <input class="form-input" id="moneyNote" name="note" type="text" data-i18n-ph="quick.notePh" placeholder="—" />
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn btn-ghost" id="quickMoneyCancel" type="button" data-i18n="projects.cancel">Cancel</button>
+        <button class="btn btn-primary" type="submit" data-i18n="quick.save">Save</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Quick Materials modal -->
+<div class="modal-overlay" id="quickMatModal" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="quickMatTitle">
+    <div class="modal-header">
+      <h2 class="modal-title" id="quickMatTitle" data-i18n="quick.materials">Quick Materials</h2>
+      <button class="btn btn-icon modal-close" id="quickMatClose" type="button" aria-label="Close">
+        <i data-lucide="x" class="icon"></i>
+      </button>
+    </div>
+    <form id="quickMatForm" class="modal-body form-stack" novalidate>
+      <div class="segmented" id="matDirection" role="group" aria-label="Direction">
+        <button class="segmented-btn is-active" type="button" data-value="in">
+          <i data-lucide="arrow-down-circle" class="icon"></i>
+          <span data-i18n="quick.incoming">Incoming</span>
+        </button>
+        <button class="segmented-btn" type="button" data-value="out">
+          <i data-lucide="arrow-up-circle" class="icon"></i>
+          <span data-i18n="quick.outgoing">Outgoing</span>
+        </button>
+      </div>
+
+      <div class="form-field">
+        <label class="form-label" for="qmProject" data-i18n="quick.project">Project</label>
+        <select class="form-input" id="qmProject" required></select>
+      </div>
+
+      <div class="form-field" id="qmSupplierField">
+        <label class="form-label" for="qmSupplier" data-i18n="quick.supplier">Supplier</label>
+        <select class="form-input" id="qmSupplier"></select>
+      </div>
+
+      <div class="form-field">
+        <label class="form-label" for="qmName" data-i18n="quick.material">Material</label>
+        <input class="form-input" id="qmName" name="name" type="text" list="qmSuggestions" required data-i18n-ph="quick.materialPh" placeholder="e.g. Cement" />
+        <datalist id="qmSuggestions"></datalist>
+      </div>
+
+      <div class="form-row">
+        <div class="form-field">
+          <label class="form-label" for="qmQty" data-i18n="quick.quantity">Quantity</label>
+          <input class="form-input" id="qmQty" name="quantity" type="number" min="0" step="0.001" required data-i18n-ph="quick.quantityPh" placeholder="0" />
+        </div>
+        <div class="form-field">
+          <label class="form-label" for="qmUnit" data-i18n="quick.unit">Unit</label>
+          <input class="form-input" id="qmUnit" name="unit" type="text" data-i18n-ph="quick.unitPh" placeholder="bag" />
+        </div>
+      </div>
+
+      <div class="form-field" id="qmPriceField">
+        <label class="form-label" for="qmPrice" data-i18n="quick.price">Unit Price</label>
+        <input class="form-input" id="qmPrice" name="unitPrice" type="number" min="0" step="0.01" required data-i18n-ph="quick.pricePh" placeholder="0" />
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn btn-ghost" id="quickMatCancel" type="button" data-i18n="projects.cancel">Cancel</button>
+        <button class="btn btn-primary" type="submit" data-i18n="quick.save">Save</button>
+      </div>
+    </form>
+  </div>
+</div>

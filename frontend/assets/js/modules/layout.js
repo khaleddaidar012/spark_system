@@ -7,6 +7,7 @@
 
 import { initTheme, toggleTheme } from "./theme.js";
 import { initI18n, getLang, toggleLanguage } from "./i18n.js";
+import { initQuickAdd } from "./quick-add.js";
 
 const SIDEBAR_KEY = "spark_sidebar_collapsed";
 
@@ -113,10 +114,20 @@ function renderBreadcrumb() {
   `;
 }
 
+async function loadQuickAdd() {
+  const host = document.createElement("div");
+  host.id = "quick-add-root";
+  document.body.appendChild(host);
+  const res = await fetch("../components/quick-add.html");
+  if (res.ok) host.innerHTML = await res.text();
+  window.lucide?.createIcons();
+  initQuickAdd();
+}
+
 export async function initLayout() {
   await loadComponent("sidebar-root", "../components/sidebar.html");
   await loadComponent("navbar-root", "../components/navbar.html");
-  window.lucide?.createIcons();
+  await loadQuickAdd();
   initTheme();
   initSidebar();
   initThemeToggle();

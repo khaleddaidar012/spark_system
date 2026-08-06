@@ -55,14 +55,14 @@
 - [x] Business actions module (auto-updates project cost, inventory, supplier account)
 
 ## 7. Quick Actions (Highest Priority)
-- [ ] Floating Action Button (always visible, large, one-thumb)
-- [ ] Quick Add menu (Quick Money / Quick Materials)
-- [ ] Quick Money flow: Incoming / Outgoing -> Choose Person -> Save (2–3 taps)
-- [ ] Money belongs to: Supplier / Contractor / Client / Other
-- [ ] Every money transaction updates the person's account automatically
-- [ ] Quick Materials flow: In/Out -> Project -> Supplier -> Material -> Qty -> Price -> Save
-- [ ] Material transaction updates project cost + inventory + supplier account automatically
-- [ ] i18n for quick action flows
+- [x] Floating Action Button (always visible, large, one-thumb)
+- [x] Quick Add menu (Quick Money / Quick Materials)
+- [x] Quick Money flow: Incoming / Outgoing -> Choose Person -> Save (2–3 taps)
+- [x] Money belongs to: Supplier / Contractor / Client / Other
+- [x] Every money transaction updates the person's account automatically
+- [x] Quick Materials flow: In/Out -> Project -> Supplier -> Material -> Qty -> Price -> Save
+- [x] Material transaction updates project cost + inventory + supplier account automatically
+- [x] i18n for quick action flows
 
 ## 8. Suppliers Page
 - [ ] Suppliers list + add supplier form
