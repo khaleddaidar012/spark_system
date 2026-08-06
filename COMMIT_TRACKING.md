@@ -106,6 +106,13 @@
 
 ---
 
+## Commit 020
+- Commit: `36d48bb` Add suppliers, contractors and finance pages with auto-calculated balances
+- Description: Suppliers page (purchases/paid/remaining), Contractors page (total/paid/remaining) and Finance page (in/out/net summary + transaction history), each with add forms.
+- Rollback: `git reset --hard 36d48bb`
+
+---
+
 ## Next Commit
 - Commit: `PENDING`
 - Description: TBA
