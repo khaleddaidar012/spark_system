@@ -20,9 +20,12 @@
 @import url("./components/charts.css");
 @import url("./components/toast.css");
 @import url("./components/placeholder.css");
+@import url("./components/modal.css");
+@import url("./components/empty-state.css");
 
 @import url("./layout/layout.css");
 @import url("./layout/auth.css");
 
 @import url("./pages/dashboard.css");
 @import url("./pages/login.css");
+@import url("./pages/projects.css");

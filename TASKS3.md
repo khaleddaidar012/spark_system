@@ -25,22 +25,22 @@
 - [x] Create sample seed data for testing
 
 ## 4. Projects List
-- [ ] Create projects.html page
-- [ ] Create project card component (name, type, area, progress, status, cost summary)
-- [ ] Create progress bar component
-- [ ] Add hover animation on cards
-- [ ] Responsive cards grid
-- [ ] Empty state when no projects
-- [ ] Page-level i18n keys
+- [x] Create projects.html page
+- [x] Create project card component (name, type, area, progress, status, cost summary)
+- [x] Create progress bar component
+- [x] Add hover animation on cards
+- [x] Responsive cards grid
+- [x] Empty state when no projects
+- [x] Page-level i18n keys
 
 ## 5. Create Project
-- [ ] "Add Project" large button
-- [ ] Create reusable modal component
-- [ ] Form fields: Project Name, Type, Area, Advance Payment
-- [ ] Project types: Apartment / Villa / Clinic / Office / Shop / Other
-- [ ] Validation (required fields only)
-- [ ] Save to store + refresh list
-- [ ] Toast notification on save
+- [x] "Add Project" large button
+- [x] Create reusable modal component
+- [x] Form fields: Project Name, Type, Area, Advance Payment
+- [x] Project types: Apartment / Villa / Clinic / Office / Shop / Other
+- [x] Validation (required fields only)
+- [x] Save to store + refresh list
+- [x] Toast notification on save
 
 ## 6. Project Detail Page
 - [ ] Create project.html (loads project by id)

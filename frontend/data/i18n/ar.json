@@ -1,5 +1,10 @@
 {
   "appName": "سبارك للهندسة",
+  "common": {
+    "saved": "تم الحفظ بنجاح",
+    "deleted": "تم الحذف بنجاح",
+    "error": "حدث خطأ ما"
+  },
   "nav": {
     "dashboard": "لوحة التحكم",
     "projects": "المشاريع",
@@ -36,6 +41,28 @@
   "projects": {
     "title": "المشاريع",
     "subtitle": "خطط وتابع وسلم المشاريع الهندسية.",
+    "addProject": "إضافة مشروع",
+    "costMaterials": "الخامات",
+    "costContractors": "المقاولون",
+    "costTotal": "التكلفة الإجمالية",
+    "modalTitle": "مشروع جديد",
+    "formName": "اسم المشروع",
+    "formNamePh": "مثال: شقة 150 م²",
+    "formType": "نوع المشروع",
+    "typeApartment": "شقة",
+    "typeVilla": "فيلا",
+    "typeClinic": "عيادة",
+    "typeOffice": "مكتب",
+    "typeShop": "محل",
+    "typeOther": "أخرى",
+    "formArea": "المساحة (م²)",
+    "formAreaPh": "مثال: 150",
+    "formAdvance": "الدفعة المقدمة",
+    "formAdvancePh": "0",
+    "cancel": "إلغاء",
+    "save": "حفظ",
+    "emptyTitle": "لا توجد مشاريع بعد",
+    "emptyDesc": "أنشئ مشروعك الأول لبدء متابعة التكاليف والتقدم.",
     "comingSoon": "وحدة المشاريع قريباً."
   },
   "suppliers": {

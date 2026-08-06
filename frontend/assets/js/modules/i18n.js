@@ -8,6 +8,8 @@
 const LANG_KEY = "spark_lang";
 const LANGUAGES = ["en", "ar"];
 
+let currentDict = null;
+
 function getStoredLang() {
   try {
     const lang = localStorage.getItem(LANG_KEY);
@@ -63,10 +65,17 @@ export function getLang() {
   return getStoredLang();
 }
 
+export function translate(key) {
+  if (!currentDict) return "";
+  const text = resolve(currentDict, key);
+  return text != null ? text : "";
+}
+
 export async function initI18n() {
   const lang = getStoredLang();
   applyDirection(lang);
   const dict = await loadTranslations(lang);
+  currentDict = dict;
   if (dict) applyTranslations(dict);
   return lang;
 }
@@ -80,6 +89,7 @@ export async function setLanguage(lang) {
   }
   applyDirection(lang);
   const dict = await loadTranslations(lang);
+  currentDict = dict;
   if (dict) applyTranslations(dict);
   return lang;
 }

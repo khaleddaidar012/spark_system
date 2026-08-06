@@ -1,0 +1,195 @@
+/* ============================================
+   Spark ERP — Projects page
+   ============================================ */
+
+.page-header-row {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-5);
+  flex-wrap: wrap;
+}
+
+.page-header-row .btn {
+  flex-shrink: 0;
+}
+
+/* ---------- Grid ---------- */
+
+.projects-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: var(--space-6);
+}
+
+/* ---------- Project card ---------- */
+
+.project-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  padding: var(--space-6);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  color: var(--text);
+  transition: transform var(--transition-fast) var(--ease),
+    box-shadow var(--transition-fast) var(--ease),
+    border-color var(--transition-fast) var(--ease);
+}
+
+.project-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--primary);
+}
+
+.project-card:active {
+  transform: translateY(-2px) scale(0.99);
+}
+
+.project-card-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.project-card-name {
+  font-size: var(--font-size-lg);
+  font-weight: 700;
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+
+.project-card-meta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+  font-size: var(--font-size-sm);
+  color: var(--text-muted);
+}
+
+.project-card-meta .icon {
+  width: 16px;
+  height: 16px;
+}
+
+.project-card-status {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: var(--radius-full);
+}
+
+.status-active {
+  background: var(--success-soft);
+  color: var(--success);
+}
+
+.status-paused {
+  background: var(--warning-soft);
+  color: var(--warning);
+}
+
+.status-done {
+  background: var(--info-soft);
+  color: var(--info);
+}
+
+/* ---------- Progress ---------- */
+
+.project-progress {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.project-progress-track {
+  flex: 1;
+  height: 8px;
+  border-radius: var(--radius-full);
+  background: var(--surface-2);
+  overflow: hidden;
+}
+
+.project-progress-bar {
+  display: block;
+  height: 100%;
+  border-radius: var(--radius-full);
+  background: linear-gradient(90deg, var(--primary), var(--accent));
+  transition: width var(--transition-normal) var(--ease);
+}
+
+.project-progress-value {
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+  color: var(--primary);
+  min-width: 40px;
+  text-align: end;
+}
+
+/* ---------- Quick cost summary ---------- */
+
+.project-cost {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-3);
+  padding-top: var(--space-4);
+  border-top: 1px dashed var(--border);
+}
+
+.cost-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.cost-item-label {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+}
+
+.cost-item-value {
+  font-size: var(--font-size-md);
+  font-weight: 700;
+}
+
+.cost-item-value.is-total {
+  color: var(--primary);
+}
+
+.cost-total {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: var(--space-2);
+  border-top: 1px solid var(--border);
+}
+
+.cost-total .cost-item-value {
+  font-size: var(--font-size-lg);
+}
+
+/* ---------- Responsive ---------- */
+
+@media (max-width: 640px) {
+  .projects-grid {
+    grid-template-columns: 1fr;
+    gap: var(--space-4);
+  }
+
+  .page-header-row {
+    align-items: stretch;
+  }
+
+  .page-header-row .btn {
+    width: 100%;
+  }
+}

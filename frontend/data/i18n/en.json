@@ -1,5 +1,10 @@
 {
   "appName": "Spark Engineering",
+  "common": {
+    "saved": "Saved successfully",
+    "deleted": "Deleted successfully",
+    "error": "Something went wrong"
+  },
   "nav": {
     "dashboard": "Dashboard",
     "projects": "Projects",
@@ -36,6 +41,28 @@
   "projects": {
     "title": "Projects",
     "subtitle": "Plan, track and deliver engineering projects.",
+    "addProject": "Add Project",
+    "costMaterials": "Materials",
+    "costContractors": "Contractors",
+    "costTotal": "Total Cost",
+    "modalTitle": "New Project",
+    "formName": "Project Name",
+    "formNamePh": "e.g. Apartment 150 m²",
+    "formType": "Project Type",
+    "typeApartment": "Apartment",
+    "typeVilla": "Villa",
+    "typeClinic": "Clinic",
+    "typeOffice": "Office",
+    "typeShop": "Shop",
+    "typeOther": "Other",
+    "formArea": "Area (m²)",
+    "formAreaPh": "e.g. 150",
+    "formAdvance": "Advance Payment",
+    "formAdvancePh": "0",
+    "cancel": "Cancel",
+    "save": "Save",
+    "emptyTitle": "No projects yet",
+    "emptyDesc": "Create your first project to start tracking costs and progress.",
     "comingSoon": "Projects module is coming soon."
   },
   "suppliers": {
