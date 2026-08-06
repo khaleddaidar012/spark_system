@@ -43,15 +43,16 @@
 - [x] Toast notification on save
 
 ## 6. Project Detail Page
-- [ ] Create project.html (loads project by id)
-- [ ] General Information section (name, type, area, advance, progress)
-- [ ] Contractors section (paid / remaining / total cost per contractor)
-- [ ] Add contractor form
-- [ ] Materials section (supplier, purchase cost, quantity, project, date)
-- [ ] Add material form
-- [ ] Cost Summary (material cost + contractor cost + other = grand total) — auto-calculated
-- [ ] Project Analytics (m², consumed materials, cost per m², labor per m², total per m²)
-- [ ] Auto-recalculate all totals on every change
+- [x] Create project.html (loads project by id)
+- [x] General Information section (name, type, area, advance, progress)
+- [x] Contractors section (paid / remaining / total cost per contractor)
+- [x] Add contractor form
+- [x] Materials section (supplier, purchase cost, quantity, project, date)
+- [x] Add material form
+- [x] Cost Summary (material cost + contractor cost + other = grand total) — auto-calculated
+- [x] Project Analytics (m², consumed materials, cost per m², labor per m², total per m²)
+- [x] Auto-recalculate all totals on every change
+- [x] Business actions module (auto-updates project cost, inventory, supplier account)
 
 ## 7. Quick Actions (Highest Priority)
 - [ ] Floating Action Button (always visible, large, one-thumb)

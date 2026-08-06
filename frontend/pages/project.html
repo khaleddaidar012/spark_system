@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Spark Engineering ERP System — Project Details" />
+  <title>Project | Spark ERP</title>
+  <link rel="icon" type="image/svg+xml" href="../assets/icons/favicon.svg" />
+  <link rel="stylesheet" href="../assets/css/main.css" />
+</head>
+<body data-page="projects">
+  <div class="app-layout">
+    <div id="navbar-root"></div>
+
+    <div class="app-body">
+      <div id="sidebar-root"></div>
+
+      <main class="app-main">
+        <div class="app-content">
+          <a class="btn btn-ghost back-link" href="./projects.html">
+            <i data-lucide="arrow-left" class="icon"></i>
+            <span data-i18n="project.back">Back to Projects</span>
+          </a>
+
+          <header class="detail-header" id="detailHeader"></header>
+
+          <div class="detail-grid">
+            <section class="card detail-section" id="generalCard">
+              <h2 class="detail-section-title" data-i18n="project.generalTitle">General Information</h2>
+              <div class="detail-fields" id="generalFields"></div>
+            </section>
+
+            <section class="card detail-section" id="costCard">
+              <h2 class="detail-section-title" data-i18n="project.costTitle">Cost Summary</h2>
+              <div class="cost-summary" id="costSummary"></div>
+            </section>
+
+            <section class="card detail-section" id="analyticsCard">
+              <h2 class="detail-section-title" data-i18n="project.analyticsTitle">Project Analytics</h2>
+              <div class="analytics-grid" id="analyticsGrid"></div>
+            </section>
+          </div>
+
+          <section class="card detail-section detail-section-block">
+            <div class="detail-section-head">
+              <h2 class="detail-section-title" data-i18n="project.contractorsTitle">Contractors</h2>
+              <button class="btn btn-primary btn-sm" id="addContractorBtn" type="button">
+                <i data-lucide="plus" class="icon"></i>
+                <span data-i18n="project.addContractor">Add Contractor</span>
+              </button>
+            </div>
+            <div id="contractorsList" class="rows-list"></div>
+          </section>
+
+          <section class="card detail-section detail-section-block">
+            <div class="detail-section-head">
+              <h2 class="detail-section-title" data-i18n="project.materialsTitle">Materials</h2>
+              <button class="btn btn-primary btn-sm" id="addMaterialBtn" type="button">
+                <i data-lucide="plus" class="icon"></i>
+                <span data-i18n="project.addMaterial">Add Material</span>
+              </button>
+            </div>
+            <div id="materialsList" class="rows-list"></div>
+          </section>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- Add contractor modal -->
+  <div class="modal-overlay" id="contractorModal" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="contractorModalTitle">
+      <div class="modal-header">
+        <h2 class="modal-title" id="contractorModalTitle" data-i18n="project.addContractor">Add Contractor</h2>
+        <button class="btn btn-icon modal-close" id="contractorModalClose" type="button" aria-label="Close">
+          <i data-lucide="x" class="icon"></i>
+        </button>
+      </div>
+      <form id="contractorForm" class="modal-body form-stack" novalidate>
+        <div class="form-field">
+          <label class="form-label" for="conName" data-i18n="project.formConName">Contractor Name</label>
+          <input class="form-input" id="conName" name="name" type="text" required data-i18n-ph="project.formConNamePh" placeholder="e.g. Plumbing Contractor" />
+        </div>
+        <div class="form-field">
+          <label class="form-label" for="conRole" data-i18n="project.formConRole">Role</label>
+          <select class="form-input" id="conRole" name="role">
+            <option value="plumbing" data-i18n="project.rolePlumbing">Plumbing</option>
+            <option value="electrical" data-i18n="project.roleElectrical">Electrical</option>
+            <option value="finishing" data-i18n="project.roleFinishing">Finishing</option>
+            <option value="painting" data-i18n="project.rolePainting">Painting</option>
+            <option value="tiles" data-i18n="project.roleTiles">Tiles</option>
+            <option value="other" data-i18n="project.roleOther">Other</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <div class="form-field">
+            <label class="form-label" for="conTotal" data-i18n="project.formConTotal">Total Cost</label>
+            <input class="form-input" id="conTotal" name="total" type="number" min="0" step="0.01" required data-i18n-ph="project.formConTotalPh" placeholder="0" />
+          </div>
+          <div class="form-field">
+            <label class="form-label" for="conPaid" data-i18n="project.formConPaid">Paid</label>
+            <input class="form-input" id="conPaid" name="paid" type="number" min="0" step="0.01" value="0" data-i18n-ph="project.formConPaidPh" placeholder="0" />
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button class="btn btn-ghost" id="contractorFormCancel" type="button" data-i18n="projects.cancel">Cancel</button>
+          <button class="btn btn-primary" type="submit" data-i18n="projects.save">Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Add material modal -->
+  <div class="modal-overlay" id="materialModal" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="materialModalTitle">
+      <div class="modal-header">
+        <h2 class="modal-title" id="materialModalTitle" data-i18n="project.addMaterial">Add Material</h2>
+        <button class="btn btn-icon modal-close" id="materialModalClose" type="button" aria-label="Close">
+          <i data-lucide="x" class="icon"></i>
+        </button>
+      </div>
+      <form id="materialForm" class="modal-body form-stack" novalidate>
+        <div class="form-field">
+          <label class="form-label" for="matName" data-i18n="project.formMatName">Material Name</label>
+          <input class="form-input" id="matName" name="name" type="text" list="matSuggestions" required data-i18n-ph="project.formMatNamePh" placeholder="e.g. Cement" />
+          <datalist id="matSuggestions"></datalist>
+        </div>
+        <div class="form-field">
+          <label class="form-label" for="matSupplier" data-i18n="project.formMatSupplier">Supplier</label>
+          <select class="form-input" id="matSupplier" name="supplierId">
+            <option value="" data-i18n="project.formMatSupplierNone">No supplier</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <div class="form-field">
+            <label class="form-label" for="matQty" data-i18n="project.formMatQty">Quantity</label>
+            <input class="form-input" id="matQty" name="quantity" type="number" min="0" step="0.001" required data-i18n-ph="project.formMatQtyPh" placeholder="e.g. 100" />
+          </div>
+          <div class="form-field">
+            <label class="form-label" for="matUnit" data-i18n="project.formMatUnit">Unit</label>
+            <input class="form-input" id="matUnit" name="unit" type="text" data-i18n-ph="project.formMatUnitPh" placeholder="bag / m³" />
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-field">
+            <label class="form-label" for="matPrice" data-i18n="project.formMatPrice">Unit Price</label>
+            <input class="form-input" id="matPrice" name="unitPrice" type="number" min="0" step="0.01" required data-i18n-ph="project.formMatPricePh" placeholder="0" />
+          </div>
+          <div class="form-field">
+            <label class="form-label" for="matDate" data-i18n="project.formMatDate">Date</label>
+            <input class="form-input" id="matDate" name="date" type="date" />
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button class="btn btn-ghost" id="materialFormCancel" type="button" data-i18n="projects.cancel">Cancel</button>
+          <button class="btn btn-primary" type="submit" data-i18n="projects.save">Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="../assets/vendor/lucide/lucide.min.js"></script>
+  <script type="module" src="../assets/js/pages/project.js"></script>
+</body>
+</html>

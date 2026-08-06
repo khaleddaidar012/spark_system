@@ -1,0 +1,244 @@
+/* ============================================
+   Spark ERP — Project detail page
+   ============================================ */
+
+.back-link {
+  margin-bottom: var(--space-5);
+  padding-inline-start: 8px;
+  padding-inline-end: 14px;
+}
+
+/* ---------- Header ---------- */
+
+.detail-header {
+  margin-bottom: var(--space-6);
+}
+
+.detail-title {
+  font-size: var(--font-size-2xl);
+  font-weight: 700;
+  margin: 0 0 var(--space-3);
+  letter-spacing: -0.01em;
+}
+
+.detail-meta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+/* ---------- Sections ---------- */
+
+.detail-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--space-6);
+  margin-bottom: var(--space-6);
+}
+
+.detail-section {
+  padding: var(--space-6);
+}
+
+.detail-section-block {
+  margin-bottom: var(--space-6);
+}
+
+.detail-section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  margin-bottom: var(--space-5);
+  flex-wrap: wrap;
+}
+
+.detail-section-title {
+  font-size: var(--font-size-lg);
+  font-weight: 700;
+  margin: 0;
+}
+
+/* ---------- General fields ---------- */
+
+.detail-fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-4);
+}
+
+.detail-field {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.detail-field.is-wide {
+  grid-column: 1 / -1;
+}
+
+.detail-field-label {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+}
+
+.detail-field-value {
+  font-size: var(--font-size-md);
+  font-weight: 700;
+}
+
+/* ---------- Cost summary ---------- */
+
+.cost-summary {
+  display: flex;
+  flex-direction: column;
+}
+
+.cost-summary-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-3) 0;
+  border-bottom: 1px dashed var(--border);
+  font-size: var(--font-size-md);
+}
+
+.cost-summary-row:last-child {
+  border-bottom: none;
+}
+
+.cost-summary-row.is-total {
+  border-top: 1px solid var(--border);
+  border-bottom: none;
+  font-weight: 700;
+  font-size: var(--font-size-lg);
+  padding-top: var(--space-4);
+}
+
+.cost-summary-value {
+  font-weight: 700;
+}
+
+.cost-summary-row.is-total .cost-summary-value {
+  color: var(--primary);
+}
+
+/* ---------- Analytics ---------- */
+
+.analytics-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-3);
+}
+
+.analytics-item {
+  padding: var(--space-4);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+}
+
+.analytics-item-label {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+
+.analytics-item-value {
+  font-size: var(--font-size-lg);
+  font-weight: 700;
+}
+
+.analytics-item.is-wide {
+  grid-column: 1 / -1;
+}
+
+/* ---------- Rows (contractors / materials) ---------- */
+
+.rows-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.row-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-4);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  flex-wrap: wrap;
+}
+
+.row-item-main {
+  flex: 1;
+  min-width: 160px;
+}
+
+.row-item-title {
+  font-size: var(--font-size-md);
+  font-weight: 700;
+}
+
+.row-item-sub {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+.row-item-stats {
+  display: flex;
+  align-items: center;
+  gap: var(--space-5);
+  flex-wrap: wrap;
+}
+
+.row-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.row-stat-label {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+}
+
+.row-stat-value {
+  font-size: var(--font-size-md);
+  font-weight: 700;
+}
+
+.row-stat-value.is-remaining {
+  color: var(--warning);
+}
+
+.row-stat-value.is-paid {
+  color: var(--success);
+}
+
+/* ---------- Responsive ---------- */
+
+@media (max-width: 640px) {
+  .detail-fields,
+  .analytics-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .detail-field.is-wide {
+    grid-column: auto;
+  }
+
+  .detail-grid {
+    grid-template-columns: 1fr;
+    gap: var(--space-4);
+  }
+
+  .row-item-stats {
+    gap: var(--space-4);
+  }
+}

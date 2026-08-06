@@ -1,0 +1,359 @@
+/* ============================================
+   Spark ERP — Project Detail Page Script
+   Loads a project by id, renders general info,
+   cost summary, analytics, contractors and
+   materials. All totals are auto-calculated.
+   ============================================ */
+
+import { initLayout } from "../modules/layout.js";
+import { initStore, all, get, save } from "../modules/store.js";
+import { projectCosts, projectAnalytics, formatMoney, TYPE_LABELS, STATUS_LABELS, num } from "../modules/calc.js";
+import { addContractorToProject, addMaterialToProject } from "../modules/actions.js";
+import { translate } from "../modules/i18n.js";
+import { toast } from "../modules/toast.js";
+
+const lang = () => document.documentElement.lang;
+
+function local(obj) {
+  return (obj && (obj[lang()] || obj.en)) || "";
+}
+
+function esc(value) {
+  return String(value == null ? "" : value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+const ROLE_LABELS = {
+  plumbing: { en: "Plumbing", ar: "سباكة" },
+  electrical: { en: "Electrical", ar: "كهرباء" },
+  finishing: { en: "Finishing", ar: "تشطيب" },
+  painting: { en: "Painting", ar: "دهانات" },
+  tiles: { en: "Tiles", ar: "سيراميك" },
+  other: { en: "Other", ar: "أخرى" },
+};
+
+let current = null;
+
+/* ---------- URL ---------- */
+
+function projectIdFromUrl() {
+  return new URLSearchParams(window.location.search).get("id");
+}
+
+/* ---------- Header ---------- */
+
+function renderHeader(p) {
+  const status = p.status || "active";
+  const statusLabel = local(STATUS_LABELS[status]);
+  const statusClass = status === "done" ? "status-done" : status === "paused" ? "status-paused" : "status-active";
+
+  document.getElementById("detailHeader").innerHTML = `
+    <h1 class="detail-title">${esc(p.name)}</h1>
+    <div class="detail-meta">
+      <span class="badge badge-primary">${local(TYPE_LABELS[p.type])}</span>
+      <span class="project-card-status ${statusClass}">${statusLabel}</span>
+      <span class="badge badge-outline">${formatMoney(p.area)} m²</span>
+    </div>`;
+}
+
+/* ---------- General info ---------- */
+
+function renderGeneral(p) {
+  document.getElementById("generalFields").innerHTML = `
+    <div class="detail-field">
+      <span class="detail-field-label">${translate("project.fieldName")}</span>
+      <span class="detail-field-value">${esc(p.name)}</span>
+    </div>
+    <div class="detail-field">
+      <span class="detail-field-label">${translate("project.fieldType")}</span>
+      <span class="detail-field-value">${local(TYPE_LABELS[p.type])}</span>
+    </div>
+    <div class="detail-field">
+      <span class="detail-field-label">${translate("project.fieldArea")}</span>
+      <span class="detail-field-value">${formatMoney(p.area)} m²</span>
+    </div>
+    <div class="detail-field">
+      <span class="detail-field-label">${translate("project.fieldAdvance")}</span>
+      <span class="detail-field-value">${formatMoney(p.advancePayment)}</span>
+    </div>
+    <div class="detail-field is-wide">
+      <span class="detail-field-label">${translate("project.fieldProgress")} — ${Math.round(num(p.progress))}%</span>
+      <div class="project-progress">
+        <div class="project-progress-track"><span class="project-progress-bar" style="width:${Math.min(100, Math.max(0, Math.round(num(p.progress))))}%"></span></div>
+      </div>
+    </div>`;
+}
+
+/* ---------- Cost summary ---------- */
+
+function renderCost(p) {
+  const c = projectCosts(p);
+  document.getElementById("costSummary").innerHTML = `
+    <div class="cost-summary-row">
+      <span>${translate("project.costMaterials")}</span>
+      <span class="cost-summary-value">${formatMoney(c.material)}</span>
+    </div>
+    <div class="cost-summary-row">
+      <span>${translate("project.costContractors")}</span>
+      <span class="cost-summary-value">${formatMoney(c.contractors)}</span>
+    </div>
+    <div class="cost-summary-row">
+      <span>${translate("project.costOther")}</span>
+      <span class="cost-summary-value">${formatMoney(c.other)}</span>
+    </div>
+    <div class="cost-summary-row is-total">
+      <span>${translate("project.costTotal")}</span>
+      <span class="cost-summary-value">${formatMoney(c.total)}</span>
+    </div>`;
+}
+
+/* ---------- Analytics ---------- */
+
+function renderAnalytics(p) {
+  const a = projectAnalytics(p);
+  const consumed = (p.materials || [])
+    .slice()
+    .reverse()
+    .slice(0, 6)
+    .map((m) => `<span class="badge badge-outline">${esc(m.name)} · ${formatMoney(m.quantity)} ${esc(m.unit || "")}</span>`)
+    .join(" ");
+
+  document.getElementById("analyticsGrid").innerHTML = `
+    <div class="analytics-item">
+      <div class="analytics-item-label">${translate("project.area")}</div>
+      <div class="analytics-item-value">${formatMoney(a.area)} m²</div>
+    </div>
+    <div class="analytics-item">
+      <div class="analytics-item-label">${translate("project.totalPerM2")}</div>
+      <div class="analytics-item-value">${formatMoney(a.totalPerM2)}</div>
+    </div>
+    <div class="analytics-item">
+      <div class="analytics-item-label">${translate("project.materialPerM2")}</div>
+      <div class="analytics-item-value">${formatMoney(a.materialPerM2)}</div>
+    </div>
+    <div class="analytics-item">
+      <div class="analytics-item-label">${translate("project.laborPerM2")}</div>
+      <div class="analytics-item-value">${formatMoney(a.laborPerM2)}</div>
+    </div>
+    <div class="analytics-item is-wide">
+      <div class="analytics-item-label">${translate("project.consumed")}</div>
+      <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:8px;">${consumed || `<span class="badge badge-outline">—</span>`}</div>
+    </div>`;
+}
+
+/* ---------- Contractors ---------- */
+
+function renderContractors(p) {
+  const list = document.getElementById("contractorsList");
+  const rows = p.contractors || [];
+  if (!rows.length) {
+    list.innerHTML = `<p class="row-empty">${translate("project.noContractors")}</p>`;
+    return;
+  }
+  list.innerHTML = rows
+    .map((c) => {
+      const remaining = num(c.total) - num(c.paid);
+      return `
+        <div class="row-item">
+          <div class="row-item-main">
+            <div class="row-item-title">${esc(c.name)}</div>
+            <div class="row-item-sub">${local(ROLE_LABELS[c.role])}</div>
+          </div>
+          <div class="row-item-stats">
+            <div class="row-stat">
+              <span class="row-stat-label">${translate("project.total")}</span>
+              <span class="row-stat-value">${formatMoney(c.total)}</span>
+            </div>
+            <div class="row-stat">
+              <span class="row-stat-label">${translate("project.paid")}</span>
+              <span class="row-stat-value is-paid">${formatMoney(c.paid)}</span>
+            </div>
+            <div class="row-stat">
+              <span class="row-stat-label">${translate("project.remaining")}</span>
+              <span class="row-stat-value is-remaining">${formatMoney(remaining)}</span>
+            </div>
+          </div>
+        </div>`;
+    })
+    .join("");
+}
+
+/* ---------- Materials ---------- */
+
+function renderMaterials(p) {
+  const list = document.getElementById("materialsList");
+  const rows = p.materials || [];
+  if (!rows.length) {
+    list.innerHTML = `<p class="row-empty">${translate("project.noMaterials")}</p>`;
+    return;
+  }
+  list.innerHTML = rows
+    .slice()
+    .reverse()
+    .map((m) => `
+      <div class="row-item">
+        <div class="row-item-main">
+          <div class="row-item-title">${esc(m.name)}</div>
+          <div class="row-item-sub">${esc(m.supplierName || "—")} · ${esc(m.date || "")}</div>
+        </div>
+        <div class="row-item-stats">
+          <div class="row-stat">
+            <span class="row-stat-label">${translate("project.qty")}</span>
+            <span class="row-stat-value">${formatMoney(m.quantity)} ${esc(m.unit || "")}</span>
+          </div>
+          <div class="row-stat">
+            <span class="row-stat-label">${translate("project.unitPrice")}</span>
+            <span class="row-stat-value">${formatMoney(m.unitPrice)}</span>
+          </div>
+          <div class="row-stat">
+            <span class="row-stat-label">${translate("project.total")}</span>
+            <span class="row-stat-value">${formatMoney(m.total)}</span>
+          </div>
+        </div>
+      </div>`)
+    .join("");
+}
+
+/* ---------- Full render ---------- */
+
+function renderAll() {
+  if (!current) return;
+  const p = get("projects", current.id);
+  if (!p) {
+    window.location.href = "./projects.html";
+    return;
+  }
+  current = p;
+  renderHeader(p);
+  renderGeneral(p);
+  renderCost(p);
+  renderAnalytics(p);
+  renderContractors(p);
+  renderMaterials(p);
+}
+
+/* ---------- Contractor modal ---------- */
+
+function openContractorModal() {
+  const modal = document.getElementById("contractorModal");
+  modal.hidden = false;
+  document.getElementById("conName").focus();
+  window.lucide?.createIcons();
+}
+
+function closeContractorModal() {
+  document.getElementById("contractorModal").hidden = true;
+  document.getElementById("contractorForm").reset();
+}
+
+function submitContractor(event) {
+  event.preventDefault();
+  const form = event.currentTarget;
+  const name = form.name.value.trim();
+  if (!name) {
+    form.name.focus();
+    return;
+  }
+  addContractorToProject(current.id, {
+    name,
+    role: form.role.value,
+    total: form.total.value,
+    paid: form.paid.value,
+  });
+  closeContractorModal();
+  renderAll();
+  toast(translate("common.saved"));
+}
+
+/* ---------- Material modal ---------- */
+
+function fillMaterialSuppliers() {
+  const select = document.getElementById("matSupplier");
+  const currentVal = select.value;
+  select.innerHTML =
+    `<option value="">${translate("project.formMatSupplierNone")}</option>` +
+    all("suppliers")
+      .map((s) => `<option value="${s.id}">${esc(s.name)}</option>`)
+      .join("");
+  select.value = currentVal;
+}
+
+function fillMaterialSuggestions() {
+  const datalist = document.getElementById("matSuggestions");
+  const names = [...new Set(all("materials").map((m) => m.name))].concat(
+    (current.materials || []).map((m) => m.name)
+  );
+  datalist.innerHTML = [...new Set(names)]
+    .map((n) => `<option value="${esc(n)}"></option>`)
+    .join("");
+}
+
+function openMaterialModal() {
+  const modal = document.getElementById("materialModal");
+  fillMaterialSuppliers();
+  fillMaterialSuggestions();
+  const dateInput = document.getElementById("matDate");
+  if (!dateInput.value) dateInput.value = new Date().toISOString().slice(0, 10);
+  modal.hidden = false;
+  document.getElementById("matName").focus();
+  window.lucide?.createIcons();
+}
+
+function closeMaterialModal() {
+  document.getElementById("materialModal").hidden = true;
+  document.getElementById("materialForm").reset();
+}
+
+function submitMaterial(event) {
+  event.preventDefault();
+  const form = event.currentTarget;
+  const name = form.name.value.trim();
+  if (!name) {
+    form.name.focus();
+    return;
+  }
+  addMaterialToProject(current.id, {
+    name,
+    supplierId: form.supplierId.value || null,
+    quantity: form.quantity.value,
+    unit: form.unit.value,
+    unitPrice: form.unitPrice.value,
+    date: form.date.value,
+  });
+  closeMaterialModal();
+  renderAll();
+  toast(translate("common.saved"));
+}
+
+/* ---------- Init ---------- */
+
+document.addEventListener("DOMContentLoaded", async () => {
+  initStore();
+  await initLayout();
+  current = get("projects", projectIdFromUrl());
+  if (!current) {
+    window.location.href = "./projects.html";
+    return;
+  }
+  renderAll();
+
+  document.getElementById("addContractorBtn").addEventListener("click", openContractorModal);
+  document.getElementById("contractorModalClose").addEventListener("click", closeContractorModal);
+  document.getElementById("contractorFormCancel").addEventListener("click", closeContractorModal);
+  document.getElementById("contractorModal").addEventListener("click", (e) => {
+    if (e.target === e.currentTarget) closeContractorModal();
+  });
+  document.getElementById("contractorForm").addEventListener("submit", submitContractor);
+
+  document.getElementById("addMaterialBtn").addEventListener("click", openMaterialModal);
+  document.getElementById("materialModalClose").addEventListener("click", closeMaterialModal);
+  document.getElementById("materialFormCancel").addEventListener("click", closeMaterialModal);
+  document.getElementById("materialModal").addEventListener("click", (e) => {
+    if (e.target === e.currentTarget) closeMaterialModal();
+  });
+  document.getElementById("materialForm").addEventListener("submit", submitMaterial);
+});
