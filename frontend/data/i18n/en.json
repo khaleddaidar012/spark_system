@@ -5,6 +5,16 @@
     "deleted": "Deleted successfully",
     "error": "Something went wrong"
   },
+  "login": {
+    "subtitle": "Sign in to your account",
+    "username": "Username",
+    "password": "Password",
+    "rememberMe": "Remember me",
+    "forgot": "Forgot password?",
+    "button": "Sign In",
+    "showPassword": "Show password",
+    "footer": "© Spark Engineering Company"
+  },
   "nav": {
     "dashboard": "Dashboard",
     "projects": "Projects",
