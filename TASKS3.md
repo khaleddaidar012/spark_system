@@ -86,7 +86,7 @@
 - [x] Mobile / tablet / desktop responsive check
 - [x] Full navigation test
 - [x] Missing login translations added
-- [ ] Final commit + push to GitHub (push blocked — run `git push origin main` manually)
+- [x] Final commit + push to GitHub
 
 ---
 

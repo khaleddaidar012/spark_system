@@ -130,6 +130,18 @@
 
 ---
 
+## Commit 025
+- Commit: `9a8eacb` Complete Phase 2 polish and task tracking
+- Description: Final polish, full navigation test and task tracking updates. Pushed all Phase 2 commits to GitHub.
+- Rollback: `git reset --hard 9a8eacb`
+
+## Commit 024
+- Commit: `ab21939` Fix commit tracking hash
+- Description: Corrected the commit hash in COMMIT_TRACKING.md.
+- Rollback: `git reset --hard ab21939`
+
+---
+
 ## Next Commit
 - Commit: `PENDING`
 - Description: TBA
