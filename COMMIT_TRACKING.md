@@ -60,6 +60,31 @@
 - Description: Created TASKS3.md roadmap and COMMIT_TRACKING.md, committed and pushed.
 - Rollback: `git reset --hard f95a4d5`
 
+## Commit 016
+- Commit: `f8ef77d` Build projects list page with cards, progress bars and create project modal
+- Description: Projects list page with project cards (name, type, area, progress, status, cost summary), progress bars, hover animations, empty state, create-project modal and toast notifications.
+- Rollback: `git reset --hard f8ef77d`
+
+## Commit 015
+- Commit: `938bb07` Add localStorage data store with seed data
+- Description: Created store.js (localStorage CRUD + collections) with sample seed data.
+- Rollback: `git reset --hard 938bb07`
+
+## Commit 014
+- Commit: `4e10052` Clean up gitignore
+- Description: Removed invalid Arabic entry from .gitignore.
+- Rollback: `git reset --hard 4e10052`
+
+## Commit 013
+- Commit: `0197d5e` Remove stray plan file from tracking
+- Description: Removed the unreadable old plan file from git tracking.
+- Rollback: `git reset --hard 0197d5e`
+
+## Commit 012
+- Commit: `1f78242` Add Reports dashboard card and placeholder module pages
+- Description: Added the Reports card to the dashboard (5 cards) and created placeholder pages for Projects / Suppliers / Finance / Contractors / Reports.
+- Rollback: `git reset --hard 1f78242`
+
 ---
 
 ## Next Commit
