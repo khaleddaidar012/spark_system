@@ -13,9 +13,10 @@
 - [x] Commit + push planning files
 
 ## 2. Dashboard
-- [ ] Add Reports module card (5 cards total)
-- [ ] Dashboard cards occupy most of the screen
-- [ ] Responsive + premium polish
+- [x] Add Reports module card (5 cards total)
+- [x] Dashboard cards occupy most of the screen
+- [x] Responsive + premium polish
+- [x] Create placeholder pages for Projects / Suppliers / Finance / Contractors / Reports
 
 ## 3. Data Layer (localStorage)
 - [ ] Create store.js module (load / save / CRUD helpers)

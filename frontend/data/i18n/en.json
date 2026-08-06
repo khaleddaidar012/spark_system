@@ -29,6 +29,33 @@
     "financeTitle": "Financial Accounts",
     "financeDesc": "Monitor income, expenses and cash flow.",
     "contractorsTitle": "Contractors",
-    "contractorsDesc": "Manage contractors and track their payments."
+    "contractorsDesc": "Manage contractors and track their payments.",
+    "reportsTitle": "Reports",
+    "reportsDesc": "View financial reports and statistics."
+  },
+  "projects": {
+    "title": "Projects",
+    "subtitle": "Plan, track and deliver engineering projects.",
+    "comingSoon": "Projects module is coming soon."
+  },
+  "suppliers": {
+    "title": "Suppliers",
+    "subtitle": "Manage suppliers and material purchases.",
+    "comingSoon": "Suppliers module is coming soon."
+  },
+  "finance": {
+    "title": "Financial Accounts",
+    "subtitle": "Monitor income, expenses and cash flow.",
+    "comingSoon": "Financial Accounts module is coming soon."
+  },
+  "contractors": {
+    "title": "Contractors",
+    "subtitle": "Manage contractors and track their payments.",
+    "comingSoon": "Contractors module is coming soon."
+  },
+  "reports": {
+    "title": "Reports",
+    "subtitle": "View financial reports and statistics.",
+    "comingSoon": "Reports module is coming soon."
   }
 }

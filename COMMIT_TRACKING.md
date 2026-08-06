@@ -55,6 +55,11 @@
 - Description: Full-width layout, larger responsive cards, refined sidebar/navbar and RTL polish.
 - Rollback: `git reset --hard 50fcd88`
 
+## Commit 011
+- Commit: `f95a4d5` Add Phase 2 roadmap (TASKS3.md) and commit tracking
+- Description: Created TASKS3.md roadmap and COMMIT_TRACKING.md, committed and pushed.
+- Rollback: `git reset --hard f95a4d5`
+
 ---
 
 ## Next Commit
