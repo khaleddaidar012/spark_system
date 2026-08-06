@@ -19,10 +19,10 @@
 - [x] Create placeholder pages for Projects / Suppliers / Finance / Contractors / Reports
 
 ## 3. Data Layer (localStorage)
-- [ ] Create store.js module (load / save / CRUD helpers)
-- [ ] Create uid generator
-- [ ] Create default collections: projects, suppliers, contractors, clients, materials, moneyTransactions, materialTransactions
-- [ ] Create sample seed data for testing
+- [x] Create store.js module (load / save / CRUD helpers)
+- [x] Create uid generator
+- [x] Create default collections: projects, suppliers, contractors, clients, materials, moneyTransactions, materialTransactions
+- [x] Create sample seed data for testing
 
 ## 4. Projects List
 - [ ] Create projects.html page
