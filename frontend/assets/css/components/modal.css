@@ -15,6 +15,17 @@
   animation: modal-fade var(--transition-fast) var(--ease);
 }
 
+/* Critical: the `hidden` attribute must always win over display:flex */
+.modal-overlay[hidden],
+.modal[hidden] {
+  display: none !important;
+}
+
+/* Lock page scroll while any modal is open */
+body.modal-open {
+  overflow: hidden;
+}
+
 @keyframes modal-fade {
   from { opacity: 0; }
   to { opacity: 1; }

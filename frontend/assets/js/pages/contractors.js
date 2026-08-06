@@ -7,6 +7,7 @@ import { initStore, all, save, uid } from "../modules/store.js";
 import { contractorBalance, formatMoney } from "../modules/calc.js";
 import { translate } from "../modules/i18n.js";
 import { toast } from "../modules/toast.js";
+import { showModal, hideModal } from "../modules/modal.js";
 
 const lang = () => document.documentElement.lang;
 
@@ -72,12 +73,12 @@ function renderContractors() {
 function initModal() {
   const modal = document.getElementById("contractorModal");
   const open = () => {
-    modal.hidden = false;
+    showModal(modal);
     document.getElementById("conName").focus();
     window.lucide?.createIcons();
   };
   const close = () => {
-    modal.hidden = true;
+    hideModal(modal);
     document.getElementById("contractorForm").reset();
   };
 

@@ -96,6 +96,20 @@ The server serves the frontend statically and exposes a health check at
 
 ---
 
+## Development Login
+
+Temporary administrator account for development (until authentication is
+connected to MongoDB):
+
+```
+Username: admin
+Password: Spark@2026#ERP
+```
+
+> For development only. Replace with real MongoDB-backed authentication.
+
+---
+
 ## GitHub
 
 Repository: `https://github.com/khaleddaidar012/spark_system`

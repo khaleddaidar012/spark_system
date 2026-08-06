@@ -49,3 +49,23 @@
   gap: var(--space-2);
   z-index: 10;
 }
+
+/* RTL-aware alignment: form content follows the document direction */
+.auth-card {
+  text-align: start;
+}
+
+.auth-form .form-label,
+.auth-form .form-check-label,
+.auth-forgot {
+  text-align: start;
+}
+
+.auth-error {
+  text-align: start;
+}
+
+[dir="rtl"] .auth-card .form-input,
+[dir="rtl"] .auth-card .form-textarea {
+  text-align: right;
+}

@@ -8,6 +8,7 @@
 import { initTheme, toggleTheme } from "./theme.js";
 import { initI18n, getLang, toggleLanguage } from "./i18n.js";
 import { initQuickAdd } from "./quick-add.js";
+import { initModalManager } from "./modal.js";
 
 const SIDEBAR_KEY = "spark_sidebar_collapsed";
 
@@ -134,6 +135,7 @@ export async function initLayout() {
   initLangToggle();
   highlightActiveMenu();
   renderBreadcrumb();
+  initModalManager();
   await initI18n();
 }
 

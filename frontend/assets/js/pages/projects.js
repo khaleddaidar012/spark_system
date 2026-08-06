@@ -10,6 +10,7 @@ import { initStore, all, save, uid } from "../modules/store.js";
 import { projectCosts, formatMoney, TYPE_LABELS, STATUS_LABELS, num } from "../modules/calc.js";
 import { translate } from "../modules/i18n.js";
 import { toast } from "../modules/toast.js";
+import { showModal, hideModal } from "../modules/modal.js";
 
 const lang = () => document.documentElement.lang;
 
@@ -83,14 +84,13 @@ function renderProjects() {
 /* ---------- Create project modal ---------- */
 
 function openModal() {
-  const modal = document.getElementById("projectModal");
-  modal.hidden = false;
+  showModal(document.getElementById("projectModal"));
   document.getElementById("projName").focus();
   window.lucide?.createIcons();
 }
 
 function closeModal() {
-  document.getElementById("projectModal").hidden = true;
+  hideModal(document.getElementById("projectModal"));
   document.getElementById("projectForm").reset();
 }
 

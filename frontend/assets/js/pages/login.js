@@ -1,37 +1,33 @@
 /* ============================================
    Spark ERP — Login Page Script
+   Theme, i18n (en/ar), demo admin account.
    ============================================ */
 
 import { initTheme, toggleTheme } from "../modules/theme.js";
+import { initI18n, setLanguage, translate } from "../modules/i18n.js";
 
 const REMEMBER_KEY = "spark_remembered_user";
-const LANG_KEY = "spark_lang";
 
-document.addEventListener("DOMContentLoaded", () => {
+/* Temporary development account (until MongoDB auth is wired). */
+const DEMO_ADMIN = { username: "admin", password: "Spark@2026#ERP" };
+
+document.addEventListener("DOMContentLoaded", async () => {
   initTheme();
 
-  /* Lucide replaces <i data-lucide> with inline SVGs.
-     Run after initTheme so the theme icon visibility carries over. */
+  /* ---------- Language ---------- */
+  const langToggle = document.getElementById("langToggle");
+  await initI18n();
+  langToggle.textContent = document.documentElement.lang === "ar" ? "EN" : "ع";
+  langToggle?.addEventListener("click", async () => {
+    await setLanguage(document.documentElement.lang === "ar" ? "en" : "ar");
+    langToggle.textContent = document.documentElement.lang === "ar" ? "EN" : "ع";
+  });
+
+  /* Lucide replaces <i data-lucide> with inline SVGs. */
   window.lucide?.createIcons();
 
   /* ---------- Theme toggle ---------- */
-  const themeToggle = document.getElementById("themeToggle");
-  themeToggle?.addEventListener("click", toggleTheme);
-
-  /* ---------- Language toggle (placeholder until i18n phase) ---------- */
-  const langToggle = document.getElementById("langToggle");
-  const html = document.documentElement;
-  const applyLang = (lang) => {
-    html.lang = lang;
-    html.dir = lang === "ar" ? "rtl" : "ltr";
-    langToggle.textContent = lang === "ar" ? "EN" : "ع";
-  };
-  applyLang(localStorage.getItem(LANG_KEY) || "en");
-  langToggle?.addEventListener("click", () => {
-    const next = html.lang === "ar" ? "en" : "ar";
-    localStorage.setItem(LANG_KEY, next);
-    applyLang(next);
-  });
+  document.getElementById("themeToggle")?.addEventListener("click", toggleTheme);
 
   /* ---------- Show / hide password ---------- */
   const passwordInput = document.getElementById("password");
@@ -44,10 +40,6 @@ document.addEventListener("DOMContentLoaded", () => {
     passwordInput.type = isVisible ? "password" : "text";
     iconEye.style.display = isVisible ? "" : "none";
     iconEyeOff.style.display = isVisible ? "none" : "";
-    togglePassword.setAttribute(
-      "aria-label",
-      isVisible ? "Show password" : "Hide password"
-    );
   });
 
   /* ---------- Remember me (prefill) ---------- */
@@ -63,10 +55,15 @@ document.addEventListener("DOMContentLoaded", () => {
     /* storage unavailable */
   }
 
-  /* ---------- Form validation (UI only, no real auth yet) ---------- */
+  /* ---------- Demo login validation ---------- */
   const form = document.getElementById("loginForm");
   const errorBox = document.getElementById("loginError");
   const loginBtn = document.getElementById("loginBtn");
+
+  const showError = (key) => {
+    errorBox.textContent = translate(key);
+    errorBox.hidden = false;
+  };
 
   form?.addEventListener("submit", (e) => {
     e.preventDefault();
@@ -75,17 +72,24 @@ document.addEventListener("DOMContentLoaded", () => {
     const username = usernameInput.value.trim();
     const password = passwordInput.value.trim();
 
+    usernameInput.classList.remove("is-invalid");
+    passwordInput.classList.remove("is-invalid");
+
     if (!username || !password) {
-      errorBox.textContent = "Please enter your username and password.";
-      errorBox.hidden = false;
+      showError("login.errorRequired");
       usernameInput.classList.toggle("is-invalid", !username);
       passwordInput.classList.toggle("is-invalid", !password);
       (username ? passwordInput : usernameInput).focus();
       return;
     }
 
-    usernameInput.classList.remove("is-invalid");
-    passwordInput.classList.remove("is-invalid");
+    if (username !== DEMO_ADMIN.username || password !== DEMO_ADMIN.password) {
+      showError("login.errorInvalid");
+      usernameInput.classList.add("is-invalid");
+      passwordInput.classList.add("is-invalid");
+      passwordInput.focus();
+      return;
+    }
 
     if (rememberMe.checked) {
       try {
@@ -102,10 +106,9 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     loginBtn.disabled = true;
-    loginBtn.textContent = "Signing in…";
+    loginBtn.textContent = translate("login.signingIn");
     setTimeout(() => {
-      // UI only — no real authentication yet. Redirect to the dashboard.
       window.location.href = "./dashboard.html";
-    }, 800);
+    }, 700);
   });
 });

@@ -7,6 +7,7 @@ import { initStore, all, save, uid } from "../modules/store.js";
 import { supplierBalance, formatMoney } from "../modules/calc.js";
 import { translate } from "../modules/i18n.js";
 import { toast } from "../modules/toast.js";
+import { showModal, hideModal } from "../modules/modal.js";
 
 function esc(value) {
   return String(value == null ? "" : value)
@@ -60,12 +61,12 @@ function renderSuppliers() {
 function initModal() {
   const modal = document.getElementById("supplierModal");
   const open = () => {
-    modal.hidden = false;
+    showModal(modal);
     document.getElementById("supName").focus();
     window.lucide?.createIcons();
   };
   const close = () => {
-    modal.hidden = true;
+    hideModal(modal);
     document.getElementById("supplierForm").reset();
   };
 

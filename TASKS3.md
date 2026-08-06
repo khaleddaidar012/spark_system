@@ -90,5 +90,28 @@
 
 ---
 
+## 13. Bug Fixes (High Priority)
+### Quick Add Modal Bug
+- [x] Fix modal CSS `hidden` override (root cause of auto-open)
+- [x] Quick Add modal opens only on + button press
+- [x] Clear Close (X) button works
+- [x] Click outside modal closes it
+- [x] ESC key closes the modal
+- [x] Body scroll restored after closing a modal
+
+### Arabic Login Page
+- [x] Login page applies i18n translations (Arabic text)
+- [x] Fix RTL direction and text alignment
+- [x] Fix input / button / checkbox alignment
+- [x] Fix Arabic spacing, margins, padding
+- [x] Translated input placeholders
+
+### Demo Login Account
+- [x] Validate username `admin` / password `Spark@2026#ERP`
+- [x] Show error for wrong credentials
+- [x] Update README with Development Login section
+
+---
+
 ## Progress Notes
 - Phase 1 + Dashboard redesign are complete (see TASKS.md / TASKS2.md).

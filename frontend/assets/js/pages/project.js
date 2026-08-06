@@ -11,6 +11,7 @@ import { projectCosts, projectAnalytics, formatMoney, TYPE_LABELS, STATUS_LABELS
 import { addContractorToProject, addMaterialToProject } from "../modules/actions.js";
 import { translate } from "../modules/i18n.js";
 import { toast } from "../modules/toast.js";
+import { showModal, hideModal } from "../modules/modal.js";
 
 const lang = () => document.documentElement.lang;
 
@@ -239,14 +240,13 @@ function renderAll() {
 /* ---------- Contractor modal ---------- */
 
 function openContractorModal() {
-  const modal = document.getElementById("contractorModal");
-  modal.hidden = false;
+  showModal(document.getElementById("contractorModal"));
   document.getElementById("conName").focus();
   window.lucide?.createIcons();
 }
 
 function closeContractorModal() {
-  document.getElementById("contractorModal").hidden = true;
+  hideModal(document.getElementById("contractorModal"));
   document.getElementById("contractorForm").reset();
 }
 
@@ -293,18 +293,17 @@ function fillMaterialSuggestions() {
 }
 
 function openMaterialModal() {
-  const modal = document.getElementById("materialModal");
   fillMaterialSuppliers();
   fillMaterialSuggestions();
   const dateInput = document.getElementById("matDate");
   if (!dateInput.value) dateInput.value = new Date().toISOString().slice(0, 10);
-  modal.hidden = false;
+  showModal(document.getElementById("materialModal"));
   document.getElementById("matName").focus();
   window.lucide?.createIcons();
 }
 
 function closeMaterialModal() {
-  document.getElementById("materialModal").hidden = true;
+  hideModal(document.getElementById("materialModal"));
   document.getElementById("materialForm").reset();
 }
 

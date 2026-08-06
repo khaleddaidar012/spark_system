@@ -9,6 +9,7 @@ import { all, get } from "./store.js";
 import { recordMoney, addMaterialToProject, consumeMaterial } from "./actions.js";
 import { translate } from "./i18n.js";
 import { toast } from "./toast.js";
+import { showModal, hideModal } from "./modal.js";
 
 function esc(value) {
   return String(value == null ? "" : value)
@@ -21,13 +22,13 @@ function esc(value) {
 
 function openModal(id) {
   const el = document.getElementById(id);
-  el.hidden = false;
+  showModal(el);
   window.lucide?.createIcons();
   return el;
 }
 
 function closeModal(id) {
-  document.getElementById(id).hidden = true;
+  hideModal(document.getElementById(id));
 }
 
 function bindSegmented(containerId, onChange) {

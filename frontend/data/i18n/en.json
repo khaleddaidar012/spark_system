@@ -8,11 +8,16 @@
   "login": {
     "subtitle": "Sign in to your account",
     "username": "Username",
+    "usernamePh": "Enter your username",
     "password": "Password",
+    "passwordPh": "Enter your password",
     "rememberMe": "Remember me",
     "forgot": "Forgot password?",
     "button": "Sign In",
     "showPassword": "Show password",
+    "signingIn": "Signing in…",
+    "errorRequired": "Please enter your username and password.",
+    "errorInvalid": "Invalid username or password.",
     "footer": "© Spark Engineering Company"
   },
   "nav": {
