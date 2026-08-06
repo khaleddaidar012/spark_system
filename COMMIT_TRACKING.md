@@ -142,6 +142,13 @@
 
 ---
 
+## Commit 026
+- Commit: `42189de` Fix quick add modal and improve Arabic login
+- Description: Fixed the Quick Add modal auto-open bug (modal `hidden` attribute was overridden by `display:flex`), added a modal manager (X, ESC, click-outside to close + body scroll lock), made the login page apply i18n, added RTL/Arabic alignment polish, and added a demo admin account (admin / Spark@2026#ERP) with login validation. README now lists the development login.
+- Rollback: `git reset --hard 42189de`
+
+---
+
 ## Next Commit
 - Commit: `PENDING`
 - Description: TBA
