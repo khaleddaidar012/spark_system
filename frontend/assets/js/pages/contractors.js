@@ -91,9 +91,9 @@ function initModal() {
   document.getElementById("contractorForm").addEventListener("submit", (e) => {
     e.preventDefault();
     const form = e.currentTarget;
-    const name = form.name.value.trim();
+    const name = form.elements["name"].value.trim();
     if (!name) {
-      form.name.focus();
+      form.elements["name"].focus();
       return;
     }
     save("contractors", {

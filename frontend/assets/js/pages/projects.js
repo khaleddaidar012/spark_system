@@ -97,13 +97,13 @@ function closeModal() {
 function submitProject(event) {
   event.preventDefault();
   const form = event.currentTarget;
-  const name = form.name.value.trim();
-  const type = form.type.value;
-  const area = Number(form.area.value);
-  const advancePayment = Number(form.advancePayment.value || 0);
+  const name = form.elements["name"].value.trim();
+  const type = form.elements["type"].value;
+  const area = Number(form.elements["area"].value);
+  const advancePayment = Number(form.elements["advancePayment"].value || 0);
 
   if (!name || !area || area <= 0) {
-    form.name.focus();
+    form.elements["name"].focus();
     return;
   }
 

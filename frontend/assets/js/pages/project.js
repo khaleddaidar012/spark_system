@@ -253,9 +253,9 @@ function closeContractorModal() {
 function submitContractor(event) {
   event.preventDefault();
   const form = event.currentTarget;
-  const name = form.name.value.trim();
+  const name = form.elements["name"].value.trim();
   if (!name) {
-    form.name.focus();
+    form.elements["name"].focus();
     return;
   }
   addContractorToProject(current.id, {
@@ -311,9 +311,9 @@ function closeMaterialModal() {
 function submitMaterial(event) {
   event.preventDefault();
   const form = event.currentTarget;
-  const name = form.name.value.trim();
+  const name = form.elements["name"].value.trim();
   if (!name) {
-    form.name.focus();
+    form.elements["name"].focus();
     return;
   }
   addMaterialToProject(current.id, {
