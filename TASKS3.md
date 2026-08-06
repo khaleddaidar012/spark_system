@@ -80,12 +80,13 @@
 - [x] Reports page (placeholder)
 
 ## 12. i18n & Final Polish
-- [ ] English translations for all new pages
-- [ ] Arabic translations for all new pages
-- [ ] Dark mode check on all new pages
-- [ ] Mobile / tablet / desktop responsive check
-- [ ] Full navigation test
-- [ ] Final commit + push to GitHub
+- [x] English translations for all new pages
+- [x] Arabic translations for all new pages
+- [x] Dark mode check on all new pages
+- [x] Mobile / tablet / desktop responsive check
+- [x] Full navigation test
+- [x] Missing login translations added
+- [ ] Final commit + push to GitHub (push blocked — run `git push origin main` manually)
 
 ---
 
