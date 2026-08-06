@@ -113,6 +113,23 @@
 
 ---
 
+## Commit 023
+- Commit: `67cbd01` Add missing login page translations
+- Description: Added missing login.* i18n keys to en/ar translation files.
+- Rollback: `git reset --hard 67cbd01`
+
+## Commit 022
+- Commit: `3d41092` Fix form name field access in submit handlers
+- Description: Fixed `form.name` collision (HTMLFormElement.name) in all submit handlers.
+- Rollback: `git reset --hard 3d41092`
+
+## Commit 021
+- Commit: `741ba34` Update commit tracking
+- Description: Updated COMMIT_TRACKING.md.
+- Rollback: `git reset --hard 74a6f41`
+
+---
+
 ## Next Commit
 - Commit: `PENDING`
 - Description: TBA
