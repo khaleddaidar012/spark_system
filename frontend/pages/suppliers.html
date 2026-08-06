@@ -17,17 +17,54 @@
 
       <main class="app-main">
         <div class="app-content">
-          <header class="page-header">
-            <h1 class="page-title" data-i18n="suppliers.title">Suppliers</h1>
-            <p class="page-subtitle text-muted" data-i18n="suppliers.subtitle">Manage suppliers and material purchases.</p>
+          <header class="page-header page-header-row">
+            <div>
+              <h1 class="page-title" data-i18n="suppliers.title">Suppliers</h1>
+              <p class="page-subtitle text-muted" data-i18n="suppliers.subtitle">Manage suppliers and material purchases.</p>
+            </div>
+            <button class="btn btn-primary" id="addSupplierBtn" type="button">
+              <i data-lucide="plus" class="icon"></i>
+              <span data-i18n="suppliers.addSupplier">Add Supplier</span>
+            </button>
           </header>
 
-          <section class="placeholder">
-            <i data-lucide="truck" class="icon"></i>
-            <p data-i18n="suppliers.comingSoon">Suppliers module is coming soon.</p>
+          <section id="suppliersList" class="rows-list" aria-label="Suppliers list"></section>
+          <section id="suppliersEmpty" class="empty-state" hidden>
+            <span class="empty-state-icon" aria-hidden="true"><i data-lucide="truck" class="icon"></i></span>
+            <h2 class="empty-state-title" data-i18n="suppliers.emptyTitle">No suppliers yet</h2>
+            <p class="empty-state-desc" data-i18n="suppliers.emptyDesc">Add your first supplier to track purchases and payments.</p>
           </section>
         </div>
       </main>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="supplierModal" hidden>
+    <div class="modal modal-sm" role="dialog" aria-modal="true" aria-labelledby="supplierModalTitle">
+      <div class="modal-header">
+        <h2 class="modal-title" id="supplierModalTitle" data-i18n="suppliers.modalTitle">Add Supplier</h2>
+        <button class="btn btn-icon modal-close" id="supplierModalClose" type="button" aria-label="Close">
+          <i data-lucide="x" class="icon"></i>
+        </button>
+      </div>
+      <form id="supplierForm" class="modal-body form-stack" novalidate>
+        <div class="form-field">
+          <label class="form-label" for="supName" data-i18n="suppliers.formName">Supplier Name</label>
+          <input class="form-input" id="supName" name="name" type="text" required data-i18n-ph="suppliers.formNamePh" placeholder="e.g. Abu Hamad" />
+        </div>
+        <div class="form-field">
+          <label class="form-label" for="supPhone" data-i18n="suppliers.formPhone">Phone</label>
+          <input class="form-input" id="supPhone" name="phone" type="text" data-i18n-ph="suppliers.formPhonePh" placeholder="01xxxxxxxxx" />
+        </div>
+        <div class="form-field">
+          <label class="form-label" for="supNotes" data-i18n="suppliers.formNotes">Notes</label>
+          <textarea class="form-textarea" id="supNotes" name="notes" rows="2" data-i18n-ph="suppliers.formNotesPh" placeholder="—"></textarea>
+        </div>
+        <div class="modal-actions">
+          <button class="btn btn-ghost" id="supplierFormCancel" type="button" data-i18n="projects.cancel">Cancel</button>
+          <button class="btn btn-primary" type="submit" data-i18n="projects.save">Save</button>
+        </div>
+      </form>
     </div>
   </div>
 

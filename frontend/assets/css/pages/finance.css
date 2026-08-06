@@ -1,0 +1,76 @@
+/* ============================================
+   Spark ERP — Financial Accounts page
+   ============================================ */
+
+.finance-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: var(--space-6);
+  margin-bottom: var(--space-6);
+}
+
+.finance-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-6);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+.finance-card-icon {
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-md);
+  margin-bottom: var(--space-1);
+}
+
+.finance-card-icon .icon {
+  width: 22px;
+  height: 22px;
+}
+
+.finance-card.is-in .finance-card-icon {
+  background: var(--success-soft);
+  color: var(--success);
+}
+
+.finance-card.is-out .finance-card-icon {
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
+.finance-card.is-net .finance-card-icon {
+  background: var(--primary-soft);
+  color: var(--primary);
+}
+
+.finance-card-label {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+}
+
+.finance-card-value {
+  font-size: var(--font-size-xl);
+  font-weight: 700;
+}
+
+.finance-card.is-in .finance-card-value {
+  color: var(--success);
+}
+
+.finance-card.is-out .finance-card-value {
+  color: var(--danger);
+}
+
+@media (max-width: 640px) {
+  .finance-summary {
+    grid-template-columns: 1fr;
+    gap: var(--space-4);
+  }
+}

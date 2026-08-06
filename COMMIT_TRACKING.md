@@ -99,6 +99,13 @@
 
 ---
 
+## Commit 019
+- Commit: `d56bddf` Add floating quick add button with Quick Money and Quick Materials flows
+- Description: Global floating action button with Quick Add menu, Quick Money (in/out → person → save) and Quick Materials (in/out → project → supplier → material → qty → price → save). All flows auto-update person accounts, project cost and inventory.
+- Rollback: `git reset --hard d56bddf`
+
+---
+
 ## Next Commit
 - Commit: `PENDING`
 - Description: TBA

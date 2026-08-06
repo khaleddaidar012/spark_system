@@ -22,9 +22,31 @@
             <p class="page-subtitle text-muted" data-i18n="finance.subtitle">Monitor income, expenses and cash flow.</p>
           </header>
 
-          <section class="placeholder">
-            <i data-lucide="wallet" class="icon"></i>
-            <p data-i18n="finance.comingSoon">Financial Accounts module is coming soon.</p>
+          <section class="finance-summary" aria-label="Financial summary">
+            <div class="finance-card is-in">
+              <span class="finance-card-icon" aria-hidden="true"><i data-lucide="arrow-down-circle" class="icon"></i></span>
+              <span class="finance-card-label" data-i18n="finance.totalIn">Total Incoming</span>
+              <span class="finance-card-value" id="financeIn">0</span>
+            </div>
+            <div class="finance-card is-out">
+              <span class="finance-card-icon" aria-hidden="true"><i data-lucide="arrow-up-circle" class="icon"></i></span>
+              <span class="finance-card-label" data-i18n="finance.totalOut">Total Outgoing</span>
+              <span class="finance-card-value" id="financeOut">0</span>
+            </div>
+            <div class="finance-card is-net">
+              <span class="finance-card-icon" aria-hidden="true"><i data-lucide="scale" class="icon"></i></span>
+              <span class="finance-card-label" data-i18n="finance.net">Net Balance</span>
+              <span class="finance-card-value" id="financeNet">0</span>
+            </div>
+          </section>
+
+          <section class="card detail-section detail-section-block">
+            <h2 class="detail-section-title" data-i18n="finance.history">Transaction History</h2>
+            <div id="financeList" class="rows-list"></div>
+            <div id="financeEmpty" class="placeholder" hidden>
+              <i data-lucide="wallet" class="icon"></i>
+              <p data-i18n="finance.emptyDesc">No transactions yet. Use the + button for quick entry.</p>
+            </div>
           </section>
         </div>
       </main>

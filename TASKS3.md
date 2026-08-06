@@ -65,19 +65,19 @@
 - [x] i18n for quick action flows
 
 ## 8. Suppliers Page
-- [ ] Suppliers list + add supplier form
-- [ ] Show purchases, payments, remaining balance (auto-calculated)
+- [x] Suppliers list + add supplier form
+- [x] Show purchases, payments, remaining balance (auto-calculated)
 
 ## 9. Contractors Page
-- [ ] Contractors list + add contractor form
-- [ ] Show paid, remaining, total (auto-calculated)
+- [x] Contractors list + add contractor form
+- [x] Show paid, remaining, total (auto-calculated)
 
 ## 10. Finance Page
-- [ ] Accounts summary (incoming / outgoing / balances)
-- [ ] Transaction history list
+- [x] Accounts summary (incoming / outgoing / balances)
+- [x] Transaction history list
 
 ## 11. Reports
-- [ ] Reports page (placeholder)
+- [x] Reports page (placeholder)
 
 ## 12. i18n & Final Polish
 - [ ] English translations for all new pages
