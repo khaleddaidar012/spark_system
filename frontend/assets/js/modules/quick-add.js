@@ -44,23 +44,62 @@ function bindSegmented(containerId, onChange) {
 
 /* ---------- FAB ---------- */
 
+let closeFabMenu;
+
 function initFab() {
   const fab = document.getElementById("fab");
   const menu = document.getElementById("fabMenu");
   const root = document.getElementById("quickAdd");
+  const CLOSE_MS = 250;
+  let closeTimer = null;
+
+  const cancelClose = () => {
+    if (closeTimer) {
+      clearTimeout(closeTimer);
+      closeTimer = null;
+    }
+  };
+
+  const openMenu = () => {
+    cancelClose();
+    menu.classList.remove("is-closing");
+    menu.hidden = false;
+    root.classList.add("is-open");
+  };
+
+  const closeMenu = (instant = false) => {
+    if (menu.hidden) return;
+    cancelClose();
+    if (instant) {
+      menu.classList.remove("is-closing");
+      menu.hidden = true;
+      root.classList.remove("is-open");
+      return;
+    }
+    if (menu.classList.contains("is-closing")) return;
+    menu.classList.add("is-closing");
+    closeTimer = setTimeout(() => {
+      menu.hidden = true;
+      menu.classList.remove("is-closing");
+      root.classList.remove("is-open");
+      closeTimer = null;
+    }, CLOSE_MS);
+  };
 
   const toggle = () => {
-    const isOpen = root.classList.toggle("is-open");
-    menu.hidden = !isOpen;
+    const isOpen = root.classList.contains("is-open") && !menu.hidden;
+    isOpen ? closeMenu() : openMenu();
   };
 
   fab.addEventListener("click", toggle);
   document.addEventListener("click", (e) => {
-    if (!root.contains(e.target)) {
-      root.classList.remove("is-open");
-      menu.hidden = true;
-    }
+    if (!root.contains(e.target)) closeMenu();
   });
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") closeMenu();
+  });
+
+  closeFabMenu = closeMenu;
 }
 
 /* ---------- Quick Money ---------- */
@@ -93,8 +132,7 @@ function fillPersonSelect() {
 
 function initQuickMoney() {
   document.getElementById("fabMoney").addEventListener("click", () => {
-    document.getElementById("fabMenu").hidden = true;
-    document.getElementById("quickAdd").classList.remove("is-open");
+    closeFabMenu(true);
     const modal = openModal("quickMoneyModal");
     const firstChip = modal.querySelector("#moneyPersonType .chip");
     modal.querySelectorAll("#moneyPersonType .chip").forEach((c) => c.classList.toggle("is-active", c === firstChip));
@@ -195,8 +233,7 @@ function applyMaterialDirection(direction) {
 
 function initQuickMaterials() {
   document.getElementById("fabMaterials").addEventListener("click", () => {
-    document.getElementById("fabMenu").hidden = true;
-    document.getElementById("quickAdd").classList.remove("is-open");
+    closeFabMenu(true);
     if (!fillProjectSelect()) {
       toast(translate("quick.noProjects"), "info");
       return;

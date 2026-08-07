@@ -149,6 +149,13 @@
 
 ---
 
+## Commit 027
+- Commit: `PENDING`
+- Description: Fixed Quick Add default open behavior — FAB menu no longer auto-opens on page load (`.fab-menu[hidden]` now wins over `display:flex`, same as the modal fix). Menu opens only on FAB click with toggle, and closes via the X/ESC key/click-outside, with a smooth 250ms slide/fade animation.
+- Rollback: `git reset --hard <commit_hash>`
+
+---
+
 ## Next Commit
 - Commit: `PENDING`
 - Description: TBA

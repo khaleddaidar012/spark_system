@@ -111,6 +111,16 @@
 - [x] Show error for wrong credentials
 - [x] Update README with Development Login section
 
+### Quick Add Default-Open Bug
+- [x] Fix Quick Add always-open bug
+- [x] Open Quick Add only on button click
+- [x] Add toggle behavior
+- [x] Add close button
+- [x] Add click outside to close
+- [x] Add ESC key support
+- [x] Test on desktop
+- [x] Test on mobile
+
 ---
 
 ## Progress Notes
