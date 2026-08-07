@@ -183,6 +183,8 @@
     "formMatNamePh": "e.g. Cement",
     "formMatSupplier": "Supplier",
     "formMatSupplierNone": "No supplier",
+    "formMatContractor": "Assigned Contractor",
+    "formMatContractorNone": "No contractor",
     "formMatQty": "Quantity",
     "formMatQtyPh": "e.g. 100",
     "formMatUnit": "Unit",

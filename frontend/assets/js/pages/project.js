@@ -218,7 +218,7 @@ function renderMaterials(p) {
       <div class="row-item">
         <div class="row-item-main">
           <div class="row-item-title">${esc(m.name)}</div>
-          <div class="row-item-sub">${esc(m.supplierName || "—")} · ${esc(m.date || "")}</div>
+          <div class="row-item-sub">${esc(m.supplierName || "—")}${m.contractorName ? ` · ${translate("project.formMatContractor")}: ${esc(m.contractorName)}` : ""} · ${esc(m.date || "")}</div>
         </div>
         <div class="row-item-stats">
           <div class="row-stat">
@@ -348,6 +348,23 @@ function fillMaterialSuppliers() {
   select.value = currentVal;
 }
 
+function fillMaterialContractors() {
+  const select = document.getElementById("matContractor");
+  if (!select) return;
+  const currentVal = select.value;
+  const people = peopleWithRole("contractor");
+  select.innerHTML =
+    `<option value="">${translate("project.formMatContractorNone")}</option>` +
+    people
+      .map((c) => {
+        const roles = personRolesLabel(c, lang());
+        const label = roles ? `${esc(c.name)} — ${roles}` : esc(c.name);
+        return `<option value="${c.id}">${label}</option>`;
+      })
+      .join("");
+  select.value = currentVal;
+}
+
 function fillMaterialSuggestions() {
   const datalist = document.getElementById("matSuggestions");
   const names = [...new Set(all("materials").map((m) => m.name))].concat(
@@ -367,6 +384,7 @@ function applySupplierSupplies(supplierId) {
 
 function openMaterialModal() {
   fillMaterialSuppliers();
+  fillMaterialContractors();
   fillMaterialSuggestions();
   const dateInput = document.getElementById("matDate");
   if (!dateInput.value) dateInput.value = new Date().toISOString().slice(0, 10);
@@ -391,6 +409,7 @@ function submitMaterial(event) {
   addMaterialToProject(current.id, {
     name,
     supplierId: form.supplierId.value || null,
+    contractorId: form.contractorId.value || null,
     quantity: form.quantity.value,
     unit: form.unit.value,
     unitPrice: form.unitPrice.value,

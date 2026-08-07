@@ -182,9 +182,9 @@ function seedIfEmpty() {
       paid: c.paid,
     })),
     materials: [
-      { id: uid(), name: "أسمنت", supplierId: suppliers[1].id, supplierName: suppliers[1].name, quantity: 100, unit: "شيكارة", unitPrice: 110, total: 11000, date: today() },
-      { id: uid(), name: "رمل", supplierId: suppliers[0].id, supplierName: suppliers[0].name, quantity: 10, unit: "متر مكعب", unitPrice: 250, total: 2500, date: today() },
-      { id: uid(), name: "حديد تسليح", supplierId: suppliers[2].id, supplierName: suppliers[2].name, quantity: 4, unit: "طن", unitPrice: 12000, total: 48000, date: today() },
+      { id: uid(), name: "أسمنت", supplierId: suppliers[1].id, supplierName: suppliers[1].name, contractorId: contractors[0].id, contractorName: contractors[0].name, quantity: 100, unit: "شيكارة", unitPrice: 110, total: 11000, date: today() },
+      { id: uid(), name: "رمل", supplierId: suppliers[0].id, supplierName: suppliers[0].name, contractorId: contractors[0].id, contractorName: contractors[0].name, quantity: 10, unit: "متر مكعب", unitPrice: 250, total: 2500, date: today() },
+      { id: uid(), name: "حديد تسليح", supplierId: suppliers[2].id, supplierName: suppliers[2].name, contractorId: contractors[1].id, contractorName: contractors[1].name, quantity: 4, unit: "طن", unitPrice: 12000, total: 48000, date: today() },
     ],
     otherExpenses: [],
   };

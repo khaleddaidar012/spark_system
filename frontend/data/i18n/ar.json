@@ -183,6 +183,8 @@
     "formMatNamePh": "مثال: أسمنت",
     "formMatSupplier": "المورد",
     "formMatSupplierNone": "بدون مورد",
+    "formMatContractor": "رايحة لمقاول",
+    "formMatContractorNone": "بدون مقاول",
     "formMatQty": "الكمية",
     "formMatQtyPh": "مثال: 100",
     "formMatUnit": "الوحدة",

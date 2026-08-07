@@ -76,11 +76,13 @@ function stockIn(name, quantity, unit) {
   }
 }
 
-export function addMaterialToProject(projectId, { name, supplierId, quantity, unit, unitPrice, date }) {
+export function addMaterialToProject(projectId, { name, supplierId, contractorId, quantity, unit, unitPrice, date }) {
   const project = get("projects", projectId);
   if (!project) return null;
   const supplierRef = supplierId ? findPersonById(supplierId) : null;
   const supplier = supplierRef ? supplierRef.person : null;
+  const contractorRef = contractorId ? findPersonById(contractorId) : null;
+  const contractor = contractorRef ? contractorRef.person : null;
   const qty = num(quantity);
   const price = num(unitPrice);
   const total = qty * price;
@@ -90,6 +92,8 @@ export function addMaterialToProject(projectId, { name, supplierId, quantity, un
     name: String(name || "").trim(),
     supplierId: supplier ? supplier.id : null,
     supplierName: supplier ? supplier.name : "",
+    contractorId: contractor ? contractor.id : null,
+    contractorName: contractor ? contractor.name : "",
     quantity: qty,
     unit: unit || "",
     unitPrice: price,
@@ -113,6 +117,9 @@ export function addMaterialToProject(projectId, { name, supplierId, quantity, un
     direction: "in",
     projectId: project.id,
     supplierId: supplier ? supplier.id : null,
+    supplierName: supplier ? supplier.name : "",
+    contractorId: contractor ? contractor.id : null,
+    contractorName: contractor ? contractor.name : "",
     materialName: item.name,
     quantity: qty,
     unit: item.unit,

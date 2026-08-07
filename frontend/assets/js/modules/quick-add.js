@@ -241,9 +241,24 @@ function fillMaterialSuggestions() {
     .join("");
 }
 
+function fillContractorSelect() {
+  const select = document.getElementById("qmContractor");
+  const people = peopleWithRole("contractor");
+  select.innerHTML =
+    `<option value="">${translate("project.formMatContractorNone")}</option>` +
+    people
+      .map((c) => {
+        const roles = personRolesLabel(c, lang());
+        const label = roles ? `${esc(c.name)} — ${roles}` : esc(c.name);
+        return `<option value="${c.id}">${label}</option>`;
+      })
+      .join("");
+}
+
 function applyMaterialDirection(direction) {
   document.getElementById("qmSupplierField").hidden = direction === "out";
   document.getElementById("qmPriceField").hidden = direction === "out";
+  document.getElementById("qmContractorField").hidden = direction === "out";
   if (direction === "out") {
     document.getElementById("qmPrice").value = "";
   }
@@ -257,6 +272,7 @@ function initQuickMaterials() {
       return;
     }
     fillSupplierSelect();
+    fillContractorSelect();
     fillMaterialSuggestions();
     const modal = openModal("quickMatModal");
     const dirBox = modal.querySelector("#matDirection");
@@ -317,6 +333,7 @@ function initQuickMaterials() {
       addMaterialToProject(projectId, {
         name,
         supplierId: document.getElementById("qmSupplier").value || null,
+        contractorId: document.getElementById("qmContractor").value || null,
         quantity: document.getElementById("qmQty").value,
         unit: document.getElementById("qmUnit").value,
         unitPrice: document.getElementById("qmPrice").value,
