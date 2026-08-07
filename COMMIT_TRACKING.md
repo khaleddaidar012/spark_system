@@ -157,9 +157,9 @@
 ---
 
 ## Commit 028
-- Commit: `PENDING`
-- Description: Improve projects module and fix empty state — empty state no longer overrides the `hidden` attribute; project cards redesigned (name, type, area, progress bar/%, status badge, total cost); added View Details button linking to the existing detail page and a Complete Project button with confirmation dialog that sets status to done + progress 100%, badges completed projects and moves them to the bottom.
-- Rollback: `git reset --hard <commit_hash>`
+- Commit: `81d5378`
+- Description: Improve projects module and fix empty state — empty state no longer overrides the `hidden` attribute; project cards redesigned (name, type, area, progress bar/%, status badge, total cost); added View Details button linking to the existing detail page and a Complete Project button with confirmation dialog that sets status to done + progress 100, badges completed projects and moves them to the bottom.
+- Rollback: `git reset --hard 81d5378`
 
 ---
 
