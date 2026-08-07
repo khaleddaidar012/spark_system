@@ -72,6 +72,7 @@ function extraFields() {
   if (currentType === "supplier" || currentType === "client") {
     return [
       { name: "address", label: translate("quickAdd.address"), placeholder: translate("quickAdd.addressPh"), id: "qaPersonAddress" },
+      { name: "supplies", label: translate("quickAdd.supplies"), placeholder: translate("quickAdd.suppliesPh"), id: "qaPersonSupplies" },
       { name: "notes", label: translate("suppliers.formNotes"), type: "textarea", placeholder: "—", id: "qaPersonNotes" },
     ];
   }
@@ -166,6 +167,13 @@ function submit(e) {
 
   for (const f of extraFields()) {
     item[f.name] = document.getElementById(f.id).value.trim();
+  }
+
+  if (item.supplies != null) {
+    item.supplies = String(item.supplies)
+      .split(/[,،]/)
+      .map((s) => s.trim())
+      .filter(Boolean);
   }
 
   save(COLLECTION_BY_TYPE[currentType], item);

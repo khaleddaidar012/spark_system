@@ -140,9 +140,9 @@ function seedIfEmpty() {
   });
 
   const suppliers = [
-    { id: uid(), name: "أبو حمد للرمل", phone: "01000000001", notes: "", purchases: 12500, paid: 12500 },
-    { id: uid(), name: "المنصورة للأسمنت", phone: "01000000002", notes: "", purchases: 48000, paid: 30000 },
-    { id: uid(), name: "الصلب الحديث", phone: "01000000003", notes: "", purchases: 96000, paid: 60000 },
+    { id: uid(), name: "أبو حمد للرمل", phone: "01000000001", notes: "", supplies: ["رمل", "زلط", "سن"], purchases: 12500, paid: 12500 },
+    { id: uid(), name: "المنصورة للأسمنت", phone: "01000000002", notes: "", supplies: ["أسمنت", "جبس"], purchases: 48000, paid: 30000 },
+    { id: uid(), name: "الصلب الحديث", phone: "01000000003", notes: "", supplies: ["حديد تسليح"], purchases: 96000, paid: 60000 },
   ];
 
   const contractors = [

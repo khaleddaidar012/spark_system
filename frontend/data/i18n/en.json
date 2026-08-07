@@ -95,6 +95,8 @@
     "notSupplierMessage": "Person added successfully as {type}, but cannot be selected as a Supplier.",
     "address": "Address",
     "addressPh": "e.g. Industrial Zone",
+    "supplies": "Supplies",
+    "suppliesPh": "e.g. Sand, Cement",
     "add": "Quick add"
   },
   "projects": {
@@ -204,6 +206,8 @@
     "formPhonePh": "01xxxxxxxxx",
     "formNotes": "Notes",
     "formNotesPh": "—",
+    "formSupplies": "Supplies",
+    "formSuppliesPh": "e.g. Sand, Cement",
     "emptyTitle": "No suppliers yet",
     "emptyDesc": "Add your first supplier to track purchases and payments.",
     "comingSoon": "Suppliers module is coming soon."

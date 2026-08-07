@@ -85,11 +85,16 @@ function initModal() {
       form.elements["name"].focus();
       return;
     }
+    const supplies = (form.elements["supplies"].value || "")
+      .split(/[,،]/)
+      .map((s) => s.trim())
+      .filter(Boolean);
     save("suppliers", {
       id: uid(),
       name,
       phone: form.phone.value.trim(),
       notes: form.notes.value.trim(),
+      supplies,
       purchases: 0,
       paid: 0,
     });

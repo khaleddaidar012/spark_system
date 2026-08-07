@@ -95,6 +95,8 @@
     "notSupplierMessage": "تمت إضافة الشخص بنجاح كـ{type}، لكن لا يمكن اختياره كمورد.",
     "address": "العنوان",
     "addressPh": "مثال: المنطقة الصناعية",
+    "supplies": "الخامات الموردة",
+    "suppliesPh": "مثال: رمل، أسمنت",
     "add": "إضافة سريعة"
   },
   "projects": {
@@ -204,6 +206,8 @@
     "formPhonePh": "01xxxxxxxxx",
     "formNotes": "ملاحظات",
     "formNotesPh": "—",
+    "formSupplies": "بيورد إيه",
+    "formSuppliesPh": "مثال: رمل، أسمنت",
     "emptyTitle": "لا يوجد موردون بعد",
     "emptyDesc": "أضف موردك الأول لتتبع المشتريات والمدفوعات.",
     "comingSoon": "وحدة الموردين قريباً."

@@ -5,7 +5,7 @@
    accounts via the actions module.
    ============================================ */
 
-import { all, get, peopleWithRole } from "./store.js";
+import { all, get, peopleWithRole, findPersonById } from "./store.js";
 import { recordMoney, addMaterialToProject, consumeMaterial } from "./actions.js";
 import { translate } from "./i18n.js";
 import { toast } from "./toast.js";
@@ -227,6 +227,13 @@ function fillSupplierSelect() {
       .join("");
 }
 
+function applySupplierSupplies(supplierId) {
+  if (!supplierId) return;
+  const ref = findPersonById(supplierId);
+  const supplies = ref && Array.isArray(ref.person.supplies) ? ref.person.supplies : [];
+  if (supplies.length) document.getElementById("qmName").value = supplies[0];
+}
+
 function fillMaterialSuggestions() {
   const datalist = document.getElementById("qmSuggestions");
   datalist.innerHTML = [...new Set(all("materials").map((m) => m.name))]
@@ -290,6 +297,10 @@ function initQuickMaterials() {
         }
       },
     });
+  });
+
+  document.getElementById("qmSupplier").addEventListener("change", (e) => {
+    applySupplierSupplies(e.target.value);
   });
 
   document.getElementById("quickMatForm").addEventListener("submit", (e) => {

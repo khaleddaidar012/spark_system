@@ -358,6 +358,13 @@ function fillMaterialSuggestions() {
     .join("");
 }
 
+function applySupplierSupplies(supplierId) {
+  if (!supplierId) return;
+  const ref = findPersonById(supplierId);
+  const supplies = ref && Array.isArray(ref.person.supplies) ? ref.person.supplies : [];
+  if (supplies.length) document.getElementById("matName").value = supplies[0];
+}
+
 function openMaterialModal() {
   fillMaterialSuppliers();
   fillMaterialSuggestions();
@@ -458,5 +465,9 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
       },
     });
+  });
+
+  document.getElementById("matSupplier").addEventListener("change", (e) => {
+    applySupplierSupplies(e.target.value);
   });
 });
