@@ -38,7 +38,13 @@
       </header>
 
       <section class="statement-section">
-        <h2 class="statement-section-title" data-i18n="statement.materials">Project Materials</h2>
+        <div class="statement-section-head">
+          <h2 class="statement-section-title" data-i18n="statement.materials">Project Materials</h2>
+          <button class="btn btn-outline btn-sm no-print" id="statementAddMaterial" type="button">
+            <i data-lucide="plus" class="icon"></i>
+            <span data-i18n="statement.addMaterial">Add Material</span>
+          </button>
+        </div>
         <table class="statement-table" id="statementMaterials">
           <thead>
             <tr>
@@ -48,6 +54,7 @@
               <th data-i18n="statement.contractor">Contractor</th>
               <th data-i18n="statement.workmanship">Workmanship</th>
               <th class="is-center" data-i18n="statement.clientBought">Purchased by the client</th>
+              <th class="is-center no-print" data-i18n="statement.remove">Remove</th>
             </tr>
           </thead>
           <tbody></tbody>
@@ -67,6 +74,10 @@
         <div class="statement-summary-row">
           <span data-i18n="statement.supervisionPercent">Supervision Percentage</span>
           <input class="form-input statement-supervision-input" id="statementSupervision" type="number" min="0" max="100" step="0.01" value="0" />
+        </div>
+        <div class="statement-summary-row" id="statementSupervisionAmountRow">
+          <span data-i18n="statement.supervisionAmount">Supervision Amount</span>
+          <span id="statementSupervisionAmount">0</span>
         </div>
         <div class="statement-summary-row is-total">
           <span data-i18n="statement.grandTotal">Grand Total</span>

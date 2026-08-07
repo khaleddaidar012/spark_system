@@ -74,10 +74,18 @@
 
 /* ---------- Sections ---------- */
 
+.statement-section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  margin-bottom: var(--space-4);
+}
+
 .statement-section-title {
   font-size: var(--font-size-md);
   font-weight: 700;
-  margin: 0 0 var(--space-4);
+  margin: 0;
 }
 
 /* ---------- Table ---------- */
@@ -106,8 +114,38 @@
   text-align: center;
 }
 
-.statement-cell-name {
+.statement-row-name {
+  min-width: 150px;
+}
+
+.statement-qty-cell,
+.statement-cost-cell {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.statement-row-qty {
+  width: 70px;
+  text-align: end;
+}
+
+.statement-row-unit {
+  width: 64px;
+}
+
+.statement-row-price {
+  width: 90px;
+  text-align: end;
+}
+
+.statement-row-total {
   font-weight: 600;
+  white-space: nowrap;
+}
+
+.statement-row-contractor {
+  min-width: 130px;
 }
 
 .statement-row-workmanship {
@@ -115,8 +153,19 @@
   text-align: end;
 }
 
-.statement-row-contractor {
-  min-width: 130px;
+.statement-table tr.is-client-bought {
+  opacity: 0.5;
+  background: var(--surface-2);
+}
+
+.statement-table tr.is-client-bought .statement-row-price,
+.statement-table tr.is-client-bought .statement-row-total {
+  text-decoration: line-through;
+  text-decoration-thickness: 1px;
+}
+
+.statement-row-remove {
+  color: var(--danger);
 }
 
 .statement-empty {
@@ -225,5 +274,21 @@
   .statement-table th,
   .statement-table td {
     border-color: #000;
+  }
+
+  .statement-table input,
+  .statement-table select {
+    border: none;
+    padding: 0;
+    background: transparent;
+    box-shadow: none;
+    appearance: none;
+    -webkit-appearance: none;
+    min-width: 0;
+  }
+
+  .statement-table tr.is-client-bought {
+    background: #eee;
+    opacity: 1;
   }
 }

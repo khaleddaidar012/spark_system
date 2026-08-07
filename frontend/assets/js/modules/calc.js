@@ -133,9 +133,7 @@ export function statementData(project) {
   const materialTotal = materials
     .filter((m) => !m.clientBought)
     .reduce((s, m) => s + num(m.total), 0);
-  const workmanshipTotal = materials
-    .filter((m) => !m.clientBought)
-    .reduce((s, m) => s + num(m.workmanship), 0);
+  const workmanshipTotal = materials.reduce((s, m) => s + num(m.workmanship), 0);
   const supervisionPercent = num(project.supervisionPercent);
   const supervision = (materialTotal + workmanshipTotal) * (supervisionPercent / 100);
   return {
