@@ -165,6 +165,8 @@
     "formConName": "Contractor Name",
     "formConNamePh": "e.g. Plumbing Contractor",
     "formConRole": "Role",
+    "formConChoose": "Choose existing contractor",
+    "formConChooseNone": "— Choose contractor —",
     "rolePlumbing": "Plumbing",
     "roleElectrical": "Electrical",
     "roleFinishing": "Finishing",

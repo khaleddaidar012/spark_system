@@ -94,6 +94,17 @@
       </div>
       <form id="contractorForm" class="modal-body form-stack" novalidate>
         <div class="form-field">
+          <label class="form-label" data-i18n="project.formConChoose">Choose existing contractor</label>
+          <div class="field-with-action">
+            <select class="form-input" id="conChoose" name="choose">
+              <option value="" data-i18n="project.formConChooseNone">— Choose contractor —</option>
+            </select>
+            <button class="btn btn-soft btn-icon" id="conAddBtn" type="button" data-i18n-aria="quickAdd.add" aria-label="Quick add contractor" title="Quick add contractor">
+              <i data-lucide="plus" class="icon"></i>
+            </button>
+          </div>
+        </div>
+        <div class="form-field">
           <label class="form-label" for="conName" data-i18n="project.formConName">Contractor Name</label>
           <input class="form-input" id="conName" name="name" type="text" required data-i18n-ph="project.formConNamePh" placeholder="e.g. Plumbing Contractor" />
         </div>

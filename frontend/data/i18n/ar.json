@@ -165,6 +165,8 @@
     "formConName": "اسم المقاول",
     "formConNamePh": "مثال: مقاول السباكة",
     "formConRole": "التخصص",
+    "formConChoose": "اختر مقاولاً موجوداً",
+    "formConChooseNone": "— اختر مقاولاً —",
     "rolePlumbing": "سباكة",
     "roleElectrical": "كهرباء",
     "roleFinishing": "تشطيب",

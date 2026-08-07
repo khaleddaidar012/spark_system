@@ -6,10 +6,10 @@
    ============================================ */
 
 import { initLayout } from "../modules/layout.js";
-import { initStore, all, get, save, peopleWithRole } from "../modules/store.js";
+import { initStore, all, get, save, peopleWithRole, findPersonById } from "../modules/store.js";
 import { projectCosts, projectAnalytics, materialAnalytics, formatMoney, TYPE_LABELS, STATUS_LABELS, num } from "../modules/calc.js";
 import { addContractorToProject, addMaterialToProject } from "../modules/actions.js";
-import { openQuickAddSupplier } from "../modules/quick-add-person.js";
+import { openQuickAddSupplier, openQuickAddPerson } from "../modules/quick-add-person.js";
 import { personRolesLabel, personTypeLabel } from "../modules/person-roles.js";
 import { translate } from "../modules/i18n.js";
 import { toast } from "../modules/toast.js";
@@ -258,7 +258,36 @@ function renderAll() {
 
 /* ---------- Contractor modal ---------- */
 
+function pickContractorRole(person) {
+  const options = [...document.getElementById("conRole").options].map((o) => o.value);
+  if (person.role && options.includes(person.role)) return person.role;
+  if (Array.isArray(person.roles)) {
+    for (const r of person.roles) {
+      if (options.includes(r)) return r;
+    }
+  }
+  return "other";
+}
+
+function fillContractorSelect() {
+  const select = document.getElementById("conChoose");
+  if (!select) return;
+  const currentVal = select.value;
+  const people = peopleWithRole("contractor");
+  select.innerHTML =
+    `<option value="">${translate("project.formConChooseNone")}</option>` +
+    people
+      .map((c) => {
+        const roles = personRolesLabel(c, lang());
+        const label = roles ? `${esc(c.name)} — ${roles}` : esc(c.name);
+        return `<option value="${c.id}">${label}</option>`;
+      })
+      .join("");
+  select.value = currentVal;
+}
+
 function openContractorModal() {
+  fillContractorSelect();
   showModal(document.getElementById("contractorModal"));
   document.getElementById("conName").focus();
   window.lucide?.createIcons();
@@ -272,16 +301,29 @@ function closeContractorModal() {
 function submitContractor(event) {
   event.preventDefault();
   const form = event.currentTarget;
+  const chooseId = form.elements["choose"].value;
   const name = form.elements["name"].value.trim();
-  if (!name) {
+  if (!chooseId && !name) {
     form.elements["name"].focus();
     return;
   }
+  let contractorId = null;
+  let finalName = name;
+  let finalRole = form.role.value;
+  if (chooseId) {
+    const ref = findPersonById(chooseId);
+    if (ref) {
+      contractorId = ref.person.id;
+      finalName = ref.person.name;
+      finalRole = pickContractorRole(ref.person);
+    }
+  }
   addContractorToProject(current.id, {
-    name,
-    role: form.role.value,
+    name: finalName,
+    role: finalRole,
     total: form.total.value,
     paid: form.paid.value,
+    contractorId,
   });
   closeContractorModal();
   renderAll();
@@ -371,6 +413,29 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (e.target === e.currentTarget) closeContractorModal();
   });
   document.getElementById("contractorForm").addEventListener("submit", submitContractor);
+
+  document.getElementById("conChoose").addEventListener("change", (e) => {
+    const id = e.target.value;
+    if (!id) return;
+    const ref = findPersonById(id);
+    if (!ref) return;
+    document.getElementById("conName").value = ref.person.name;
+    document.getElementById("conRole").value = pickContractorRole(ref.person);
+  });
+
+  document.getElementById("conAddBtn").addEventListener("click", () => {
+    openQuickAddPerson({
+      title: translate("quickAdd.addPerson"),
+      initialType: "contractor",
+      onCreated: (person) => {
+        fillContractorSelect();
+        document.getElementById("conChoose").value = person.id;
+        document.getElementById("conName").value = person.name;
+        document.getElementById("conRole").value = pickContractorRole(person);
+        toast(translate("common.saved"));
+      },
+    });
+  });
 
   document.getElementById("addMaterialBtn").addEventListener("click", openMaterialModal);
   document.getElementById("materialModalClose").addEventListener("click", closeMaterialModal);

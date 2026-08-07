@@ -163,7 +163,7 @@ export function consumeMaterial(projectId, { name, quantity, unit, date }) {
 
 /* ---------- Project contractors ---------- */
 
-export function addContractorToProject(projectId, { name, role, total, paid }) {
+export function addContractorToProject(projectId, { name, role, total, paid, contractorId = null }) {
   const project = get("projects", projectId);
   if (!project) return null;
   const totalV = num(total);
@@ -176,25 +176,35 @@ export function addContractorToProject(projectId, { name, role, total, paid }) {
     total: totalV,
     paid: paidV,
   };
+  if (contractorId) item.contractorId = contractorId;
 
   project.contractors = project.contractors || [];
   project.contractors.push(item);
   save("projects", project);
 
-  const existing = all("contractors").find((c) => c.name === item.name);
-  if (existing) {
-    existing.total = num(existing.total) + totalV;
-    existing.paid = num(existing.paid) + paidV;
-    save("contractors", existing);
+  if (contractorId) {
+    const existing = all("contractors").find((c) => c.id === contractorId);
+    if (existing) {
+      existing.total = num(existing.total) + totalV;
+      existing.paid = num(existing.paid) + paidV;
+      save("contractors", existing);
+    }
   } else {
-    save("contractors", {
-      id: uid(),
-      name: item.name,
-      role: item.role,
-      phone: "",
-      total: totalV,
-      paid: paidV,
-    });
+    const existing = all("contractors").find((c) => c.name === item.name);
+    if (existing) {
+      existing.total = num(existing.total) + totalV;
+      existing.paid = num(existing.paid) + paidV;
+      save("contractors", existing);
+    } else {
+      save("contractors", {
+        id: uid(),
+        name: item.name,
+        role: item.role,
+        phone: "",
+        total: totalV,
+        paid: paidV,
+      });
+    }
   }
 
   return item;
