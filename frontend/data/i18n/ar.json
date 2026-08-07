@@ -248,6 +248,14 @@
     "formPaidPh": "0",
     "emptyTitle": "لا يوجد مقاولون بعد",
     "emptyDesc": "أضف مقاولك الأول لتتبع أعماله ومدفوعاته.",
+    "settleAccount": "اعمال حساب المقاول",
+    "settleModalTitle": "تسوية حساب",
+    "viewProjects": "المشاريع",
+    "projectsTitle": "مشاريع المقاول",
+    "materialsConsumed": "الخامات المستهلكة",
+    "noProjects": "لا توجد مشاريع بعد.",
+    "settleAmount": "المبلغ",
+    "settleNote": "ملاحظة (اختياري)",
     "comingSoon": "وحدة المقاولين قريباً."
   },
   "reports": {

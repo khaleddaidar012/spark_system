@@ -85,6 +85,43 @@
     </div>
   </div>
 
+  <div class="modal-overlay" id="settleModal" hidden>
+    <div class="modal modal-sm" role="dialog" aria-modal="true" aria-labelledby="settleModalTitle">
+      <div class="modal-header">
+        <h2 class="modal-title" id="settleModalTitle" data-i18n="contractors.settleModalTitle">Settle Account</h2>
+        <button class="btn btn-icon modal-close" id="settleModalClose" type="button" aria-label="Close">
+          <i data-lucide="x" class="icon"></i>
+        </button>
+      </div>
+      <form id="settleForm" class="modal-body form-stack" novalidate>
+        <div class="form-field">
+          <label class="form-label" for="settleAmount" data-i18n="contractors.settleAmount">Amount</label>
+          <input class="form-input" id="settleAmount" name="amount" type="number" min="0" step="0.01" required data-i18n-ph="project.formConTotalPh" placeholder="0" />
+        </div>
+        <div class="form-field">
+          <label class="form-label" for="settleNote" data-i18n="contractors.settleNote">Note (optional)</label>
+          <input class="form-input" id="settleNote" name="note" type="text" data-i18n-ph="quick.notePh" placeholder="—" />
+        </div>
+        <div class="modal-actions">
+          <button class="btn btn-ghost" id="settleCancel" type="button" data-i18n="projects.cancel">Cancel</button>
+          <button class="btn btn-primary" type="submit" data-i18n="projects.save">Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="projectsModal" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="projectsModalTitle">
+      <div class="modal-header">
+        <h2 class="modal-title" id="projectsModalTitle" data-i18n="contractors.projectsTitle">Contractor Projects</h2>
+        <button class="btn btn-icon modal-close" id="projectsModalClose" type="button" aria-label="Close">
+          <i data-lucide="x" class="icon"></i>
+        </button>
+      </div>
+      <div class="modal-body" id="projectsModalBody"></div>
+    </div>
+  </div>
+
   <script src="../assets/vendor/lucide/lucide.min.js"></script>
   <script type="module" src="../assets/js/pages/contractors.js"></script>
 </body>

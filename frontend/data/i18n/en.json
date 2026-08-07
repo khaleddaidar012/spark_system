@@ -248,6 +248,14 @@
     "formPaidPh": "0",
     "emptyTitle": "No contractors yet",
     "emptyDesc": "Add your first contractor to track their work and payments.",
+    "settleAccount": "Settle Account",
+    "settleModalTitle": "Settle Account",
+    "viewProjects": "Projects",
+    "projectsTitle": "Contractor Projects",
+    "materialsConsumed": "Consumed Materials",
+    "noProjects": "No projects yet.",
+    "settleAmount": "Amount",
+    "settleNote": "Note (optional)",
     "comingSoon": "Contractors module is coming soon."
   },
   "reports": {

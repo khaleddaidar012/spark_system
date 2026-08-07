@@ -106,6 +106,24 @@ export function contractorBalance(contractor) {
   };
 }
 
+export function contractorProjects(contractorId) {
+  return all("projects")
+    .filter(
+      (p) =>
+        (p.contractors || []).some((c) => c.id === contractorId) ||
+        (p.materials || []).some((m) => m.contractorId === contractorId)
+    )
+    .map((p) => ({
+      project: p,
+      contractor: (p.contractors || []).find((c) => c.id === contractorId) || null,
+      materials: (p.materials || []).filter((m) => m.contractorId === contractorId),
+    }));
+}
+
+export function contractorMaterials(project, contractorId) {
+  return (project.materials || []).filter((m) => m.contractorId === contractorId);
+}
+
 export function clientBalance(client) {
   return {
     paid: moneyIn(all("moneyTransactions").filter((t) => t.personType === "client" && t.personId === client.id)),
