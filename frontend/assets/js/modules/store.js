@@ -13,9 +13,20 @@ export const COLLECTIONS = {
   suppliers: "suppliers",
   contractors: "contractors",
   clients: "clients",
+  others: "others",
   materials: "materials",
   moneyTransactions: "moneyTransactions",
   materialTransactions: "materialTransactions",
+};
+
+export const PEOPLE_COLLECTIONS = ["suppliers", "contractors", "clients", "others"];
+
+/* Implicit role of a person stored in each collection when no roles[] is set. */
+export const COLLECTION_ROLE = {
+  suppliers: "supplier",
+  contractors: "contractor",
+  clients: "client",
+  others: "other",
 };
 
 export const PROJECT_TYPES = ["apartment", "villa", "clinic", "office", "shop", "other"];
@@ -46,6 +57,32 @@ export function all(name) {
 
 export function get(name, id) {
   return all(name).find((x) => x.id === id) || null;
+}
+
+export function personHasRole(person, role) {
+  const roles =
+    Array.isArray(person.roles) && person.roles.length
+      ? person.roles
+      : [COLLECTION_ROLE[person.__collection] || "other"];
+  return roles.includes(role);
+}
+
+export function allPeople() {
+  return PEOPLE_COLLECTIONS.flatMap((name) =>
+    all(name).map((p) => ({ ...p, __collection: name }))
+  );
+}
+
+export function peopleWithRole(role) {
+  return allPeople().filter((p) => personHasRole(p, role));
+}
+
+export function findPersonById(id) {
+  for (const name of PEOPLE_COLLECTIONS) {
+    const person = get(name, id);
+    if (person) return { person, collection: name };
+  }
+  return null;
 }
 
 export function save(name, item) {

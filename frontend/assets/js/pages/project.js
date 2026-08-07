@@ -6,10 +6,11 @@
    ============================================ */
 
 import { initLayout } from "../modules/layout.js";
-import { initStore, all, get, save } from "../modules/store.js";
+import { initStore, all, get, save, peopleWithRole } from "../modules/store.js";
 import { projectCosts, projectAnalytics, formatMoney, TYPE_LABELS, STATUS_LABELS, num } from "../modules/calc.js";
 import { addContractorToProject, addMaterialToProject } from "../modules/actions.js";
 import { openQuickAddSupplier } from "../modules/quick-add-person.js";
+import { personRolesLabel, personTypeLabel } from "../modules/person-roles.js";
 import { translate } from "../modules/i18n.js";
 import { toast } from "../modules/toast.js";
 import { showModal, hideModal } from "../modules/modal.js";
@@ -275,10 +276,15 @@ function submitContractor(event) {
 function fillMaterialSuppliers() {
   const select = document.getElementById("matSupplier");
   const currentVal = select.value;
+  const people = peopleWithRole("supplier");
   select.innerHTML =
     `<option value="">${translate("project.formMatSupplierNone")}</option>` +
-    all("suppliers")
-      .map((s) => `<option value="${s.id}">${esc(s.name)}</option>`)
+    people
+      .map((s) => {
+        const roles = personRolesLabel(s, lang());
+        const label = roles ? `${esc(s.name)} — ${roles}` : esc(s.name);
+        return `<option value="${s.id}">${label}</option>`;
+      })
       .join("");
   select.value = currentVal;
 }
@@ -359,9 +365,15 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   document.getElementById("matAddSupplierBtn").addEventListener("click", () => {
     openQuickAddSupplier({
-      onCreated: (supplier) => {
+      onCreated: (person) => {
         fillMaterialSuppliers();
-        document.getElementById("matSupplier").value = supplier.id;
+        if (person.roles.includes("supplier")) {
+          document.getElementById("matSupplier").value = person.id;
+          toast(translate("common.saved"));
+        } else {
+          const type = personTypeLabel(person.roles[0], lang());
+          toast(translate("quickAdd.notSupplierMessage").replace("{type}", type), "info");
+        }
       },
     });
   });

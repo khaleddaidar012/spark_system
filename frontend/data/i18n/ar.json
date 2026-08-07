@@ -85,6 +85,14 @@
   },
   "quickAdd": {
     "addSupplier": "إضافة مورد",
+    "addPerson": "إضافة شخص",
+    "personType": "نوع الشخص",
+    "typeSupplier": "مورد",
+    "typeContractor": "مقاول",
+    "typeClient": "عميل",
+    "typeOther": "أخرى",
+    "contractorSpecialty": "تخصص المقاول",
+    "notSupplierMessage": "تمت إضافة الشخص بنجاح كـ{type}، لكن لا يمكن اختياره كمورد.",
     "address": "العنوان",
     "addressPh": "مثال: المنطقة الصناعية",
     "add": "إضافة سريعة"

@@ -170,6 +170,11 @@
 
 ---
 
+## Commit 030
+- Commit: `PENDING`
+- Description: Fix person role selection in quick add — the Quick Add modal now asks for an explicit Person Type (Supplier / Contractor / Client / Other) with conditional fields (Address + Notes for Supplier/Client, Contractor Specialty incl. Carpentry for Contractor, none for Other). Persons are stored in the matching collection with a `roles[]` array (no hardcoded type), a new `others` collection was added plus role helpers (allPeople / peopleWithRole / findPersonById / personHasRole). Supplier selects filter to supplier-role people and show "Name — Supplier • Contractor" labels for multi-role persons; the newly created person is auto-selected only when it is a supplier, otherwise an info toast explains it cannot be a supplier. addMaterialToProject now locates the supplier across all person collections. Material form data is preserved (no reload).
+- Rollback: `git reset --hard <commit_hash>`
+
 ## Next Commit
 - Commit: `PENDING`
 - Description: TBA

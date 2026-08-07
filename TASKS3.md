@@ -156,6 +156,20 @@
 - [x] Test on desktop
 - [x] Test on mobile
 
+### Person Role Selection in Quick Add (High Priority)
+- [x] Add required Person Type selector (Supplier / Contractor / Client / Other) to the quick add form
+- [x] Conditional fields per type: Supplier & Client → Address + Notes; Contractor → Contractor Specialty (Electrical / Plumbing / Painting / Tiles / Carpentry / Finishing / Other); Other → none
+- [x] Store person roles as `roles[]` array instead of a hardcoded `type` field (future multi-role ready)
+- [x] Save person to the mapped collection (suppliers / contractors / clients / others)
+- [x] Add `others` collection + role helpers (allPeople, peopleWithRole, findPersonById, personHasRole)
+- [x] Supplier selects filter to people whose roles include supplier; multi-role persons shown as "Name — Supplier • Contractor"
+- [x] Auto-select new person only when roles include supplier; otherwise show "cannot be selected as a Supplier" message
+- [x] Preserve entered material form data (no full page reload)
+- [x] Update addMaterialToProject to locate the supplier across all person collections
+- [x] i18n keys (en/ar) for person type, specialty and non-supplier message
+- [x] Test on desktop
+- [x] Test on mobile
+
 ---
 
 ## Progress Notes

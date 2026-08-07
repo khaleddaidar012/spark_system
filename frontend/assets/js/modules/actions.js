@@ -5,7 +5,7 @@
    project costs, inventory and person accounts.
    ============================================ */
 
-import { all, get, save, uid, today } from "./store.js";
+import { all, get, save, uid, today, findPersonById } from "./store.js";
 import { num } from "./calc.js";
 
 /* ---------- Money ---------- */
@@ -79,7 +79,8 @@ function stockIn(name, quantity, unit) {
 export function addMaterialToProject(projectId, { name, supplierId, quantity, unit, unitPrice, date }) {
   const project = get("projects", projectId);
   if (!project) return null;
-  const supplier = supplierId ? get("suppliers", supplierId) : null;
+  const supplierRef = supplierId ? findPersonById(supplierId) : null;
+  const supplier = supplierRef ? supplierRef.person : null;
   const qty = num(quantity);
   const price = num(unitPrice);
   const total = qty * price;
@@ -102,7 +103,7 @@ export function addMaterialToProject(projectId, { name, supplierId, quantity, un
 
   if (supplier) {
     supplier.purchases = num(supplier.purchases) + total;
-    save("suppliers", supplier);
+    save(supplierRef.collection, supplier);
   }
 
   stockIn(item.name, qty, item.unit);

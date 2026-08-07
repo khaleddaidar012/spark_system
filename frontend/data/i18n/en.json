@@ -85,6 +85,14 @@
   },
   "quickAdd": {
     "addSupplier": "Add Supplier",
+    "addPerson": "Add Person",
+    "personType": "Person Type",
+    "typeSupplier": "Supplier",
+    "typeContractor": "Contractor",
+    "typeClient": "Client",
+    "typeOther": "Other",
+    "contractorSpecialty": "Contractor Specialty",
+    "notSupplierMessage": "Person added successfully as {type}, but cannot be selected as a Supplier.",
     "address": "Address",
     "addressPh": "e.g. Industrial Zone",
     "add": "Quick add"
