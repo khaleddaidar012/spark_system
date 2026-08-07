@@ -83,6 +83,12 @@
     "save": "Save",
     "noProjects": "Create a project first"
   },
+  "quickAdd": {
+    "addSupplier": "Add Supplier",
+    "address": "Address",
+    "addressPh": "e.g. Industrial Zone",
+    "add": "Quick add"
+  },
   "projects": {
     "title": "Projects",
     "subtitle": "Plan, track and deliver engineering projects.",

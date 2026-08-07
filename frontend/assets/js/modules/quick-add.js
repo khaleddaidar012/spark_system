@@ -10,6 +10,7 @@ import { recordMoney, addMaterialToProject, consumeMaterial } from "./actions.js
 import { translate } from "./i18n.js";
 import { toast } from "./toast.js";
 import { showModal, hideModal } from "./modal.js";
+import { openQuickAddSupplier } from "./quick-add-person.js";
 
 function esc(value) {
   return String(value == null ? "" : value)
@@ -264,6 +265,15 @@ function initQuickMaterials() {
   document.getElementById("quickMatCancel").addEventListener("click", () => closeModal("quickMatModal"));
   document.getElementById("quickMatModal").addEventListener("click", (e) => {
     if (e.target === e.currentTarget) closeModal("quickMatModal");
+  });
+
+  document.getElementById("qmAddSupplierBtn").addEventListener("click", () => {
+    openQuickAddSupplier({
+      onCreated: (supplier) => {
+        fillSupplierSelect();
+        document.getElementById("qmSupplier").value = supplier.id;
+      },
+    });
   });
 
   document.getElementById("quickMatForm").addEventListener("submit", (e) => {

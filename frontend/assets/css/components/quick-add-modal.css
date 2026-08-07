@@ -1,0 +1,82 @@
+/* ============================================
+   Spark ERP — Quick Add modal (reusable)
+   Small modal that becomes a bottom sheet on
+   mobile. Used for supplier / client /
+   contractor quick creation.
+   ============================================ */
+
+.modal-overlay.is-sheet .modal {
+  max-width: 440px;
+}
+
+/* Compact field + action button (e.g. Supplier select + "+") */
+.field-with-action {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.field-with-action .form-input,
+.field-with-action .form-select {
+  flex: 1;
+  min-width: 0;
+}
+
+.field-with-action .btn-icon {
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+}
+
+.field-with-action .btn-icon .icon {
+  width: 20px;
+  height: 20px;
+}
+
+.required-star {
+  color: var(--danger);
+}
+
+/* ---------- Bottom sheet (mobile) ---------- */
+
+@media (max-width: 640px) {
+  .modal-overlay.is-sheet {
+    align-items: flex-end;
+    justify-content: center;
+    padding: 0;
+  }
+
+  .modal-overlay.is-sheet .modal {
+    width: 100%;
+    max-width: 100%;
+    max-height: 92vh;
+    margin: 0;
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    animation: sheet-in var(--transition-normal) var(--ease);
+  }
+
+  .modal-overlay.is-sheet .modal-body {
+    padding: var(--space-6) var(--space-6) calc(var(--space-6) + 16px);
+  }
+
+  .modal-overlay.is-sheet .form-input,
+  .modal-overlay.is-sheet .form-textarea {
+    padding: 14px 16px;
+    font-size: var(--font-size-lg);
+  }
+
+  .modal-overlay.is-sheet .modal-actions {
+    gap: var(--space-3);
+  }
+
+  .modal-overlay.is-sheet .modal-actions .btn {
+    flex: 1;
+    padding: 14px;
+    font-size: var(--font-size-lg);
+  }
+}
+
+@keyframes sheet-in {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}

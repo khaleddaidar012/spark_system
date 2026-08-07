@@ -127,9 +127,14 @@
         </div>
         <div class="form-field">
           <label class="form-label" for="matSupplier" data-i18n="project.formMatSupplier">Supplier</label>
-          <select class="form-input" id="matSupplier" name="supplierId">
-            <option value="" data-i18n="project.formMatSupplierNone">No supplier</option>
-          </select>
+          <div class="field-with-action">
+            <select class="form-input" id="matSupplier" name="supplierId">
+              <option value="" data-i18n="project.formMatSupplierNone">No supplier</option>
+            </select>
+            <button class="btn btn-soft btn-icon" id="matAddSupplierBtn" type="button" data-i18n-aria="quickAdd.add" aria-label="Quick add supplier" title="Quick add supplier">
+              <i data-lucide="plus" class="icon"></i>
+            </button>
+          </div>
         </div>
         <div class="form-row">
           <div class="form-field">

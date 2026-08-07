@@ -9,6 +9,7 @@ import { initLayout } from "../modules/layout.js";
 import { initStore, all, get, save } from "../modules/store.js";
 import { projectCosts, projectAnalytics, formatMoney, TYPE_LABELS, STATUS_LABELS, num } from "../modules/calc.js";
 import { addContractorToProject, addMaterialToProject } from "../modules/actions.js";
+import { openQuickAddSupplier } from "../modules/quick-add-person.js";
 import { translate } from "../modules/i18n.js";
 import { toast } from "../modules/toast.js";
 import { showModal, hideModal } from "../modules/modal.js";
@@ -355,4 +356,13 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (e.target === e.currentTarget) closeMaterialModal();
   });
   document.getElementById("materialForm").addEventListener("submit", submitMaterial);
+
+  document.getElementById("matAddSupplierBtn").addEventListener("click", () => {
+    openQuickAddSupplier({
+      onCreated: (supplier) => {
+        fillMaterialSuppliers();
+        document.getElementById("matSupplier").value = supplier.id;
+      },
+    });
+  });
 });

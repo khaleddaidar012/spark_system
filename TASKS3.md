@@ -139,6 +139,23 @@
 - [x] Test on desktop
 - [x] Test on mobile
 
+### Materials Module — Supplier Quick Add (Reusable)
+- [x] Create reusable Quick Add modal component (config-driven, bottom sheet on mobile)
+- [x] Add "+" button beside Supplier field (project material form)
+- [x] Add "+" button beside Supplier field (Quick Materials flow)
+- [x] Build Supplier form (Name required, Phone / Address / Notes optional)
+- [x] Validate required fields (stays open when empty)
+- [x] Save new supplier immediately
+- [x] Auto-close modal after save
+- [x] Auto-select new supplier in the dropdown
+- [x] Preserve entered material data (no page leave, no form reset)
+- [x] Cancel button closes modal without saving
+- [x] Mobile bottom sheet UX (full-width, bottom-aligned, large inputs/buttons)
+- [x] i18n keys (en/ar) for quick add
+- [x] Reusable for future: Add Client / Add Contractor / Add Material / Add Project
+- [x] Test on desktop
+- [x] Test on mobile
+
 ---
 
 ## Progress Notes
