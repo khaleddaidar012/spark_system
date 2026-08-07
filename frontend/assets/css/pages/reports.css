@@ -1,0 +1,141 @@
+/* ============================================
+   Spark ERP — Reports page
+   ============================================ */
+
+.reports-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: var(--space-6);
+  margin-bottom: var(--space-6);
+}
+
+.report-stat-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-6);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+.report-stat-icon {
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-md);
+  margin-bottom: var(--space-1);
+  background: var(--primary-soft);
+  color: var(--primary);
+}
+
+.report-stat-icon .icon {
+  width: 22px;
+  height: 22px;
+}
+
+.report-stat-icon.is-done {
+  background: var(--success-soft);
+  color: var(--success);
+}
+
+.report-stat-label {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+}
+
+.report-stat-value {
+  font-size: var(--font-size-xl);
+  font-weight: 700;
+}
+
+/* ---------- Panels ---------- */
+
+.report-panel {
+  margin-bottom: var(--space-6);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+
+.report-panel-title {
+  font-size: var(--font-size-md);
+  font-weight: 700;
+  margin: 0;
+  padding: var(--space-5) var(--space-6);
+  border-bottom: 1px solid var(--border);
+}
+
+.report-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--font-size-sm);
+}
+
+.report-table th,
+.report-table td {
+  padding: var(--space-3) var(--space-6);
+  text-align: start;
+  border-bottom: 1px solid var(--border);
+}
+
+.report-table th {
+  font-weight: 600;
+  color: var(--text-muted);
+  background: var(--surface-2);
+  white-space: nowrap;
+}
+
+.report-table tr:last-child td {
+  border-bottom: none;
+}
+
+.report-table .is-amount {
+  text-align: end;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.is-amount.is-positive {
+  color: var(--success);
+}
+
+.is-amount.is-negative {
+  color: var(--danger);
+}
+
+.report-project-name {
+  font-weight: 600;
+}
+
+.report-project-sub {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+.report-empty {
+  margin: 0;
+  padding: var(--space-6);
+  color: var(--text-muted);
+  font-size: var(--font-size-sm);
+}
+
+/* ---------- Responsive ---------- */
+
+@media (max-width: 640px) {
+  .reports-stats {
+    grid-template-columns: 1fr;
+    gap: var(--space-4);
+  }
+
+  .report-table th,
+  .report-table td {
+    padding: var(--space-3);
+  }
+}

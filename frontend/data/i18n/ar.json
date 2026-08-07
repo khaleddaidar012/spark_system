@@ -262,6 +262,18 @@
   "reports": {
     "title": "التقارير",
     "subtitle": "عرض التقارير المالية والإحصائيات.",
+    "totalProjects": "عدد المشاريع",
+    "completedProjects": "المشاريع الكاملة",
+    "supplierTotals": "كل مورد اخدنا منه قد إيه",
+    "profitPerProject": "الأرباح من كل مشروع",
+    "contractorProjects": "المقاولون وعدد المشاريع",
+    "projectCount": "عدد المشاريع",
+    "profit": "الربح",
+    "total": "الإجمالي",
+    "project": "المشروع",
+    "supplier": "المورد",
+    "contractor": "المقاول",
+    "noData": "لا توجد بيانات بعد.",
     "comingSoon": "وحدة التقارير قريباً."
   },
   "statement": {

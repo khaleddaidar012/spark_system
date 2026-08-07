@@ -262,6 +262,18 @@
   "reports": {
     "title": "Reports",
     "subtitle": "View financial reports and statistics.",
+    "totalProjects": "Total Projects",
+    "completedProjects": "Completed Projects",
+    "supplierTotals": "Amount Taken from Each Supplier",
+    "profitPerProject": "Profit per Project",
+    "contractorProjects": "Contractors & Project Count",
+    "projectCount": "Projects",
+    "profit": "Profit",
+    "total": "Total",
+    "project": "Project",
+    "supplier": "Supplier",
+    "contractor": "Contractor",
+    "noData": "No data yet.",
     "comingSoon": "Reports module is coming soon."
   },
   "statement": {

@@ -148,6 +148,30 @@ export function statementData(project) {
   };
 }
 
+export function projectProfit(project) {
+  const income = moneyIn(all("moneyTransactions").filter((t) => t.projectId === project.id));
+  return income - projectCost(project);
+}
+
+export function supplierPurchases() {
+  return all("suppliers").map((s) => ({
+    supplier: s,
+    purchases: supplierBalance(s).purchases,
+  }));
+}
+
+export function contractorProjectCounts() {
+  return all("contractors").map((c) => {
+    const projectIds = new Set();
+    all("projects").forEach((p) => {
+      const inContractors = (p.contractors || []).some((row) => row.id === c.id);
+      const inMaterials = (p.materials || []).some((m) => m.contractorId === c.id);
+      if (inContractors || inMaterials) projectIds.add(p.id);
+    });
+    return { contractor: c, projectCount: projectIds.size };
+  });
+}
+
 export function clientBalance(client) {
   return {
     paid: moneyIn(all("moneyTransactions").filter((t) => t.personType === "client" && t.personId === client.id)),

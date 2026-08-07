@@ -22,9 +22,59 @@
             <p class="page-subtitle text-muted" data-i18n="reports.subtitle">View financial reports and statistics.</p>
           </header>
 
-          <section class="placeholder">
-            <i data-lucide="bar-chart-3" class="icon"></i>
-            <p data-i18n="reports.comingSoon">Reports module is coming soon.</p>
+          <section class="reports-stats" aria-label="Project statistics">
+            <div class="report-stat-card">
+              <span class="report-stat-icon" aria-hidden="true"><i data-lucide="folder" class="icon"></i></span>
+              <span class="report-stat-label" data-i18n="reports.totalProjects">Total Projects</span>
+              <span class="report-stat-value" id="reportTotalProjects">0</span>
+            </div>
+            <div class="report-stat-card">
+              <span class="report-stat-icon is-done" aria-hidden="true"><i data-lucide="check-circle-2" class="icon"></i></span>
+              <span class="report-stat-label" data-i18n="reports.completedProjects">Completed Projects</span>
+              <span class="report-stat-value" id="reportCompletedProjects">0</span>
+            </div>
+          </section>
+
+          <section class="report-panel">
+            <h2 class="report-panel-title" data-i18n="reports.supplierTotals">Amount Taken from Each Supplier</h2>
+            <table class="report-table" id="reportSuppliersTable">
+              <thead>
+                <tr>
+                  <th data-i18n="reports.supplier">Supplier</th>
+                  <th data-i18n="reports.total">Total</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+            <p class="report-empty" id="reportSuppliersEmpty" hidden data-i18n="reports.noData">No data yet.</p>
+          </section>
+
+          <section class="report-panel">
+            <h2 class="report-panel-title" data-i18n="reports.profitPerProject">Profit per Project</h2>
+            <table class="report-table" id="reportProfitTable">
+              <thead>
+                <tr>
+                  <th data-i18n="reports.project">Project</th>
+                  <th data-i18n="reports.profit">Profit</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+            <p class="report-empty" id="reportProfitEmpty" hidden data-i18n="reports.noData">No data yet.</p>
+          </section>
+
+          <section class="report-panel">
+            <h2 class="report-panel-title" data-i18n="reports.contractorProjects">Contractors &amp; Project Count</h2>
+            <table class="report-table" id="reportContractorsTable">
+              <thead>
+                <tr>
+                  <th data-i18n="reports.contractor">Contractor</th>
+                  <th data-i18n="reports.projectCount">Projects</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+            <p class="report-empty" id="reportContractorsEmpty" hidden data-i18n="reports.noData">No data yet.</p>
           </section>
         </div>
       </main>
