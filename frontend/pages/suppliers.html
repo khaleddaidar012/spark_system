@@ -72,6 +72,23 @@
     </div>
   </div>
 
+  <div class="modal-overlay" id="supplierAccountModal" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="supplierAccountTitle">
+      <div class="modal-header">
+        <h2 class="modal-title" id="supplierAccountTitle" data-i18n="suppliers.accountTitle">Account & Transactions</h2>
+        <button class="btn btn-icon modal-close" id="supplierAccountClose" type="button" aria-label="Close">
+          <i data-lucide="x" class="icon"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="account-summary" id="supplierAccountSummary"></div>
+        <h3 class="detail-section-title" data-i18n="suppliers.transactions">Transactions</h3>
+        <div id="supplierAccountList" class="rows-list"></div>
+        <p class="row-empty" id="supplierAccountEmpty" hidden data-i18n="suppliers.noTransactions">No transactions yet.</p>
+      </div>
+    </div>
+  </div>
+
   <script src="../assets/vendor/lucide/lucide.min.js"></script>
   <script type="module" src="../assets/js/pages/suppliers.js"></script>
 </body>

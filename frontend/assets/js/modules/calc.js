@@ -80,6 +80,24 @@ export function supplierBalance(supplier) {
   };
 }
 
+export function supplierTransactions(supplierId) {
+  const money = all("moneyTransactions")
+    .filter((t) => t.personType === "supplier" && t.personId === supplierId)
+    .slice()
+    .sort((a, b) => (b.date || "").localeCompare(a.date || ""));
+  const material = all("materialTransactions")
+    .filter((t) => t.supplierId === supplierId)
+    .slice()
+    .sort((a, b) => (b.date || "").localeCompare(a.date || ""));
+  return { money, material };
+}
+
+export function supplierProjectName(projectId) {
+  if (!projectId) return "";
+  const p = all("projects").find((x) => x.id === projectId);
+  return p ? p.name : "";
+}
+
 export function contractorBalance(contractor) {
   return {
     total: num(contractor.total),

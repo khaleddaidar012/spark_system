@@ -279,6 +279,73 @@
   color: var(--success);
 }
 
+/* ---------- Row actions ---------- */
+
+.row-item-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.row-item-actions .btn .icon {
+  width: 14px;
+  height: 14px;
+}
+
+.row-empty {
+  font-size: var(--font-size-sm);
+  color: var(--text-muted);
+  padding: var(--space-4) 0;
+  margin: 0;
+}
+
+/* ---------- Account summary (supplier / contractor) ---------- */
+
+.account-summary {
+  margin-bottom: var(--space-5);
+}
+
+.account-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-3);
+}
+
+.account-summary-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--space-4);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+}
+
+.account-summary-label {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+}
+
+.account-summary-value {
+  font-size: var(--font-size-lg);
+  font-weight: 700;
+}
+
+.account-summary-value.is-remaining {
+  color: var(--warning);
+}
+
+.account-summary-value.is-paid {
+  color: var(--success);
+}
+
+@media (max-width: 640px) {
+  .account-summary-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 /* ---------- Responsive ---------- */
 
 @media (max-width: 640px) {
