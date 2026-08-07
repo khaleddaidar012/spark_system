@@ -38,6 +38,22 @@
             <section class="card detail-section" id="analyticsCard">
               <h2 class="detail-section-title" data-i18n="project.analyticsTitle">Project Analytics</h2>
               <div class="analytics-grid" id="analyticsGrid"></div>
+              <div class="analytics-table-wrap">
+                <h3 class="analytics-table-title" data-i18n="project.materialBreakdown">Materials per m²</h3>
+                <div class="analytics-table-scroll">
+                  <table class="analytics-table">
+                    <thead>
+                      <tr>
+                        <th data-i18n="project.material">Material</th>
+                        <th data-i18n="project.qty">Quantity</th>
+                        <th data-i18n="project.totalCost">Total Cost</th>
+                        <th data-i18n="project.costPerM2">Cost / m²</th>
+                      </tr>
+                    </thead>
+                    <tbody id="analyticsTableBody"></tbody>
+                  </table>
+                </div>
+              </div>
             </section>
           </div>
 

@@ -108,6 +108,24 @@ export function projectAnalytics(project) {
   };
 }
 
+export function materialAnalytics(project) {
+  const area = num(project.area);
+  const perArea = (v) => (area > 0 ? v / area : 0);
+  const groups = new Map();
+  (project.materials || []).forEach((m) => {
+    const key = String(m.name || "").trim() || "—";
+    const g = groups.get(key) || { name: key, quantity: 0, unit: m.unit || "", total: 0 };
+    g.quantity += num(m.quantity);
+    g.total += num(m.total);
+    if (m.unit && !g.unit) g.unit = m.unit;
+    groups.set(key, g);
+  });
+  return [...groups.values()].map((m) => ({
+    ...m,
+    totalPerM2: perArea(m.total),
+  }));
+}
+
 export function formatMoney(n) {
   return new Intl.NumberFormat("en-US", { maximumFractionDigits: 0 }).format(num(n));
 }

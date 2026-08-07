@@ -7,7 +7,7 @@
 
 import { initLayout } from "../modules/layout.js";
 import { initStore, all, get, save, peopleWithRole } from "../modules/store.js";
-import { projectCosts, projectAnalytics, formatMoney, TYPE_LABELS, STATUS_LABELS, num } from "../modules/calc.js";
+import { projectCosts, projectAnalytics, materialAnalytics, formatMoney, TYPE_LABELS, STATUS_LABELS, num } from "../modules/calc.js";
 import { addContractorToProject, addMaterialToProject } from "../modules/actions.js";
 import { openQuickAddSupplier } from "../modules/quick-add-person.js";
 import { personRolesLabel, personTypeLabel } from "../modules/person-roles.js";
@@ -118,6 +118,7 @@ function renderCost(p) {
 
 function renderAnalytics(p) {
   const a = projectAnalytics(p);
+  const perMaterial = materialAnalytics(p);
   const consumed = (p.materials || [])
     .slice()
     .reverse()
@@ -146,6 +147,22 @@ function renderAnalytics(p) {
       <div class="analytics-item-label">${translate("project.consumed")}</div>
       <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:8px;">${consumed || `<span class="badge badge-outline">—</span>`}</div>
     </div>`;
+
+  const rows = perMaterial.length
+    ? perMaterial
+        .map(
+          (m) => `
+        <tr>
+          <td>${esc(m.name)}</td>
+          <td>${formatMoney(m.quantity)} ${esc(m.unit || "")}</td>
+          <td>${formatMoney(m.total)}</td>
+          <td>${formatMoney(m.totalPerM2)}</td>
+        </tr>`
+        )
+        .join("")
+    : `<tr><td class="analytics-table-empty" colspan="4">${translate("project.noMaterials")}</td></tr>`;
+
+  document.getElementById("analyticsTableBody").innerHTML = rows;
 }
 
 /* ---------- Contractors ---------- */

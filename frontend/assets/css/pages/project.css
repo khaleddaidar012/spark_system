@@ -154,6 +154,64 @@
   grid-column: 1 / -1;
 }
 
+/* ---------- Analytics per-material table ---------- */
+
+.analytics-table-wrap {
+  margin-top: var(--space-5);
+}
+
+.analytics-table-title {
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+  margin: 0 0 var(--space-3);
+  color: var(--text-muted);
+}
+
+.analytics-table-scroll {
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+}
+
+.analytics-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--font-size-sm);
+}
+
+.analytics-table th,
+.analytics-table td {
+  padding: var(--space-3) var(--space-4);
+  text-align: start;
+  white-space: nowrap;
+}
+
+.analytics-table th {
+  background: var(--surface-2);
+  color: var(--text-muted);
+  font-weight: 700;
+  border-bottom: 1px solid var(--border);
+}
+
+.analytics-table td {
+  border-bottom: 1px dashed var(--border);
+}
+
+.analytics-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.analytics-table td:last-child,
+.analytics-table th:last-child {
+  text-align: end;
+}
+
+.analytics-table-empty {
+  text-align: center !important;
+  color: var(--text-muted);
+  padding: var(--space-5) !important;
+}
+
 /* ---------- Rows (contractors / materials) ---------- */
 
 .rows-list {

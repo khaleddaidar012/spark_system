@@ -185,7 +185,11 @@
     "formMatUnitPh": "شيكارة / م³",
     "formMatPrice": "سعر الوحدة",
     "formMatPricePh": "0",
-    "formMatDate": "التاريخ"
+    "formMatDate": "التاريخ",
+    "materialBreakdown": "الخامات لكل م²",
+    "material": "الخامة",
+    "totalCost": "التكلفة الإجمالية",
+    "costPerM2": "التكلفة لكل م²"
   },
   "suppliers": {
     "title": "الموردون",

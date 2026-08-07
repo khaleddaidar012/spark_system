@@ -185,7 +185,11 @@
     "formMatUnitPh": "bag / m³",
     "formMatPrice": "Unit Price",
     "formMatPricePh": "0",
-    "formMatDate": "Date"
+    "formMatDate": "Date",
+    "materialBreakdown": "Materials per m²",
+    "material": "Material",
+    "totalCost": "Total Cost",
+    "costPerM2": "Cost / m²"
   },
   "suppliers": {
     "title": "Suppliers",
