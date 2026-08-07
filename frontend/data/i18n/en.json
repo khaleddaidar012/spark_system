@@ -108,6 +108,14 @@
     "save": "Save",
     "emptyTitle": "No projects yet",
     "emptyDesc": "Create your first project to start tracking costs and progress.",
+    "area": "Area",
+    "progress": "Progress",
+    "viewDetails": "View Details",
+    "completeProject": "Complete Project",
+    "confirmCompleteTitle": "Complete Project?",
+    "confirmCompleteDesc": "This will mark the project as Completed and set its progress to 100%. Continue?",
+    "confirm": "Confirm",
+    "completed": "Completed",
     "comingSoon": "Projects module is coming soon."
   },
   "project": {

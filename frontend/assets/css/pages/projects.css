@@ -56,20 +56,29 @@
   gap: var(--space-3);
 }
 
+.project-card-head {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
 .project-card-name {
   font-size: var(--font-size-lg);
   font-weight: 700;
   margin: 0;
   letter-spacing: -0.01em;
+  line-height: 1.35;
 }
 
 .project-card-meta {
   display: flex;
   align-items: center;
-  gap: var(--space-3);
-  flex-wrap: wrap;
+  gap: var(--space-2);
   font-size: var(--font-size-sm);
   color: var(--text-muted);
+  margin-top: calc(var(--space-2) * -1);
 }
 
 .project-card-meta .icon {
@@ -137,17 +146,12 @@
 /* ---------- Quick cost summary ---------- */
 
 .project-cost {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   gap: var(--space-3);
   padding-top: var(--space-4);
   border-top: 1px dashed var(--border);
-}
-
-.cost-item {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
 }
 
 .cost-item-label {
@@ -156,7 +160,7 @@
 }
 
 .cost-item-value {
-  font-size: var(--font-size-md);
+  font-size: var(--font-size-lg);
   font-weight: 700;
 }
 
@@ -164,17 +168,38 @@
   color: var(--primary);
 }
 
-.cost-total {
-  grid-column: 1 / -1;
+/* ---------- Card actions ---------- */
+
+.project-card-actions {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding-top: var(--space-2);
-  border-top: 1px solid var(--border);
+  gap: var(--space-2);
+  flex-wrap: wrap;
 }
 
-.cost-total .cost-item-value {
-  font-size: var(--font-size-lg);
+.project-card-actions .btn {
+  flex: 1 1 auto;
+  white-space: nowrap;
+}
+
+/* ---------- Completed projects ---------- */
+
+.project-card.is-done {
+  opacity: 0.78;
+  background: var(--surface-2);
+  border-color: var(--border-strong);
+}
+
+.project-card.is-done:hover {
+  border-color: var(--border-strong);
+}
+
+.project-card.is-done .project-progress-bar {
+  background: linear-gradient(90deg, var(--info), #06b6d4);
+}
+
+.project-card.is-done .cost-item-value.is-total {
+  color: var(--text-muted);
 }
 
 /* ---------- Responsive ---------- */

@@ -121,6 +121,24 @@
 - [x] Test on desktop
 - [x] Test on mobile
 
+### Projects Module Improvements (High Priority)
+- [x] Fix empty state rendering (CSS `hidden` override — same root cause as Quick Add)
+- [x] Show projects when available
+- [x] Hide empty state when projects exist
+- [x] Add Complete Project button
+- [x] Add confirmation dialog
+- [x] Set status to "Completed" on confirm
+- [x] Set progress to 100% on confirm
+- [x] Add completed badge
+- [x] Move completed projects to the bottom of the list
+- [x] Visually distinguish completed projects (is-done card style)
+- [x] Improve project card layout (name, type, area, progress bar, %, status, total cost)
+- [x] Add View Details button
+- [x] Project details page (General / Contractors / Materials / Cost / Analytics) wired from View Details
+- [x] i18n keys (en/ar) for new buttons and confirmation dialog
+- [x] Test on desktop
+- [x] Test on mobile
+
 ---
 
 ## Progress Notes

@@ -108,6 +108,14 @@
     "save": "حفظ",
     "emptyTitle": "لا توجد مشاريع بعد",
     "emptyDesc": "أنشئ مشروعك الأول لبدء متابعة التكاليف والتقدم.",
+    "area": "المساحة",
+    "progress": "نسبة الإنجاز",
+    "viewDetails": "عرض التفاصيل",
+    "completeProject": "إكمال المشروع",
+    "confirmCompleteTitle": "إكمال المشروع؟",
+    "confirmCompleteDesc": "سيتم تعليم المشروع كمكتمل وتحديث نسبة الإنجاز إلى 100%. هل تريد المتابعة؟",
+    "confirm": "تأكيد",
+    "completed": "مكتمل",
     "comingSoon": "وحدة المشاريع قريباً."
   },
   "project": {

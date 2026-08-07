@@ -6,7 +6,7 @@
    ============================================ */
 
 import { initLayout } from "../modules/layout.js";
-import { initStore, all, save, uid } from "../modules/store.js";
+import { initStore, all, get, save, uid } from "../modules/store.js";
 import { projectCosts, formatMoney, TYPE_LABELS, STATUS_LABELS, num } from "../modules/calc.js";
 import { translate } from "../modules/i18n.js";
 import { toast } from "../modules/toast.js";
@@ -32,38 +32,45 @@ function esc(value) {
 function projectCardHTML(p) {
   const costs = projectCosts(p);
   const status = p.status || "active";
+  const done = status === "done";
   const progress = Math.min(100, Math.max(0, Math.round(num(p.progress))));
-  const statusClass = status === "done" ? "status-done" : status === "paused" ? "status-paused" : "status-active";
+  const statusClass = done ? "status-done" : status === "paused" ? "status-paused" : "status-active";
+  const statusLabel = done ? translate("projects.completed") : local(STATUS_LABELS[status]);
+  const detailUrl = `./project.html?id=${encodeURIComponent(p.id)}`;
 
   return `
-    <a class="project-card" href="./project.html?id=${encodeURIComponent(p.id)}">
+    <div class="project-card${done ? " is-done" : ""}">
       <div class="project-card-top">
-        <h3 class="project-card-name">${esc(p.name)}</h3>
-        <span class="badge badge-primary">${local(TYPE_LABELS[p.type])}</span>
+        <div class="project-card-head">
+          <h3 class="project-card-name">${esc(p.name)}</h3>
+          <span class="badge badge-primary">${local(TYPE_LABELS[p.type])}</span>
+        </div>
+        <span class="project-card-status ${statusClass}">${statusLabel}</span>
       </div>
       <div class="project-card-meta">
+        <i data-lucide="ruler" class="icon"></i>
         <span class="project-card-area">${formatMoney(p.area)} m²</span>
-        <span class="project-card-status ${statusClass}">${local(STATUS_LABELS[status])}</span>
       </div>
       <div class="project-progress">
         <div class="project-progress-track"><span class="project-progress-bar" style="width:${progress}%"></span></div>
         <span class="project-progress-value">${progress}%</span>
       </div>
       <div class="project-cost">
-        <div class="cost-item">
-          <span class="cost-item-label">${translate("projects.costMaterials")}</span>
-          <span class="cost-item-value">${formatMoney(costs.material)}</span>
-        </div>
-        <div class="cost-item">
-          <span class="cost-item-label">${translate("projects.costContractors")}</span>
-          <span class="cost-item-value">${formatMoney(costs.contractors)}</span>
-        </div>
-        <div class="cost-total">
-          <span class="cost-item-label">${translate("projects.costTotal")}</span>
-          <span class="cost-item-value is-total">${formatMoney(costs.total)}</span>
-        </div>
+        <span class="cost-item-label">${translate("projects.costTotal")}</span>
+        <span class="cost-item-value is-total">${formatMoney(costs.total)}</span>
       </div>
-    </a>`;
+      <div class="project-card-actions">
+        <a class="btn btn-outline btn-sm project-card-view" href="${detailUrl}">
+          <i data-lucide="eye" class="icon"></i>
+          <span>${translate("projects.viewDetails")}</span>
+        </a>
+        ${done ? "" : `
+          <button class="btn btn-soft btn-sm project-card-complete" type="button" data-complete="${esc(p.id)}">
+            <i data-lucide="check" class="icon"></i>
+            <span>${translate("projects.completeProject")}</span>
+          </button>`}
+      </div>
+    </div>`;
 }
 
 function renderProjects() {
@@ -74,11 +81,44 @@ function renderProjects() {
   if (!projects.length) {
     grid.innerHTML = "";
     empty.hidden = false;
+    window.lucide?.createIcons();
     return;
   }
 
   empty.hidden = true;
-  grid.innerHTML = projects.map(projectCardHTML).join("");
+  const rank = (s) => (s === "done" ? 1 : 0);
+  const sorted = projects
+    .slice()
+    .sort((a, b) => rank(a.status) - rank(b.status));
+  grid.innerHTML = sorted.map(projectCardHTML).join("");
+  window.lucide?.createIcons();
+}
+
+/* ---------- Complete project ---------- */
+
+let pendingCompleteId = null;
+
+function openCompleteConfirm(id) {
+  pendingCompleteId = id;
+  showModal(document.getElementById("completeModal"));
+  window.lucide?.createIcons();
+}
+
+function closeCompleteConfirm() {
+  pendingCompleteId = null;
+  hideModal(document.getElementById("completeModal"));
+}
+
+function confirmComplete() {
+  const project = get("projects", pendingCompleteId);
+  if (project) {
+    project.status = "done";
+    project.progress = 100;
+    save("projects", project);
+    toast(translate("common.saved"));
+  }
+  closeCompleteConfirm();
+  renderProjects();
 }
 
 /* ---------- Create project modal ---------- */
@@ -136,6 +176,22 @@ function initModal() {
     if (e.target === modal) closeModal();
   });
   document.getElementById("projectForm").addEventListener("submit", submitProject);
+
+  document.getElementById("projectsGrid").addEventListener("click", (e) => {
+    const btn = e.target.closest("[data-complete]");
+    if (btn) {
+      e.preventDefault();
+      openCompleteConfirm(btn.dataset.complete);
+    }
+  });
+
+  const completeModal = document.getElementById("completeModal");
+  document.getElementById("completeModalClose").addEventListener("click", closeCompleteConfirm);
+  document.getElementById("completeCancel").addEventListener("click", closeCompleteConfirm);
+  document.getElementById("completeConfirm").addEventListener("click", confirmComplete);
+  completeModal.addEventListener("click", (e) => {
+    if (e.target === completeModal) closeCompleteConfirm();
+  });
 }
 
 /* ---------- Init ---------- */

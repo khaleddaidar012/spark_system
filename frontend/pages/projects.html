@@ -46,6 +46,30 @@
     </div>
   </div>
 
+  <!-- Complete project confirmation modal -->
+  <div class="modal-overlay" id="completeModal" hidden>
+    <div class="modal modal-sm" role="dialog" aria-modal="true" aria-labelledby="completeModalTitle">
+      <div class="modal-header">
+        <h2 class="modal-title" id="completeModalTitle" data-i18n="projects.confirmCompleteTitle">Complete Project?</h2>
+        <button class="btn btn-icon modal-close" id="completeModalClose" type="button" aria-label="Close">
+          <i data-lucide="x" class="icon"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p class="confirm-desc" data-i18n="projects.confirmCompleteDesc">
+          This will mark the project as Completed and set its progress to 100%. Continue?
+        </p>
+        <div class="modal-actions">
+          <button class="btn btn-ghost" id="completeCancel" type="button" data-i18n="projects.cancel">Cancel</button>
+          <button class="btn btn-primary" id="completeConfirm" type="button">
+            <i data-lucide="check" class="icon"></i>
+            <span data-i18n="projects.confirm">Confirm</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Create project modal -->
   <div class="modal-overlay" id="projectModal" hidden>
     <div class="modal" role="dialog" aria-modal="true" aria-labelledby="projectModalTitle">

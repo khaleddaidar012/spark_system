@@ -2,6 +2,11 @@
    Spark ERP — Empty state
    ============================================ */
 
+/* Critical: the `hidden` attribute must always win over display:flex */
+.empty-state[hidden] {
+  display: none !important;
+}
+
 .empty-state {
   display: flex;
   flex-direction: column;
