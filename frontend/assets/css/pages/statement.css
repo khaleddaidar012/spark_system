@@ -1,0 +1,229 @@
+/* ============================================
+   Spark ERP — Statement of Account (A4 print)
+   ============================================ */
+
+@page {
+  size: A4;
+  margin: 12mm;
+}
+
+.statement-page {
+  padding: var(--space-6);
+  display: flex;
+  justify-content: center;
+  background: var(--bg);
+}
+
+.statement-sheet {
+  width: 210mm;
+  max-width: 100%;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 14mm 12mm;
+  box-shadow: var(--shadow-lg);
+}
+
+/* ---------- Header ---------- */
+
+.statement-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-6);
+  flex-wrap: wrap;
+  border-bottom: 2px solid var(--primary);
+  padding-bottom: var(--space-5);
+  margin-bottom: var(--space-6);
+}
+
+.statement-title {
+  font-size: var(--font-size-lg);
+  font-weight: 700;
+  margin: 0 0 var(--space-2);
+  color: var(--text);
+}
+
+.statement-company-name {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.statement-meta {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-width: 200px;
+}
+
+.statement-meta-item {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-4);
+  font-size: var(--font-size-sm);
+}
+
+.statement-meta-label {
+  color: var(--text-muted);
+}
+
+.statement-meta-value {
+  font-weight: 600;
+}
+
+/* ---------- Sections ---------- */
+
+.statement-section-title {
+  font-size: var(--font-size-md);
+  font-weight: 700;
+  margin: 0 0 var(--space-4);
+}
+
+/* ---------- Table ---------- */
+
+.statement-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--font-size-sm);
+}
+
+.statement-table th,
+.statement-table td {
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--border);
+  text-align: start;
+  vertical-align: middle;
+}
+
+.statement-table th {
+  background: var(--surface-2);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.statement-table .is-center {
+  text-align: center;
+}
+
+.statement-cell-name {
+  font-weight: 600;
+}
+
+.statement-row-workmanship {
+  width: 110px;
+  text-align: end;
+}
+
+.statement-row-contractor {
+  min-width: 130px;
+}
+
+.statement-empty {
+  color: var(--text-muted);
+  padding: var(--space-6) 0;
+  margin: 0;
+}
+
+/* ---------- Summary ---------- */
+
+.statement-summary {
+  margin-top: var(--space-6);
+  max-width: 420px;
+  margin-inline-start: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.statement-summary-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--border);
+  font-size: var(--font-size-sm);
+}
+
+.statement-summary-row:last-child {
+  border-bottom: none;
+}
+
+.statement-summary-row.is-total {
+  background: var(--primary-soft);
+  font-weight: 700;
+  font-size: var(--font-size-md);
+}
+
+.statement-supervision-input {
+  width: 100px;
+  text-align: end;
+}
+
+/* ---------- Footer ---------- */
+
+.statement-footer {
+  margin-top: var(--space-8);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--border);
+}
+
+.statement-note {
+  margin: 0;
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+}
+
+/* ---------- Toolbar (screen only) ---------- */
+
+.statement-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-4) var(--space-6);
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.statement-toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+/* ---------- Print ---------- */
+
+@media print {
+  body {
+    background: #fff;
+  }
+
+  .statement-page {
+    padding: 0;
+    background: #fff;
+  }
+
+  .statement-sheet {
+    width: 100%;
+    max-width: none;
+    border: none;
+    border-radius: 0;
+    padding: 0;
+    box-shadow: none;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+  .statement-table,
+  .statement-table th,
+  .statement-table td {
+    border-color: #000;
+  }
+}

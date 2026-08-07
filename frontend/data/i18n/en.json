@@ -128,6 +128,7 @@
     "progress": "Progress",
     "viewDetails": "View Details",
     "completeProject": "Complete Project",
+    "statement": "Statement",
     "confirmCompleteTitle": "Complete Project?",
     "confirmCompleteDesc": "This will mark the project as Completed and set its progress to 100%. Continue?",
     "confirm": "Confirm",
@@ -262,5 +263,28 @@
     "title": "Reports",
     "subtitle": "View financial reports and statistics.",
     "comingSoon": "Reports module is coming soon."
+  },
+  "statement": {
+    "title": "Spark Engineering Co. — Statement of Account",
+    "project": "Project",
+    "area": "Area",
+    "date": "Date",
+    "materials": "Project Materials",
+    "material": "Material",
+    "qty": "Qty",
+    "cost": "Cost",
+    "contractor": "Contractor",
+    "workmanship": "Workmanship",
+    "clientBought": "Purchased by the client",
+    "materialTotal": "Materials Total",
+    "workmanshipTotal": "Workmanship Total",
+    "grandTotal": "Grand Total",
+    "supervisionPercent": "Supervision Percentage",
+    "save": "Save",
+    "print": "Print / PDF",
+    "back": "Back to Projects",
+    "noMaterials": "No materials added yet.",
+    "note": "This document is an official statement from Spark Engineering Co. All amounts are in EGP.",
+    "company": "Spark Engineering Co."
   }
 }

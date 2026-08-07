@@ -124,6 +124,30 @@ export function contractorMaterials(project, contractorId) {
   return (project.materials || []).filter((m) => m.contractorId === contractorId);
 }
 
+export function statementData(project) {
+  const materials = (project.materials || []).map((m) => ({
+    ...m,
+    workmanship: num(m.workmanship),
+    clientBought: Boolean(m.clientBought),
+  }));
+  const materialTotal = materials
+    .filter((m) => !m.clientBought)
+    .reduce((s, m) => s + num(m.total), 0);
+  const workmanshipTotal = materials
+    .filter((m) => !m.clientBought)
+    .reduce((s, m) => s + num(m.workmanship), 0);
+  const supervisionPercent = num(project.supervisionPercent);
+  const supervision = (materialTotal + workmanshipTotal) * (supervisionPercent / 100);
+  return {
+    materials,
+    materialTotal,
+    workmanshipTotal,
+    supervisionPercent,
+    supervision,
+    grandTotal: materialTotal + workmanshipTotal + supervision,
+  };
+}
+
 export function clientBalance(client) {
   return {
     paid: moneyIn(all("moneyTransactions").filter((t) => t.personType === "client" && t.personId === client.id)),

@@ -37,6 +37,7 @@ function projectCardHTML(p) {
   const statusClass = done ? "status-done" : status === "paused" ? "status-paused" : "status-active";
   const statusLabel = done ? translate("projects.completed") : local(STATUS_LABELS[status]);
   const detailUrl = `./project.html?id=${encodeURIComponent(p.id)}`;
+  const statementUrl = `./statement.html?id=${encodeURIComponent(p.id)}`;
 
   return `
     <div class="project-card${done ? " is-done" : ""}">
@@ -63,6 +64,10 @@ function projectCardHTML(p) {
         <a class="btn btn-outline btn-sm project-card-view" href="${detailUrl}">
           <i data-lucide="eye" class="icon"></i>
           <span>${translate("projects.viewDetails")}</span>
+        </a>
+        <a class="btn btn-soft btn-sm project-card-statement" href="${statementUrl}">
+          <i data-lucide="file-text" class="icon"></i>
+          <span>${translate("projects.statement")}</span>
         </a>
         ${done ? "" : `
           <button class="btn btn-soft btn-sm project-card-complete" type="button" data-complete="${esc(p.id)}">

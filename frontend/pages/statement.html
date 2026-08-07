@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Spark Engineering Co. — Statement of Account" />
+  <title>Statement | Spark ERP</title>
+  <link rel="icon" type="image/svg+xml" href="../assets/icons/favicon.svg" />
+  <link rel="stylesheet" href="../assets/css/main.css" />
+  <link rel="stylesheet" href="../assets/css/pages/statement.css" />
+</head>
+<body data-page="statement">
+  <div class="statement-toolbar no-print">
+    <a class="btn btn-ghost" id="statementBack" href="./projects.html">
+      <i data-lucide="arrow-left" class="icon"></i>
+      <span data-i18n="statement.back">Back to Projects</span>
+    </a>
+    <div class="statement-toolbar-actions">
+      <button class="btn btn-primary" id="statementSave" type="button">
+        <i data-lucide="save" class="icon"></i>
+        <span data-i18n="statement.save">Save</span>
+      </button>
+      <button class="btn btn-outline" id="statementPrint" type="button">
+        <i data-lucide="printer" class="icon"></i>
+        <span data-i18n="statement.print">Print / PDF</span>
+      </button>
+    </div>
+  </div>
+
+  <main class="statement-page">
+    <div class="statement-sheet" id="statementSheet">
+      <header class="statement-header">
+        <div class="statement-company">
+          <h1 class="statement-title" data-i18n="statement.title">Spark Engineering Co. — Statement of Account</h1>
+          <p class="statement-company-name" data-i18n="statement.company">Spark Engineering Co.</p>
+        </div>
+        <div class="statement-meta" id="statementMeta"></div>
+      </header>
+
+      <section class="statement-section">
+        <h2 class="statement-section-title" data-i18n="statement.materials">Project Materials</h2>
+        <table class="statement-table" id="statementMaterials">
+          <thead>
+            <tr>
+              <th data-i18n="statement.material">Material</th>
+              <th data-i18n="statement.qty">Qty</th>
+              <th data-i18n="statement.cost">Cost</th>
+              <th data-i18n="statement.contractor">Contractor</th>
+              <th data-i18n="statement.workmanship">Workmanship</th>
+              <th class="is-center" data-i18n="statement.clientBought">Purchased by the client</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+        <p class="statement-empty" id="statementEmpty" hidden data-i18n="statement.noMaterials">No materials added yet.</p>
+      </section>
+
+      <section class="statement-summary">
+        <div class="statement-summary-row">
+          <span data-i18n="statement.materialTotal">Materials Total</span>
+          <span id="statementMaterialTotal">0</span>
+        </div>
+        <div class="statement-summary-row">
+          <span data-i18n="statement.workmanshipTotal">Workmanship Total</span>
+          <span id="statementWorkmanshipTotal">0</span>
+        </div>
+        <div class="statement-summary-row">
+          <span data-i18n="statement.supervisionPercent">Supervision Percentage</span>
+          <input class="form-input statement-supervision-input" id="statementSupervision" type="number" min="0" max="100" step="0.01" value="0" />
+        </div>
+        <div class="statement-summary-row is-total">
+          <span data-i18n="statement.grandTotal">Grand Total</span>
+          <span id="statementGrandTotal">0</span>
+        </div>
+      </section>
+
+      <footer class="statement-footer">
+        <p class="statement-note" data-i18n="statement.note">
+          This document is an official statement from Spark Engineering Co. All amounts are in EGP.
+        </p>
+      </footer>
+    </div>
+  </main>
+
+  <script src="../assets/vendor/lucide/lucide.min.js"></script>
+  <script type="module" src="../assets/js/pages/statement.js"></script>
+</body>
+</html>
