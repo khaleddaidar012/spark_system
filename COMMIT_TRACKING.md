@@ -164,9 +164,9 @@
 ---
 
 ## Commit 029
-- Commit: `PENDING`
+- Commit: `921a3d2`
 - Description: Add Quick Supplier creation from material form — reusable config-driven Quick Add modal (quick-add-person.js) opens from a "+" button beside the Supplier dropdown in the project material form and the Quick Materials flow. Creates the supplier without leaving the page, auto-closes, auto-selects the new supplier and preserves all entered material data. Opens as a bottom sheet on mobile with large inputs/buttons. Ready to reuse for Client / Contractor / Material / Project.
-- Rollback: `git reset --hard <commit_hash>`
+- Rollback: `git reset --hard 921a3d2`
 
 ---
 
