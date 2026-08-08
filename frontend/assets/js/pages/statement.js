@@ -49,6 +49,12 @@ function contractorName(id) {
   return c ? c.name : "";
 }
 
+function roleLabel(role) {
+  const key = "project.role" + String(role || "other").charAt(0).toUpperCase() + String(role || "other").slice(1);
+  const label = translate(key);
+  return label && label !== key ? label : String(role || "");
+}
+
 function contractorOptions(selectedId) {
   return (
     `<option value="">—</option>` +
@@ -198,6 +204,35 @@ function applyStatementData() {
   document.getElementById("statementMaterialTotal").textContent = formatMoney(data.materialTotal);
   document.getElementById("statementWorkmanshipTotal").textContent = formatMoney(data.workmanshipTotal);
   document.getElementById("statementGrandTotal").textContent = formatMoney(data.grandTotal);
+  renderWorkmanshipLines(data.materials);
+}
+
+function renderWorkmanshipLines(materials) {
+  const host = document.getElementById("statementContractorLines");
+  if (!host) return;
+  const byContractor = new Map();
+  for (const m of materials) {
+    const id = m.contractorId;
+    if (!id || !num(m.workmanship)) continue;
+    const c = peopleWithRole("contractor").find((x) => x.id === id);
+    const entry =
+      byContractor.get(id) ||
+      { role: c ? c.role : "other", name: c ? c.name : m.contractorName || "", total: 0 };
+    entry.total += num(m.workmanship);
+    byContractor.set(id, entry);
+  }
+  const lines = Array.from(byContractor.values()).filter((e) => e.total > 0);
+  host.innerHTML = lines.length
+    ? lines
+        .map(
+          (e) => `
+      <div class="statement-contractor-line">
+        <span>${translate("statement.against")} ${roleLabel(e.role)} (${esc(e.name)})</span>
+        <span>${formatMoney(e.total)}</span>
+      </div>`
+        )
+        .join("")
+    : `<p class="statement-empty">${translate("statement.noContractorWork")}</p>`;
 }
 
 function saveStatement() {
