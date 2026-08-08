@@ -18,6 +18,8 @@ Each task was implemented, tested (EN + AR), and committed separately.
 | 9 | lines 88–96 | Statement fixes: supervision sum, remove type from meta, shade client-bought, add/remove materials, workmanship on client-bought | `09-statement-fixes.md` | `9448d38` |
 | 10 | lines 99–103 | Supervision is a value (not %) + statement formatting | `10-statement-supervision-value.md` | `2795361` |
 | 11 | lines 108–111 | PDF text outside page → white border so all text stays inside | `11-pdf-white-border-fix.md` | `52e1a3f` |
+| 12 | line 114 | Settings section with a "Delete all data" button requiring the password twice | `12-settings-delete-all-data.md` | `90bb77d` |
+| 13 | lines 115–116 | Automatic local backup twice a day, synced with the DB copy | `13-local-backup.md` | `90bb77d` |
 
 ## Status
 
