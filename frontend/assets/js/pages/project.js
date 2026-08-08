@@ -132,8 +132,8 @@ function renderAnalytics(p) {
       <div class="analytics-item-value">${formatMoney(a.area)} m²</div>
     </div>
     <div class="analytics-item">
-      <div class="analytics-item-label">${translate("project.totalPerM2")}</div>
-      <div class="analytics-item-value">${formatMoney(a.totalPerM2)}</div>
+      <div class="analytics-item-label">${translate("project.materialTotal")}</div>
+      <div class="analytics-item-value">${formatMoney(a.materialTotal)}</div>
     </div>
     <div class="analytics-item">
       <div class="analytics-item-label">${translate("project.materialPerM2")}</div>
@@ -142,6 +142,10 @@ function renderAnalytics(p) {
     <div class="analytics-item">
       <div class="analytics-item-label">${translate("project.laborPerM2")}</div>
       <div class="analytics-item-value">${formatMoney(a.laborPerM2)}</div>
+    </div>
+    <div class="analytics-item">
+      <div class="analytics-item-label">${translate("project.totalPerM2")}</div>
+      <div class="analytics-item-value">${formatMoney(a.totalPerM2)}</div>
     </div>
     <div class="analytics-item is-wide">
       <div class="analytics-item-label">${translate("project.consumed")}</div>
@@ -155,12 +159,13 @@ function renderAnalytics(p) {
         <tr>
           <td>${esc(m.name)}</td>
           <td>${formatMoney(m.quantity)} ${esc(m.unit || "")}</td>
+          <td>${formatMoney(m.unitPrice)}</td>
           <td>${formatMoney(m.total)}</td>
           <td>${formatMoney(m.totalPerM2)}</td>
         </tr>`
         )
         .join("")
-    : `<tr><td class="analytics-table-empty" colspan="4">${translate("project.noMaterials")}</td></tr>`;
+    : `<tr><td class="analytics-table-empty" colspan="5">${translate("project.noMaterials")}</td></tr>`;
 
   document.getElementById("analyticsTableBody").innerHTML = rows;
 }

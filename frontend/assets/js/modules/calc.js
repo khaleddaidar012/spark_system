@@ -181,11 +181,14 @@ export function projectAnalytics(project) {
   const costs = projectCosts(project);
   const area = num(project.area);
   const perArea = (v) => (area > 0 ? v / area : 0);
+  const materialPerM2 = perArea(costs.material);
+  const laborPerM2 = perArea(costs.contractors);
   return {
     area,
-    materialPerM2: perArea(costs.material),
-    laborPerM2: perArea(costs.contractors),
-    totalPerM2: perArea(costs.total),
+    materialTotal: costs.material,
+    materialPerM2,
+    laborPerM2,
+    totalPerM2: materialPerM2 + laborPerM2,
     consumedMaterials: project.materials || [],
   };
 }
@@ -204,6 +207,7 @@ export function materialAnalytics(project) {
   });
   return [...groups.values()].map((m) => ({
     ...m,
+    unitPrice: m.quantity > 0 ? m.total / m.quantity : 0,
     totalPerM2: perArea(m.total),
   }));
 }
