@@ -114,6 +114,16 @@ export function clearAll() {
   }
 }
 
+/* Empty the database without removing the key, so the
+   first-run demo seed is NOT re-created after a wipe. */
+export function wipeAll() {
+  try {
+    localStorage.setItem(DB_KEY, "{}");
+  } catch {
+    /* storage unavailable */
+  }
+}
+
 export function today() {
   return new Date().toISOString().slice(0, 10);
 }

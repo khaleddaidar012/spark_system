@@ -9,6 +9,7 @@ import { initTheme, toggleTheme } from "./theme.js";
 import { initI18n, getLang, toggleLanguage } from "./i18n.js";
 import { initQuickAdd } from "./quick-add.js";
 import { initModalManager } from "./modal.js";
+import { maybeAutoBackup } from "./backup.js";
 
 const SIDEBAR_KEY = "spark_sidebar_collapsed";
 
@@ -19,6 +20,7 @@ const PAGE_META = {
   finance: { title: "Financial Accounts" },
   contractors: { title: "Contractors" },
   reports: { title: "Reports" },
+  settings: { title: "Settings" },
 };
 
 async function loadComponent(id, url) {
@@ -137,6 +139,7 @@ export async function initLayout() {
   renderBreadcrumb();
   initModalManager();
   await initI18n();
+  maybeAutoBackup();
 }
 
 export { getLang };

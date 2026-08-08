@@ -27,6 +27,7 @@
     "finance": "Financial Accounts",
     "contractors": "Contractors",
     "reports": "Reports",
+    "settings": "Settings",
     "logout": "Logout",
     "collapse": "Collapse"
   },
@@ -301,5 +302,32 @@
     "noMaterials": "No materials added yet.",
     "note": "This document is an official statement from Spark Engineering Co. All amounts are in EGP.",
     "company": "Spark Engineering Co."
+  },
+  "settings": {
+    "title": "Settings",
+    "subtitle": "Manage data backups and application data.",
+    "backupTitle": "Data Backup",
+    "backupDesc": "A full local backup of your data is taken automatically twice a day. You can also download or restore a backup at any time.",
+    "lastBackup": "Last backup",
+    "backupNow": "Download backup",
+    "restore": "Restore backup",
+    "backupDownloaded": "Backup downloaded.",
+    "restoreSuccess": "Backup restored successfully.",
+    "restoreError": "Invalid backup file.",
+    "dangerTitle": "Danger Zone",
+    "dangerDesc": "Delete all projects, suppliers, contractors, clients and transactions. This cannot be undone.",
+    "deleteAll": "Delete all data",
+    "deleteTitle": "Delete All Data",
+    "deleteWarning": "This will permanently delete all data. A backup will be downloaded first. Enter your password twice to confirm.",
+    "password": "Password",
+    "passwordPh": "Enter your password",
+    "confirmPassword": "Confirm password",
+    "confirmPasswordPh": "Re-enter your password",
+    "enterBothPasswords": "Please enter the password twice.",
+    "passwordsDontMatch": "Passwords do not match.",
+    "wrongPassword": "Incorrect password.",
+    "cancel": "Cancel",
+    "confirmDelete": "Delete everything",
+    "deleted": "All data deleted."
   }
 }

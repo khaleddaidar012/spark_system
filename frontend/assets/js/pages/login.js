@@ -5,11 +5,9 @@
 
 import { initTheme, toggleTheme } from "../modules/theme.js";
 import { initI18n, setLanguage, translate } from "../modules/i18n.js";
+import { ADMIN } from "../modules/auth.js";
 
 const REMEMBER_KEY = "spark_remembered_user";
-
-/* Temporary development account (until MongoDB auth is wired). */
-const DEMO_ADMIN = { username: "admin", password: "Spark@2026#ERP" };
 
 document.addEventListener("DOMContentLoaded", async () => {
   initTheme();
@@ -83,7 +81,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       return;
     }
 
-    if (username !== DEMO_ADMIN.username || password !== DEMO_ADMIN.password) {
+    if (username !== ADMIN.username || password !== ADMIN.password) {
       showError("login.errorInvalid");
       usernameInput.classList.add("is-invalid");
       passwordInput.classList.add("is-invalid");
