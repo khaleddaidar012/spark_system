@@ -194,11 +194,9 @@ function buildMaterials(rows, assignIds = false) {
 
 function applyStatementData() {
   const rows = collectRows();
-  const percent = collectSupervision();
-  const data = statementData({ materials: buildMaterials(rows), supervisionPercent: percent });
+  const data = statementData({ materials: buildMaterials(rows), supervisionAmount: collectSupervision() });
   document.getElementById("statementMaterialTotal").textContent = formatMoney(data.materialTotal);
   document.getElementById("statementWorkmanshipTotal").textContent = formatMoney(data.workmanshipTotal);
-  document.getElementById("statementSupervisionAmount").textContent = formatMoney(data.supervision);
   document.getElementById("statementGrandTotal").textContent = formatMoney(data.grandTotal);
 }
 
@@ -206,7 +204,8 @@ function saveStatement() {
   const project = get("projects", current.id);
   if (!project) return;
   project.materials = buildMaterials(collectRows(), true);
-  project.supervisionPercent = collectSupervision();
+  project.supervisionAmount = collectSupervision();
+  delete project.supervisionPercent;
   save("projects", project);
   toast(translate("common.saved"));
 }
@@ -221,7 +220,8 @@ function render() {
   current = p;
   renderMeta(p);
   renderMaterials(p);
-  document.getElementById("statementSupervision").value = num(p.supervisionPercent) || "";
+  document.getElementById("statementSupervision").value =
+    num(p.supervisionAmount ?? p.supervisionPercent) || "";
   applyStatementData();
 }
 

@@ -93,64 +93,88 @@
 .statement-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: var(--font-size-sm);
+  font-size: 12px;
+  table-layout: fixed;
 }
 
 .statement-table th,
 .statement-table td {
-  padding: var(--space-2) var(--space-3);
+  padding: 5px 6px;
   border: 1px solid var(--border);
   text-align: start;
   vertical-align: middle;
+  overflow-wrap: anywhere;
 }
 
 .statement-table th {
   background: var(--surface-2);
   font-weight: 600;
-  white-space: nowrap;
+  font-size: 11px;
 }
 
 .statement-table .is-center {
   text-align: center;
 }
 
+#statementMaterials th:nth-child(1) { width: 24%; }
+#statementMaterials th:nth-child(2) { width: 16%; }
+#statementMaterials th:nth-child(3) { width: 18%; }
+#statementMaterials th:nth-child(4) { width: 16%; }
+#statementMaterials th:nth-child(5) { width: 13%; }
+#statementMaterials th:nth-child(6) { width: 7%; }
+#statementMaterials th:nth-child(7) { width: 6%; }
+
 .statement-row-name {
-  min-width: 150px;
+  width: 100%;
+  min-width: 0;
 }
 
 .statement-qty-cell,
 .statement-cost-cell {
   display: flex;
   align-items: center;
-  gap: var(--space-2);
+  justify-content: space-between;
+  gap: 6px;
 }
 
 .statement-row-qty {
-  width: 70px;
+  width: 54px;
   text-align: end;
+  min-width: 0;
 }
 
 .statement-row-unit {
-  width: 64px;
+  width: 50px;
+  min-width: 0;
 }
 
 .statement-row-price {
-  width: 90px;
+  width: 66px;
   text-align: end;
+  min-width: 0;
 }
 
 .statement-row-total {
   font-weight: 600;
   white-space: nowrap;
+  font-size: 11px;
 }
 
 .statement-row-contractor {
-  min-width: 130px;
+  width: 100%;
+  min-width: 0;
 }
 
 .statement-row-workmanship {
-  width: 110px;
+  width: 100%;
   text-align: end;
+  min-width: 0;
+}
+
+.statement-row-client {
+  width: 15px;
+  height: 15px;
+  cursor: pointer;
 }
 
 .statement-table tr.is-client-bought {

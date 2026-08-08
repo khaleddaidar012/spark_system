@@ -134,15 +134,14 @@ export function statementData(project) {
     .filter((m) => !m.clientBought)
     .reduce((s, m) => s + num(m.total), 0);
   const workmanshipTotal = materials.reduce((s, m) => s + num(m.workmanship), 0);
-  const supervisionPercent = num(project.supervisionPercent);
-  const supervision = (materialTotal + workmanshipTotal) * (supervisionPercent / 100);
+  const supervisionAmount = num(project.supervisionAmount ?? project.supervisionPercent);
   return {
     materials,
     materialTotal,
     workmanshipTotal,
-    supervisionPercent,
-    supervision,
-    grandTotal: materialTotal + workmanshipTotal + supervision,
+    supervisionAmount,
+    supervision: supervisionAmount,
+    grandTotal: materialTotal + workmanshipTotal + supervisionAmount,
   };
 }
 
