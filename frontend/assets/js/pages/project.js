@@ -7,7 +7,7 @@
 
 import { initLayout } from "../modules/layout.js";
 import { initStore, all, get, save, peopleWithRole, findPersonById } from "../modules/store.js";
-import { projectCosts, projectAnalytics, materialAnalytics, formatMoney, TYPE_LABELS, STATUS_LABELS, num, contractorBalance } from "../modules/calc.js";
+import { projectCosts, projectAnalytics, materialAnalytics, formatMoney, TYPE_LABELS, STATUS_LABELS, num, contractorBalance, balanceDirection } from "../modules/calc.js";
 import { addContractorToProject, addMaterialToProject } from "../modules/actions.js";
 import { openQuickAddSupplier, openQuickAddPerson } from "../modules/quick-add-person.js";
 import { personRolesLabel, personTypeLabel, contractorLabel, contractorSpecialty } from "../modules/person-roles.js";
@@ -173,6 +173,7 @@ function renderContractors(p) {
   list.innerHTML = rows
     .map((c) => {
       const b = contractorBalance(c);
+      const direction = balanceDirection(b);
       return `
         <div class="row-item">
           <div class="row-item-main">
@@ -188,8 +189,8 @@ function renderContractors(p) {
               <span class="row-stat-value is-paid">${formatMoney(b.paid)}</span>
             </div>
             <div class="row-stat">
-              <span class="row-stat-label">${translate("project.remaining")}</span>
-              <span class="row-stat-value is-remaining">${formatMoney(b.remaining)}</span>
+              <span class="row-stat-label">${translate(direction.key)}</span>
+              <span class="row-stat-value ${direction.paid ? "is-paid" : "is-remaining"}">${formatMoney(direction.amount)}</span>
             </div>
           </div>
         </div>`;

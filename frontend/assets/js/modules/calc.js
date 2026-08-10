@@ -74,10 +74,14 @@ export function moneyBalance(txns) {
 
 export function supplierBalance(supplier) {
   const purchases = moneyOut(all("moneyTransactions").filter((t) => t.personType === "supplier" && t.personId === supplier.id));
+  const paid = Math.max(0, num(supplier.paid));
+  const diff = purchases - paid;
   return {
     purchases,
-    paid: Math.max(0, num(supplier.paid)),
-    remaining: Math.max(0, purchases - num(supplier.paid)),
+    paid,
+    remaining: Math.max(0, diff),
+    dueToThem: Math.max(0, diff),
+    dueToUs: Math.max(0, -diff),
   };
 }
 
@@ -102,11 +106,20 @@ export function supplierProjectName(projectId) {
 export function contractorBalance(contractor) {
   const total = num(contractor.total);
   const paid = Math.max(0, num(contractor.paid));
+  const diff = total - paid;
   return {
     total,
     paid,
-    remaining: Math.max(0, total - paid),
+    remaining: Math.max(0, diff),
+    dueToThem: Math.max(0, diff),
+    dueToUs: Math.max(0, -diff),
   };
+}
+
+export function balanceDirection(b) {
+  return b.dueToUs > 0
+    ? { key: "balance.owedToUs", amount: b.dueToUs, paid: true }
+    : { key: "balance.owedByUs", amount: b.dueToThem, paid: false };
 }
 
 export function contractorProjects(contractorId) {

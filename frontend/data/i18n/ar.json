@@ -5,6 +5,10 @@
     "deleted": "تم الحذف بنجاح",
     "error": "حدث خطأ ما"
   },
+  "balance": {
+    "owedByUs": "باقي علينا",
+    "owedToUs": "باقي لينا"
+  },
   "login": {
     "subtitle": "سجّل الدخول إلى حسابك",
     "username": "اسم المستخدم",

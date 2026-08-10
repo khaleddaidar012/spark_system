@@ -5,6 +5,10 @@
     "deleted": "Deleted successfully",
     "error": "Something went wrong"
   },
+  "balance": {
+    "owedByUs": "Due to them",
+    "owedToUs": "Due to us"
+  },
   "login": {
     "subtitle": "Sign in to your account",
     "username": "Username",

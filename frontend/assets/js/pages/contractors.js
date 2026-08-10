@@ -7,7 +7,7 @@
 
 import { initLayout } from "../modules/layout.js";
 import { initStore, all, save, uid } from "../modules/store.js";
-import { contractorBalance, contractorProjects, formatMoney } from "../modules/calc.js";
+import { contractorBalance, contractorProjects, formatMoney, balanceDirection } from "../modules/calc.js";
 import { contractorLabel } from "../modules/person-roles.js";
 import { recordMoney } from "../modules/actions.js";
 import { translate } from "../modules/i18n.js";
@@ -49,6 +49,7 @@ function renderContractors() {
   list.innerHTML = rows
     .map((c) => {
       const b = contractorBalance(c);
+      const direction = balanceDirection(b);
       const roleName = contractorLabel(c.role, c.name, lang());
       return `
         <div class="row-item">
@@ -66,8 +67,8 @@ function renderContractors() {
               <span class="row-stat-value is-paid">${formatMoney(b.paid)}</span>
             </div>
             <div class="row-stat">
-              <span class="row-stat-label">${translate("project.remaining")}</span>
-              <span class="row-stat-value is-remaining">${formatMoney(b.remaining)}</span>
+              <span class="row-stat-label">${translate(direction.key)}</span>
+              <span class="row-stat-value ${direction.paid ? "is-paid" : "is-remaining"}">${formatMoney(direction.amount)}</span>
             </div>
           </div>
           <div class="row-item-actions">
@@ -142,6 +143,7 @@ function openProjectsModal(id) {
     body.innerHTML = projects
       .map(({ project, contractor: row, materials }) => {
         const b = contractorBalance(row || { total: 0, paid: 0 });
+        const direction = balanceDirection(b);
         const type = (TYPE_LABELS[project.type] || TYPE_LABELS.other)[lang()] || "—";
         const matRows = materials.length
           ? materials
@@ -171,8 +173,8 @@ function openProjectsModal(id) {
                 <span class="row-stat-value is-paid">${formatMoney(b.paid)}</span>
               </div>
               <div class="row-stat">
-                <span class="row-stat-label">${translate("project.remaining")}</span>
-                <span class="row-stat-value is-remaining">${formatMoney(b.remaining)}</span>
+                <span class="row-stat-label">${translate(direction.key)}</span>
+                <span class="row-stat-value ${direction.paid ? "is-paid" : "is-remaining"}">${formatMoney(direction.amount)}</span>
               </div>
             </div>
             <div class="modal-project-section">

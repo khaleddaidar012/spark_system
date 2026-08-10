@@ -7,7 +7,7 @@
 
 import { initLayout } from "../modules/layout.js";
 import { initStore, all, get, save, uid } from "../modules/store.js";
-import { supplierBalance, supplierTransactions, supplierProjectName, formatMoney } from "../modules/calc.js";
+import { supplierBalance, supplierTransactions, supplierProjectName, formatMoney, balanceDirection } from "../modules/calc.js";
 import { translate } from "../modules/i18n.js";
 import { toast } from "../modules/toast.js";
 import { showModal, hideModal } from "../modules/modal.js";
@@ -48,6 +48,7 @@ function renderSuppliers() {
   list.innerHTML = rows
     .map((s) => {
       const b = supplierBalance(s);
+      const direction = balanceDirection(b);
       return `
         <div class="row-item">
           <div class="row-item-main">
@@ -64,8 +65,8 @@ function renderSuppliers() {
               <span class="row-stat-value is-paid">${formatMoney(b.paid)}</span>
             </div>
             <div class="row-stat">
-              <span class="row-stat-label">${translate("project.remaining")}</span>
-              <span class="row-stat-value is-remaining">${formatMoney(b.remaining)}</span>
+              <span class="row-stat-label">${translate(direction.key)}</span>
+              <span class="row-stat-value ${direction.paid ? "is-paid" : "is-remaining"}">${formatMoney(direction.amount)}</span>
             </div>
           </div>
           <div class="row-item-actions">
@@ -144,6 +145,7 @@ function renderAccount() {
   const supplier = get("suppliers", accountId);
   if (!supplier) return;
   const b = supplierBalance(supplier);
+  const direction = balanceDirection(b);
   const { money, material } = supplierTransactions(supplier.id);
 
   document.getElementById("supplierAccountTitle").textContent =
@@ -160,8 +162,8 @@ function renderAccount() {
         <span class="account-summary-value is-paid">${formatMoney(b.paid)}</span>
       </div>
       <div class="account-summary-item">
-        <span class="account-summary-label">${translate("project.remaining")}</span>
-        <span class="account-summary-value is-remaining">${formatMoney(b.remaining)}</span>
+        <span class="account-summary-label">${translate(direction.key)}</span>
+        <span class="account-summary-value ${direction.paid ? "is-paid" : "is-remaining"}">${formatMoney(direction.amount)}</span>
       </div>
     </div>`;
 
