@@ -53,7 +53,12 @@
 
       <div class="form-field" id="moneyPersonField">
         <label class="form-label" data-i18n="quick.person">Person</label>
-        <select class="form-input" id="moneyPersonSelect"></select>
+        <div class="field-with-action">
+          <select class="form-input" id="moneyPersonSelect"></select>
+          <button class="btn btn-soft btn-icon" id="moneyAddPersonBtn" type="button" data-i18n-aria="quickAdd.add" aria-label="Quick add person" title="Quick add person">
+            <i data-lucide="plus" class="icon"></i>
+          </button>
+        </div>
         <input class="form-input" id="moneyPersonName" type="text" hidden data-i18n-ph="quick.personNamePh" placeholder="Person name" />
       </div>
 

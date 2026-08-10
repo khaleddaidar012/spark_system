@@ -10,7 +10,7 @@ import { recordMoney, addMaterialToProject, consumeMaterial } from "./actions.js
 import { translate } from "./i18n.js";
 import { toast } from "./toast.js";
 import { showModal, hideModal } from "./modal.js";
-import { openQuickAddSupplier } from "./quick-add-person.js";
+import { openQuickAddSupplier, openQuickAddPerson } from "./quick-add-person.js";
 import { personRolesLabel, personTypeLabel, contractorLabel, contractorSpecialty } from "./person-roles.js";
 
 function esc(value) {
@@ -112,6 +112,7 @@ function fillPersonSelect() {
   const type = document.querySelector("#moneyPersonType .chip.is-active").dataset.value;
   const select = document.getElementById("moneyPersonSelect");
   const freeName = document.getElementById("moneyPersonName");
+  const addBtn = document.getElementById("moneyAddPersonBtn");
 
   const collections = {
     supplier: all("suppliers"),
@@ -121,6 +122,7 @@ function fillPersonSelect() {
 
   if (type === "other") {
     select.hidden = true;
+    addBtn.hidden = true;
     freeName.hidden = false;
     freeName.focus();
     return;
@@ -129,6 +131,7 @@ function fillPersonSelect() {
   const list = collections[type] || [];
   freeName.hidden = true;
   select.hidden = false;
+  addBtn.hidden = false;
   select.innerHTML =
     `<option value="">${translate("quick.choosePerson")}</option>` +
     list
@@ -159,6 +162,26 @@ function initQuickMoney() {
     if (!chip) return;
     document.querySelectorAll("#moneyPersonType .chip").forEach((c) => c.classList.toggle("is-active", c === chip));
     fillPersonSelect();
+  });
+
+  document.getElementById("moneyAddPersonBtn").addEventListener("click", () => {
+    const type = document.querySelector("#moneyPersonType .chip.is-active").dataset.value;
+    openQuickAddPerson({
+      title: translate("quickAdd.addPerson"),
+      defaults: type === "supplier" ? { purchases: 0, paid: 0 } : type === "client" ? { paid: 0, remaining: 0 } : { total: 0, paid: 0 },
+      initialType: type,
+      onCreated: (person) => {
+        fillPersonSelect();
+        const expected = type;
+        if (person.roles.includes(expected)) {
+          document.getElementById("moneyPersonSelect").value = person.id;
+          toast(translate("common.saved"));
+        } else {
+          const label = personTypeLabel(person.roles[0], lang());
+          toast(translate("quickAdd.notSupplierMessage").replace("{type}", label), "info");
+        }
+      },
+    });
   });
 
   document.getElementById("quickMoneyClose").addEventListener("click", () => closeModal("quickMoneyModal"));

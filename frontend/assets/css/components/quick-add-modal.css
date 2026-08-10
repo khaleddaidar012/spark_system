@@ -33,6 +33,11 @@
   height: 20px;
 }
 
+/* Critical: the `hidden` attribute must always win over display:inline-flex */
+.field-with-action .btn-icon[hidden] {
+  display: none;
+}
+
 .required-star {
   color: var(--danger);
 }
