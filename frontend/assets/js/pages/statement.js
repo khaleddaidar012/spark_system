@@ -11,6 +11,7 @@ import { initStore, get, save, uid, today, peopleWithRole } from "../modules/sto
 import { statementData, formatMoney, num } from "../modules/calc.js";
 import { translate, initI18n } from "../modules/i18n.js";
 import { toast } from "../modules/toast.js";
+import { requireAuth } from "../modules/auth.js";
 
 function esc(value) {
   return String(value == null ? "" : value)
@@ -261,6 +262,7 @@ function render() {
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
+  if (!requireAuth()) return;
   initStore();
   await initI18n();
 

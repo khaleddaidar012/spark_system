@@ -5,7 +5,7 @@
 
 import { initTheme, toggleTheme } from "../modules/theme.js";
 import { initI18n, setLanguage, translate } from "../modules/i18n.js";
-import { ADMIN } from "../modules/auth.js";
+import { ADMIN, createSession, isLoggedIn } from "../modules/auth.js";
 
 const REMEMBER_KEY = "spark_remembered_user";
 
@@ -39,6 +39,12 @@ document.addEventListener("DOMContentLoaded", async () => {
     iconEye.style.display = isVisible ? "" : "none";
     iconEyeOff.style.display = isVisible ? "none" : "";
   });
+
+  /* ---------- Already signed in? (Remember me) ---------- */
+  if (isLoggedIn()) {
+    window.location.replace("./dashboard.html");
+    return;
+  }
 
   /* ---------- Remember me (prefill) ---------- */
   const usernameInput = document.getElementById("username");
@@ -102,6 +108,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         /* storage unavailable */
       }
     }
+
+    createSession(rememberMe.checked);
 
     loginBtn.disabled = true;
     loginBtn.textContent = translate("login.signingIn");

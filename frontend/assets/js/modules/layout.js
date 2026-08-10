@@ -10,6 +10,7 @@ import { initI18n, getLang, toggleLanguage } from "./i18n.js";
 import { initQuickAdd } from "./quick-add.js";
 import { initModalManager } from "./modal.js";
 import { maybeAutoBackup } from "./backup.js";
+import { requireAuth, logout } from "./auth.js";
 
 const SIDEBAR_KEY = "spark_sidebar_collapsed";
 
@@ -49,6 +50,14 @@ function initLangToggle() {
   btn.addEventListener("click", async () => {
     await toggleLanguage();
     applyLabel();
+  });
+}
+
+function initLogout() {
+  const btn = document.getElementById("navLogout");
+  btn?.addEventListener("click", () => {
+    logout();
+    window.location.href = "./login.html";
   });
 }
 
@@ -128,6 +137,7 @@ async function loadQuickAdd() {
 }
 
 export async function initLayout() {
+  if (!requireAuth()) return;
   await loadComponent("sidebar-root", "../components/sidebar.html");
   await loadComponent("navbar-root", "../components/navbar.html");
   await loadQuickAdd();
@@ -135,6 +145,7 @@ export async function initLayout() {
   initSidebar();
   initThemeToggle();
   initLangToggle();
+  initLogout();
   highlightActiveMenu();
   renderBreadcrumb();
   initModalManager();
