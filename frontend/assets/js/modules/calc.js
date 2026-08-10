@@ -40,7 +40,7 @@ export function contractorPaid(project) {
 }
 
 export function contractorRemaining(project) {
-  return contractorCost(project) - contractorPaid(project);
+  return Math.max(0, contractorCost(project) - contractorPaid(project));
 }
 
 export function otherExpensesCost(project) {
@@ -73,10 +73,11 @@ export function moneyBalance(txns) {
 }
 
 export function supplierBalance(supplier) {
+  const purchases = moneyOut(all("moneyTransactions").filter((t) => t.personType === "supplier" && t.personId === supplier.id));
   return {
-    purchases: moneyOut(all("moneyTransactions").filter((t) => t.personType === "supplier" && t.personId === supplier.id)),
-    paid: num(supplier.paid),
-    remaining: moneyOut(all("moneyTransactions").filter((t) => t.personType === "supplier" && t.personId === supplier.id)) - num(supplier.paid),
+    purchases,
+    paid: Math.max(0, num(supplier.paid)),
+    remaining: Math.max(0, purchases - num(supplier.paid)),
   };
 }
 
@@ -99,10 +100,12 @@ export function supplierProjectName(projectId) {
 }
 
 export function contractorBalance(contractor) {
+  const total = num(contractor.total);
+  const paid = Math.max(0, num(contractor.paid));
   return {
-    total: num(contractor.total),
-    paid: num(contractor.paid),
-    remaining: num(contractor.total) - num(contractor.paid),
+    total,
+    paid,
+    remaining: Math.max(0, total - paid),
   };
 }
 

@@ -28,19 +28,19 @@ export function recordMoney({ direction, personType, personId, personName, amoun
   if (personType === "supplier") {
     const person = get("suppliers", personId);
     if (person) {
-      person.paid = num(person.paid) + (direction === "out" ? value : -value);
+      person.paid = Math.max(0, num(person.paid) + (direction === "out" ? value : -value));
       save("suppliers", person);
     }
   } else if (personType === "contractor") {
     const person = get("contractors", personId);
     if (person) {
-      person.paid = num(person.paid) + (direction === "out" ? value : -value);
+      person.paid = Math.max(0, num(person.paid) + (direction === "out" ? value : -value));
       save("contractors", person);
     }
   } else if (personType === "client") {
     const person = get("clients", personId);
     if (person) {
-      person.paid = num(person.paid) + (direction === "in" ? value : -value);
+      person.paid = Math.max(0, num(person.paid) + (direction === "in" ? value : -value));
       save("clients", person);
     }
   }

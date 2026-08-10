@@ -7,7 +7,7 @@
 
 import { initLayout } from "../modules/layout.js";
 import { initStore, all, get, save, peopleWithRole, findPersonById } from "../modules/store.js";
-import { projectCosts, projectAnalytics, materialAnalytics, formatMoney, TYPE_LABELS, STATUS_LABELS, num } from "../modules/calc.js";
+import { projectCosts, projectAnalytics, materialAnalytics, formatMoney, TYPE_LABELS, STATUS_LABELS, num, contractorBalance } from "../modules/calc.js";
 import { addContractorToProject, addMaterialToProject } from "../modules/actions.js";
 import { openQuickAddSupplier, openQuickAddPerson } from "../modules/quick-add-person.js";
 import { personRolesLabel, personTypeLabel, contractorLabel, contractorSpecialty } from "../modules/person-roles.js";
@@ -172,7 +172,7 @@ function renderContractors(p) {
   }
   list.innerHTML = rows
     .map((c) => {
-      const remaining = num(c.total) - num(c.paid);
+      const b = contractorBalance(c);
       return `
         <div class="row-item">
           <div class="row-item-main">
@@ -181,15 +181,15 @@ function renderContractors(p) {
           <div class="row-item-stats">
             <div class="row-stat">
               <span class="row-stat-label">${translate("project.total")}</span>
-              <span class="row-stat-value">${formatMoney(c.total)}</span>
+              <span class="row-stat-value">${formatMoney(b.total)}</span>
             </div>
             <div class="row-stat">
               <span class="row-stat-label">${translate("project.paid")}</span>
-              <span class="row-stat-value is-paid">${formatMoney(c.paid)}</span>
+              <span class="row-stat-value is-paid">${formatMoney(b.paid)}</span>
             </div>
             <div class="row-stat">
               <span class="row-stat-label">${translate("project.remaining")}</span>
-              <span class="row-stat-value is-remaining">${formatMoney(remaining)}</span>
+              <span class="row-stat-value is-remaining">${formatMoney(b.remaining)}</span>
             </div>
           </div>
         </div>`;
