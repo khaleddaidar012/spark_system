@@ -33,3 +33,23 @@ export function personRolesLabel(person, lang) {
   if (roles.length <= 1) return "";
   return roles.map((r) => personTypeLabel(r, lang)).join(" • ");
 }
+
+export function contractorLabel(role, name, lang = "en") {
+  const specialty = CONTRACTOR_SPECIALTIES.find((s) => s.value === role) || CONTRACTOR_SPECIALTIES[CONTRACTOR_SPECIALTIES.length - 1];
+  const roleLabel = specialty[lang] || specialty.en;
+  const personName = String(name || "").trim();
+  return lang === "ar"
+    ? `مقاول ${roleLabel} (${personName})`
+    : `${roleLabel} Contractor (${personName})`;
+}
+
+export function contractorSpecialty(person) {
+  if (person && person.role) return person.role;
+  if (Array.isArray(person && person.roles)) {
+    const known = CONTRACTOR_SPECIALTIES.map((s) => s.value);
+    for (const r of person.roles) {
+      if (known.includes(r)) return r;
+    }
+  }
+  return "other";
+}

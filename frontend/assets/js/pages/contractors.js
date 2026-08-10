@@ -8,6 +8,7 @@
 import { initLayout } from "../modules/layout.js";
 import { initStore, all, save, uid } from "../modules/store.js";
 import { contractorBalance, contractorProjects, formatMoney } from "../modules/calc.js";
+import { contractorLabel } from "../modules/person-roles.js";
 import { recordMoney } from "../modules/actions.js";
 import { translate } from "../modules/i18n.js";
 import { toast } from "../modules/toast.js";
@@ -23,15 +24,6 @@ function esc(value) {
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#39;");
 }
-
-const ROLE_LABELS = {
-  plumbing: { en: "Plumbing", ar: "سباكة" },
-  electrical: { en: "Electrical", ar: "كهرباء" },
-  finishing: { en: "Finishing", ar: "تشطيب" },
-  painting: { en: "Painting", ar: "دهانات" },
-  tiles: { en: "Tiles", ar: "سيراميك" },
-  other: { en: "Other", ar: "أخرى" },
-};
 
 const TYPE_LABELS = {
   apartment: { en: "Apartment", ar: "شقة" },
@@ -57,12 +49,12 @@ function renderContractors() {
   list.innerHTML = rows
     .map((c) => {
       const b = contractorBalance(c);
-      const role = ROLE_LABELS[c.role] || ROLE_LABELS.other;
+      const roleName = contractorLabel(c.role, c.name, lang());
       return `
         <div class="row-item">
           <div class="row-item-main">
             <div class="row-item-title">${esc(c.name)}</div>
-            <div class="row-item-sub">${role[lang()] || role.en}${c.phone ? " · " + esc(c.phone) : ""}</div>
+            <div class="row-item-sub">${roleName}${c.phone ? " · " + esc(c.phone) : ""}</div>
           </div>
           <div class="row-item-stats">
             <div class="row-stat">

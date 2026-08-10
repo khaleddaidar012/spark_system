@@ -11,7 +11,7 @@ import { translate } from "./i18n.js";
 import { toast } from "./toast.js";
 import { showModal, hideModal } from "./modal.js";
 import { openQuickAddSupplier } from "./quick-add-person.js";
-import { personRolesLabel, personTypeLabel } from "./person-roles.js";
+import { personRolesLabel, personTypeLabel, contractorLabel, contractorSpecialty } from "./person-roles.js";
 
 function esc(value) {
   return String(value == null ? "" : value)
@@ -131,7 +131,15 @@ function fillPersonSelect() {
   select.hidden = false;
   select.innerHTML =
     `<option value="">${translate("quick.choosePerson")}</option>` +
-    list.map((p) => `<option value="${p.id}">${esc(p.name)}</option>`).join("");
+    list
+      .map((p) => {
+        const label =
+          type === "contractor"
+            ? contractorLabel(contractorSpecialty(p), p.name, lang())
+            : p.name;
+        return `<option value="${p.id}">${esc(label)}</option>`;
+      })
+      .join("");
 }
 
 function initQuickMoney() {
@@ -248,9 +256,8 @@ function fillContractorSelect() {
     `<option value="">${translate("project.formMatContractorNone")}</option>` +
     people
       .map((c) => {
-        const roles = personRolesLabel(c, lang());
-        const label = roles ? `${esc(c.name)} — ${roles}` : esc(c.name);
-        return `<option value="${c.id}">${label}</option>`;
+        const label = contractorLabel(contractorSpecialty(c), c.name, lang());
+        return `<option value="${c.id}">${esc(label)}</option>`;
       })
       .join("");
 }

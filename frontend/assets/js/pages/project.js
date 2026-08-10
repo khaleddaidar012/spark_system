@@ -10,7 +10,7 @@ import { initStore, all, get, save, peopleWithRole, findPersonById } from "../mo
 import { projectCosts, projectAnalytics, materialAnalytics, formatMoney, TYPE_LABELS, STATUS_LABELS, num } from "../modules/calc.js";
 import { addContractorToProject, addMaterialToProject } from "../modules/actions.js";
 import { openQuickAddSupplier, openQuickAddPerson } from "../modules/quick-add-person.js";
-import { personRolesLabel, personTypeLabel } from "../modules/person-roles.js";
+import { personRolesLabel, personTypeLabel, contractorLabel, contractorSpecialty } from "../modules/person-roles.js";
 import { translate } from "../modules/i18n.js";
 import { toast } from "../modules/toast.js";
 import { showModal, hideModal } from "../modules/modal.js";
@@ -29,15 +29,6 @@ function esc(value) {
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#39;");
 }
-
-const ROLE_LABELS = {
-  plumbing: { en: "Plumbing", ar: "سباكة" },
-  electrical: { en: "Electrical", ar: "كهرباء" },
-  finishing: { en: "Finishing", ar: "تشطيب" },
-  painting: { en: "Painting", ar: "دهانات" },
-  tiles: { en: "Tiles", ar: "سيراميك" },
-  other: { en: "Other", ar: "أخرى" },
-};
 
 let current = null;
 
@@ -185,8 +176,7 @@ function renderContractors(p) {
       return `
         <div class="row-item">
           <div class="row-item-main">
-            <div class="row-item-title">${esc(c.name)}</div>
-            <div class="row-item-sub">${local(ROLE_LABELS[c.role])}</div>
+            <div class="row-item-title">${esc(contractorLabel(c.role, c.name, lang()))}</div>
           </div>
           <div class="row-item-stats">
             <div class="row-stat">
@@ -283,9 +273,8 @@ function fillContractorSelect() {
     `<option value="">${translate("project.formConChooseNone")}</option>` +
     people
       .map((c) => {
-        const roles = personRolesLabel(c, lang());
-        const label = roles ? `${esc(c.name)} — ${roles}` : esc(c.name);
-        return `<option value="${c.id}">${label}</option>`;
+        const label = contractorLabel(contractorSpecialty(c), c.name, lang());
+        return `<option value="${c.id}">${esc(label)}</option>`;
       })
       .join("");
   select.value = currentVal;
@@ -362,9 +351,8 @@ function fillMaterialContractors() {
     `<option value="">${translate("project.formMatContractorNone")}</option>` +
     people
       .map((c) => {
-        const roles = personRolesLabel(c, lang());
-        const label = roles ? `${esc(c.name)} — ${roles}` : esc(c.name);
-        return `<option value="${c.id}">${label}</option>`;
+        const label = contractorLabel(contractorSpecialty(c), c.name, lang());
+        return `<option value="${c.id}">${esc(label)}</option>`;
       })
       .join("");
   select.value = currentVal;
