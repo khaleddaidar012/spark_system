@@ -79,6 +79,30 @@
             </div>
             <div id="materialsList" class="rows-list"></div>
           </section>
+
+          <section class="card detail-section detail-section-block">
+            <div class="detail-section-head">
+              <h2 class="detail-section-title" data-i18n="project.moneyTitle">Money</h2>
+            </div>
+            <div class="finance-summary" aria-label="Project money summary">
+              <div class="finance-card is-in">
+                <span class="finance-card-icon" aria-hidden="true"><i data-lucide="arrow-down-circle" class="icon"></i></span>
+                <span class="finance-card-label" data-i18n="project.moneyIn">Total Incoming</span>
+                <span class="finance-card-value" id="moneyIn">0</span>
+              </div>
+              <div class="finance-card is-out">
+                <span class="finance-card-icon" aria-hidden="true"><i data-lucide="arrow-up-circle" class="icon"></i></span>
+                <span class="finance-card-label" data-i18n="project.moneyOut">Total Outgoing</span>
+                <span class="finance-card-value" id="moneyOut">0</span>
+              </div>
+              <div class="finance-card is-net">
+                <span class="finance-card-icon" aria-hidden="true"><i data-lucide="scale" class="icon"></i></span>
+                <span class="finance-card-label" data-i18n="project.moneyNet">Net</span>
+                <span class="finance-card-value" id="moneyNet">0</span>
+              </div>
+            </div>
+            <div id="moneyList" class="rows-list"></div>
+          </section>
         </div>
       </main>
     </div>
@@ -127,7 +151,7 @@
           </div>
           <div class="form-field">
             <label class="form-label" for="conPaid" data-i18n="project.formConPaid">Paid</label>
-            <input class="form-input" id="conPaid" name="paid" type="number" min="0" step="0.01" value="0" data-i18n-ph="project.formConPaidPh" placeholder="0" />
+            <input class="form-input" id="conPaid" name="paid" type="number" min="0" step="0.01" data-i18n-ph="project.formConPaidPh" placeholder="0" />
           </div>
         </div>
         <div class="modal-actions">

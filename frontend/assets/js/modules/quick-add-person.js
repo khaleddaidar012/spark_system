@@ -9,6 +9,7 @@
    ============================================ */
 
 import { save, uid } from "./store.js";
+import { notifyDataChanged } from "./actions.js";
 import { showModal, hideModal } from "./modal.js";
 import { translate } from "./i18n.js";
 import { CONTRACTOR_SPECIALTIES } from "./person-roles.js";
@@ -179,6 +180,7 @@ function submit(e) {
   save(COLLECTION_BY_TYPE[currentType], item);
   config.onCreated?.(item);
   close();
+  notifyDataChanged();
 }
 
 export function openQuickAddPerson({ title, defaults, onCreated, initialType = "supplier" }) {

@@ -7,7 +7,7 @@
 
 import { initLayout } from "../modules/layout.js";
 import { initStore, all, save, uid } from "../modules/store.js";
-import { contractorBalance, contractorProjects, formatMoney, balanceDirection } from "../modules/calc.js";
+import { contractorBalance, contractorProjects, formatMoney, balanceDirection, sortNewestFirst, supplierProjectName } from "../modules/calc.js";
 import { contractorLabel } from "../modules/person-roles.js";
 import { recordMoney } from "../modules/actions.js";
 import { translate } from "../modules/i18n.js";
@@ -76,6 +76,10 @@ function renderContractors() {
               <i data-lucide="wallet" class="icon"></i>
               <span>${translate("contractors.settleAccount")}</span>
             </button>
+            <button class="btn btn-outline btn-sm" type="button" data-account="${c.id}">
+              <i data-lucide="book-open" class="icon"></i>
+              <span>${translate("contractors.viewAccount")}</span>
+            </button>
             <button class="btn btn-outline btn-sm" type="button" data-projects="${c.id}">
               <i data-lucide="folder-open" class="icon"></i>
               <span>${translate("contractors.viewProjects")}</span>
@@ -85,6 +89,89 @@ function renderContractors() {
     })
     .join("");
   window.lucide?.createIcons();
+}
+
+let accountId = null;
+
+function renderAccount() {
+  const contractor = all("contractors").find((c) => c.id === accountId);
+  if (!contractor) return;
+  const b = contractorBalance(contractor);
+  const direction = balanceDirection(b);
+
+  document.getElementById("contractorAccountTitle").textContent =
+    `${translate("contractors.accountTitle")} — ${contractor.name}`;
+
+  document.getElementById("contractorAccountSummary").innerHTML = `
+    <div class="account-summary-grid">
+      <div class="account-summary-item">
+        <span class="account-summary-label">${translate("project.total")}</span>
+        <span class="account-summary-value">${formatMoney(b.total)}</span>
+      </div>
+      <div class="account-summary-item">
+        <span class="account-summary-label">${translate("project.paid")}</span>
+        <span class="account-summary-value is-paid">${formatMoney(b.paid)}</span>
+      </div>
+      <div class="account-summary-item">
+        <span class="account-summary-label">${translate(direction.key)}</span>
+        <span class="account-summary-value ${direction.paid ? "is-paid" : "is-remaining"}">${formatMoney(direction.amount)}</span>
+      </div>
+    </div>`;
+
+  const txns = sortNewestFirst(
+    all("moneyTransactions").filter((t) => t.personType === "contractor" && t.personId === contractor.id)
+  );
+
+  const list = document.getElementById("contractorAccountList");
+  const empty = document.getElementById("contractorAccountEmpty");
+
+  if (!txns.length) {
+    list.innerHTML = "";
+    empty.hidden = false;
+    return;
+  }
+  empty.hidden = true;
+
+  list.innerHTML = txns
+    .map((t) => {
+      const isIn = t.direction === "in";
+      const project = supplierProjectName(t.projectId);
+      const projectPart = project ? ` · ${translate("contractors.project")}: ${esc(project)}` : "";
+      return `
+        <div class="row-item">
+          <div class="row-item-main">
+            <div class="row-item-title">${isIn ? translate("finance.totalIn") : translate("finance.totalOut")}</div>
+            <div class="row-item-sub">${esc(t.date || "")}${projectPart}${t.note ? " · " + esc(t.note) : ""}</div>
+          </div>
+          <div class="row-item-stats">
+            <div class="row-stat">
+              <span class="row-stat-label">${translate("quick.amount")}</span>
+              <span class="row-stat-value ${isIn ? "is-paid" : "is-remaining"}">${formatMoney(t.amount)}</span>
+            </div>
+          </div>
+        </div>`;
+    })
+    .join("");
+  window.lucide?.createIcons();
+}
+
+function openAccount(id) {
+  accountId = id;
+  showModal(document.getElementById("contractorAccountModal"));
+  renderAccount();
+}
+
+function closeAccount() {
+  accountId = null;
+  hideModal(document.getElementById("contractorAccountModal"));
+}
+
+function initAccountModal() {
+  document.getElementById("contractorAccountClose").addEventListener("click", closeAccount);
+  const modal = document.getElementById("contractorAccountModal");
+  modal.addEventListener("click", (e) => {
+    if (e.target === modal) closeAccount();
+  });
 }
 
 let settleContractorId = null;
@@ -131,7 +218,9 @@ function submitSettle(event) {
   toast(translate("common.saved"));
 }
 
-function openProjectsModal(id) {
+let projectsModalId = null;
+
+function renderProjectsModal(id) {
   const contractor = all("contractors").find((c) => c.id === id);
   if (!contractor) return;
   const body = document.getElementById("projectsModalBody");
@@ -195,8 +284,13 @@ function openProjectsModal(id) {
       .join("");
   }
 
-  showModal(document.getElementById("projectsModal"));
   window.lucide?.createIcons();
+}
+
+function openProjectsModal(id) {
+  projectsModalId = id;
+  renderProjectsModal(id);
+  showModal(document.getElementById("projectsModal"));
 }
 
 function initModal() {
@@ -251,12 +345,14 @@ function initSettleModal() {
 }
 
 function initProjectsModal() {
-  document.getElementById("projectsModalClose").addEventListener("click", () => {
+  const close = () => {
+    projectsModalId = null;
     hideModal(document.getElementById("projectsModal"));
-  });
+  };
+  document.getElementById("projectsModalClose").addEventListener("click", close);
   const modal = document.getElementById("projectsModal");
   modal.addEventListener("click", (e) => {
-    if (e.target === modal) hideModal(modal);
+    if (e.target === modal) close();
   });
 }
 
@@ -267,6 +363,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   initModal();
   initSettleModal();
   initProjectsModal();
+  initAccountModal();
 
   document.getElementById("contractorsList").addEventListener("click", (e) => {
     const settleBtn = e.target.closest("[data-settle]");
@@ -274,7 +371,18 @@ document.addEventListener("DOMContentLoaded", async () => {
       openSettleModal(settleBtn.dataset.settle);
       return;
     }
+    const accountBtn = e.target.closest("[data-account]");
+    if (accountBtn) {
+      openAccount(accountBtn.dataset.account);
+      return;
+    }
     const projectsBtn = e.target.closest("[data-projects]");
     if (projectsBtn) openProjectsModal(projectsBtn.dataset.projects);
+  });
+
+  window.addEventListener("spark:data-changed", () => {
+    renderContractors();
+    if (accountId) renderAccount();
+    if (projectsModalId) renderProjectsModal(projectsModalId);
   });
 });

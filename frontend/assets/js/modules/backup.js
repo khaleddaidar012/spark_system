@@ -1,12 +1,12 @@
 /* ============================================
    Spark ERP — Backup Module
    Full snapshot export/restore of the local DB,
-   plus automatic twice-daily local backups.
+   plus automatic twice-daily backups pushed to
+   the server (fallback: local download).
    ============================================ */
 
 const DB_KEY = "spark_db_v1";
 const LAST_BACKUP_KEY = "spark_last_backup";
-const AUTO_FLAG_KEY = "spark_auto_backup_done";
 const BACKUP_INTERVAL_MS = 12 * 60 * 60 * 1000; /* twice daily */
 const PREF_KEYS = ["spark_lang", "spark_theme"];
 
@@ -105,14 +105,51 @@ export function getLastBackupTime() {
 }
 
 export function needsAutoBackup() {
-  if (safeGet(AUTO_FLAG_KEY)) return false;
   const t = Number(safeGet(LAST_BACKUP_KEY)) || 0;
   return Date.now() - t >= BACKUP_INTERVAL_MS;
 }
 
-export function maybeAutoBackup() {
+/* Push a snapshot to the server so it survives browser data loss.
+   Returns true when the server accepted the backup. */
+export async function pushBackupToServer(data) {
+  try {
+    const res = await fetch("/api/backup", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    });
+    if (!res.ok) return false;
+    await res.json();
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+export async function autoBackup() {
   if (!needsAutoBackup()) return false;
-  safeSet(AUTO_FLAG_KEY, "1");
+  const data = buildBackupData();
+  const pushed = await pushBackupToServer(data);
+  if (pushed) {
+    setLastBackupTime(Date.now());
+    return true;
+  }
+  /* Server unreachable (e.g. app opened without backend) → local file. */
   downloadBackup();
   return true;
+}
+
+let backupTimer = null;
+
+function scheduleAutoBackup() {
+  if (backupTimer) clearTimeout(backupTimer);
+  backupTimer = setTimeout(() => {
+    backupTimer = null;
+    autoBackup();
+  }, 3000);
+}
+
+export function initAutoBackup() {
+  autoBackup();
+  window.addEventListener("spark:data-changed", scheduleAutoBackup);
 }

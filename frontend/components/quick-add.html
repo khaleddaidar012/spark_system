@@ -34,14 +34,21 @@
     </div>
     <form id="quickMoneyForm" class="modal-body form-stack" novalidate>
       <div class="segmented" id="moneyDirection" role="group" aria-label="Direction">
-        <button class="segmented-btn is-active" type="button" data-value="in">
+        <button class="segmented-btn" type="button" data-value="in">
           <i data-lucide="arrow-down-circle" class="icon"></i>
           <span data-i18n="quick.incoming">Incoming</span>
         </button>
-        <button class="segmented-btn" type="button" data-value="out">
+        <button class="segmented-btn is-active" type="button" data-value="out">
           <i data-lucide="arrow-up-circle" class="icon"></i>
           <span data-i18n="quick.outgoing">Outgoing</span>
         </button>
+      </div>
+
+      <div class="form-field">
+        <label class="form-label" for="moneyProject" data-i18n="quick.project">Project</label>
+        <select class="form-input" id="moneyProject">
+          <option value="" data-i18n="quick.noProject">— No project —</option>
+        </select>
       </div>
 
       <div class="chip-row" id="moneyPersonType" role="group" aria-label="Person type">

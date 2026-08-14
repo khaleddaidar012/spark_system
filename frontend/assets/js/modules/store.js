@@ -137,6 +137,7 @@ function seedIfEmpty() {
     return;
   }
 
+  let seedCreatedAt = Date.now() - 5 * 60 * 1000;
   const money = (direction, personType, personId, personName, amount, projectId = null, note = "") => ({
     id: uid(),
     direction,
@@ -146,6 +147,7 @@ function seedIfEmpty() {
     amount: Number(amount),
     projectId,
     date: today(),
+    createdAt: (seedCreatedAt += 60 * 1000),
     note,
   });
 

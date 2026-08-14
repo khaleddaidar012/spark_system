@@ -7,6 +7,7 @@
 
 import { all, get, peopleWithRole, findPersonById } from "./store.js";
 import { recordMoney, addMaterialToProject, consumeMaterial } from "./actions.js";
+import { contractorWorksOnProject } from "./calc.js";
 import { translate } from "./i18n.js";
 import { toast } from "./toast.js";
 import { showModal, hideModal } from "./modal.js";
@@ -145,16 +146,57 @@ function fillPersonSelect() {
       .join("");
 }
 
+function fillMoneyProjectSelect() {
+  const select = document.getElementById("moneyProject");
+  if (!select) return;
+  const projects = all("projects");
+  select.innerHTML =
+    `<option value="">${translate("quick.noProject")}</option>` +
+    projects
+      .map((p) => `<option value="${p.id}">${esc(p.name)}</option>`)
+      .join("");
+}
+
+/* Reset every dynamic part of the Quick Money modal so a fresh,
+   predictable state is shown each time it opens. Without this the
+   direction / person / amount from the previous use carry over and
+   money can be recorded in the wrong direction without any warning. */
+function resetQuickMoney() {
+  const dir = document.getElementById("moneyDirection");
+  if (dir) {
+    dir.setAttribute("data-value-state", "out");
+    dir.querySelectorAll(".segmented-btn").forEach((b) =>
+      b.classList.toggle("is-active", b.dataset.value === "out")
+    );
+  }
+  const typeBox = document.getElementById("moneyPersonType");
+  if (typeBox) {
+    typeBox.querySelectorAll(".chip").forEach((c) =>
+      c.classList.toggle("is-active", c.dataset.value === "supplier")
+    );
+  }
+  const form = document.getElementById("quickMoneyForm");
+  if (form) form.reset();
+  const nameInput = document.getElementById("moneyPersonName");
+  const select = document.getElementById("moneyPersonSelect");
+  const addBtn = document.getElementById("moneyAddPersonBtn");
+  if (nameInput) nameInput.hidden = true;
+  if (select) {
+    select.hidden = false;
+    select.value = "";
+  }
+  if (addBtn) addBtn.hidden = false;
+  fillMoneyProjectSelect();
+  fillPersonSelect();
+}
+
 function initQuickMoney() {
   document.getElementById("fabMoney").addEventListener("click", () => {
     closeFabMenu(true);
-    const modal = openModal("quickMoneyModal");
-    const firstChip = modal.querySelector("#moneyPersonType .chip");
-    modal.querySelectorAll("#moneyPersonType .chip").forEach((c) => c.classList.toggle("is-active", c === firstChip));
-    document.getElementById("moneyPersonName").hidden = true;
-    document.getElementById("moneyPersonSelect").hidden = false;
-    fillPersonSelect();
-    document.getElementById("moneyAmount").focus();
+    openModal("quickMoneyModal");
+    resetQuickMoney();
+    const amount = document.getElementById("moneyAmount");
+    if (amount) amount.focus();
   });
 
   document.getElementById("moneyPersonType").addEventListener("click", (e) => {
@@ -217,17 +259,23 @@ function initQuickMoney() {
       personName = person.name;
     }
 
+    const projectId = document.getElementById("moneyProject").value || null;
+    if (type === "contractor" && projectId && personId && !contractorWorksOnProject(personId, projectId)) {
+      toast(translate("quick.contractorNotOnProject").replace("{name}", personName), "info");
+    }
+
     recordMoney({
       direction,
       personType: type,
       personId,
       personName,
       amount,
-      projectId: null,
+      projectId,
       note: document.getElementById("moneyNote").value.trim(),
     });
 
     document.getElementById("quickMoneyForm").reset();
+    resetQuickMoney();
     closeModal("quickMoneyModal");
     toast(translate("common.saved"));
   });
@@ -387,6 +435,7 @@ function initQuickMaterials() {
 /* ---------- Init ---------- */
 
 export function initQuickAdd() {
+  if (!document.getElementById("quickAdd") || !document.getElementById("fab")) return;
   initFab();
   initQuickMoney();
   initQuickMaterials();

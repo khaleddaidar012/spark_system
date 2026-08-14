@@ -5,7 +5,7 @@
 
 import { initTheme, toggleTheme } from "../modules/theme.js";
 import { initI18n, setLanguage, translate } from "../modules/i18n.js";
-import { ADMIN, createSession, isLoggedIn } from "../modules/auth.js";
+import { ADMIN, verifyAdminPassword, createSession, isLoggedIn } from "../modules/auth.js";
 
 const REMEMBER_KEY = "spark_remembered_user";
 
@@ -69,7 +69,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     errorBox.hidden = false;
   };
 
-  form?.addEventListener("submit", (e) => {
+  form?.addEventListener("submit", async (e) => {
     e.preventDefault();
     errorBox.hidden = true;
 
@@ -87,7 +87,8 @@ document.addEventListener("DOMContentLoaded", async () => {
       return;
     }
 
-    if (username !== ADMIN.username || password !== ADMIN.password) {
+    const valid = username === ADMIN.username && (await verifyAdminPassword(password));
+    if (!valid) {
       showError("login.errorInvalid");
       usernameInput.classList.add("is-invalid");
       passwordInput.classList.add("is-invalid");

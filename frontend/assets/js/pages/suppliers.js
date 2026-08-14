@@ -8,6 +8,7 @@
 import { initLayout } from "../modules/layout.js";
 import { initStore, all, get, save, uid } from "../modules/store.js";
 import { supplierBalance, supplierTransactions, supplierProjectName, formatMoney, balanceDirection } from "../modules/calc.js";
+import { recordMoney } from "../modules/actions.js";
 import { translate } from "../modules/i18n.js";
 import { toast } from "../modules/toast.js";
 import { showModal, hideModal } from "../modules/modal.js";
@@ -70,7 +71,11 @@ function renderSuppliers() {
             </div>
           </div>
           <div class="row-item-actions">
-            <button class="btn btn-soft btn-sm" type="button" data-edit="${esc(s.id)}">
+            <button class="btn btn-soft btn-sm" type="button" data-settle="${esc(s.id)}">
+              <i data-lucide="wallet" class="icon"></i>
+              <span>${translate("suppliers.settleAccount")}</span>
+            </button>
+            <button class="btn btn-outline btn-sm" type="button" data-edit="${esc(s.id)}">
               <i data-lucide="pencil" class="icon"></i>
               <span>${translate("suppliers.editSupplier")}</span>
             </button>
@@ -233,6 +238,61 @@ function closeAccount() {
   hideModal(document.getElementById("supplierAccountModal"));
 }
 
+/* ---------- Settle account ---------- */
+
+let settleSupplierId = null;
+
+function openSettleModal(id) {
+  settleSupplierId = id;
+  const supplier = get("suppliers", id);
+  if (!supplier) return;
+  const remaining = supplierBalance(supplier).remaining;
+  document.getElementById("supplierSettleAmount").value = remaining > 0 ? remaining : "";
+  document.getElementById("supplierSettleNote").value = "";
+  showModal(document.getElementById("supplierSettleModal"));
+  document.getElementById("supplierSettleAmount").focus();
+}
+
+function closeSettleModal() {
+  hideModal(document.getElementById("supplierSettleModal"));
+  document.getElementById("supplierSettleForm").reset();
+  settleSupplierId = null;
+}
+
+function submitSettle(event) {
+  event.preventDefault();
+  const form = event.currentTarget;
+  const amount = Number(form.elements["amount"].value || 0);
+  if (!(amount > 0) || !settleSupplierId) {
+    form.elements["amount"].focus();
+    return;
+  }
+  const supplier = get("suppliers", settleSupplierId);
+  if (!supplier) return;
+  recordMoney({
+    direction: "out",
+    personType: "supplier",
+    personId: supplier.id,
+    personName: supplier.name,
+    amount,
+    projectId: null,
+    note: form.elements["note"].value.trim(),
+  });
+  closeSettleModal();
+  renderSuppliers();
+  toast(translate("common.saved"));
+}
+
+function initSettleModal() {
+  document.getElementById("supplierSettleClose").addEventListener("click", closeSettleModal);
+  document.getElementById("supplierSettleCancel").addEventListener("click", closeSettleModal);
+  const modal = document.getElementById("supplierSettleModal");
+  modal.addEventListener("click", (e) => {
+    if (e.target === modal) closeSettleModal();
+  });
+  document.getElementById("supplierSettleForm").addEventListener("submit", submitSettle);
+}
+
 function initModal() {
   const modal = document.getElementById("supplierModal");
   document.getElementById("addSupplierBtn").addEventListener("click", () => openModal(null));
@@ -248,8 +308,14 @@ function initModal() {
   accountModal.addEventListener("click", (e) => {
     if (e.target === accountModal) closeAccount();
   });
+  initSettleModal();
 
   document.getElementById("suppliersList").addEventListener("click", (e) => {
+    const settleBtn = e.target.closest("[data-settle]");
+    if (settleBtn) {
+      openSettleModal(settleBtn.dataset.settle);
+      return;
+    }
     const editBtn = e.target.closest("[data-edit]");
     if (editBtn) {
       const supplier = get("suppliers", editBtn.dataset.edit);
@@ -266,4 +332,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   await initLayout();
   renderSuppliers();
   initModal();
+  window.addEventListener("spark:data-changed", () => {
+    renderSuppliers();
+    if (accountId) renderAccount();
+  });
 });

@@ -7,7 +7,7 @@
 
 import { initLayout } from "../modules/layout.js";
 import { initStore, all, get, save, peopleWithRole, findPersonById } from "../modules/store.js";
-import { projectCosts, projectAnalytics, materialAnalytics, formatMoney, TYPE_LABELS, STATUS_LABELS, num, contractorBalance, balanceDirection } from "../modules/calc.js";
+import { projectCosts, projectAnalytics, materialAnalytics, formatMoney, TYPE_LABELS, STATUS_LABELS, num, contractorBalance, balanceDirection, moneyIn, moneyOut, sortNewestFirst } from "../modules/calc.js";
 import { addContractorToProject, addMaterialToProject } from "../modules/actions.js";
 import { openQuickAddSupplier, openQuickAddPerson } from "../modules/quick-add-person.js";
 import { personRolesLabel, personTypeLabel, contractorLabel, contractorSpecialty } from "../modules/person-roles.js";
@@ -234,6 +234,46 @@ function renderMaterials(p) {
     .join("");
 }
 
+/* ---------- Money ---------- */
+
+function renderMoney(p) {
+  const txns = sortNewestFirst(
+    all("moneyTransactions").filter((t) => t.projectId === p.id)
+  );
+  const incoming = moneyIn(txns);
+  const outgoing = moneyOut(txns);
+  document.getElementById("moneyIn").textContent = formatMoney(incoming);
+  document.getElementById("moneyOut").textContent = formatMoney(outgoing);
+  document.getElementById("moneyNet").textContent = formatMoney(incoming - outgoing);
+
+  const list = document.getElementById("moneyList");
+  if (!txns.length) {
+    list.innerHTML = `<p class="row-empty">${translate("project.noMoney")}</p>`;
+    return;
+  }
+
+  list.innerHTML = txns
+    .map((t) => {
+      const isIn = t.direction === "in";
+      const typeLabel = personTypeLabel(t.personType, lang());
+      const amount = (isIn ? "+" : "-") + formatMoney(t.amount);
+      return `
+        <div class="row-item">
+          <div class="row-item-main">
+            <div class="row-item-title">${esc(t.personName)}</div>
+            <div class="row-item-sub">${esc(typeLabel)}${t.note ? " · " + esc(t.note) : ""}</div>
+          </div>
+          <div class="row-item-stats">
+            <div class="row-stat">
+              <span class="row-stat-label">${esc(t.date || "")}</span>
+              <span class="row-stat-value ${isIn ? "is-paid" : "is-remaining"}">${amount}</span>
+            </div>
+          </div>
+        </div>`;
+    })
+    .join("");
+}
+
 /* ---------- Full render ---------- */
 
 function renderAll() {
@@ -250,6 +290,7 @@ function renderAll() {
   renderAnalytics(p);
   renderContractors(p);
   renderMaterials(p);
+  renderMoney(p);
 }
 
 /* ---------- Contractor modal ---------- */
@@ -483,4 +524,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   document.getElementById("matSupplier").addEventListener("change", (e) => {
     applySupplierSupplies(e.target.value);
   });
+
+  window.addEventListener("spark:data-changed", renderAll);
 });

@@ -206,4 +206,5 @@ document.addEventListener("DOMContentLoaded", async () => {
   await initLayout();
   renderProjects();
   initModal();
+  window.addEventListener("spark:data-changed", renderProjects);
 });

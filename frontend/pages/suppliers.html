@@ -72,6 +72,31 @@
     </div>
   </div>
 
+  <div class="modal-overlay" id="supplierSettleModal" hidden>
+    <div class="modal modal-sm" role="dialog" aria-modal="true" aria-labelledby="supplierSettleTitle">
+      <div class="modal-header">
+        <h2 class="modal-title" id="supplierSettleTitle" data-i18n="suppliers.settleModalTitle">Settle Account</h2>
+        <button class="btn btn-icon modal-close" id="supplierSettleClose" type="button" aria-label="Close">
+          <i data-lucide="x" class="icon"></i>
+        </button>
+      </div>
+      <form id="supplierSettleForm" class="modal-body form-stack" novalidate>
+        <div class="form-field">
+          <label class="form-label" for="supplierSettleAmount" data-i18n="suppliers.settleAmount">Amount</label>
+          <input class="form-input" id="supplierSettleAmount" name="amount" type="number" min="0" step="0.01" required data-i18n-ph="project.formConTotalPh" placeholder="0" />
+        </div>
+        <div class="form-field">
+          <label class="form-label" for="supplierSettleNote" data-i18n="suppliers.settleNote">Note (optional)</label>
+          <input class="form-input" id="supplierSettleNote" name="note" type="text" data-i18n-ph="quick.notePh" placeholder="—" />
+        </div>
+        <div class="modal-actions">
+          <button class="btn btn-ghost" id="supplierSettleCancel" type="button" data-i18n="projects.cancel">Cancel</button>
+          <button class="btn btn-primary" type="submit" data-i18n="projects.save">Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <div class="modal-overlay" id="supplierAccountModal" hidden>
     <div class="modal" role="dialog" aria-modal="true" aria-labelledby="supplierAccountTitle">
       <div class="modal-header">

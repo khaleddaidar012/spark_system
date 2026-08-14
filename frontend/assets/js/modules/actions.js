@@ -8,6 +8,11 @@
 import { all, get, save, uid, today, findPersonById } from "./store.js";
 import { num } from "./calc.js";
 
+/* Data-changed event so the current page can live-refresh after an action. */
+export function notifyDataChanged() {
+  window.dispatchEvent(new CustomEvent("spark:data-changed"));
+}
+
 /* ---------- Money ---------- */
 
 export function recordMoney({ direction, personType, personId, personName, amount, projectId = null, note = "" }) {
@@ -21,6 +26,7 @@ export function recordMoney({ direction, personType, personId, personName, amoun
     amount: value,
     projectId: projectId || null,
     date: today(),
+    createdAt: Date.now(),
     note: note || "",
   };
   save("moneyTransactions", txn);
@@ -28,23 +34,34 @@ export function recordMoney({ direction, personType, personId, personName, amoun
   if (personType === "supplier") {
     const person = get("suppliers", personId);
     if (person) {
-      person.paid = Math.max(0, num(person.paid) + (direction === "out" ? value : -value));
+      person.paid = num(person.paid) + (direction === "out" ? value : -value);
       save("suppliers", person);
     }
   } else if (personType === "contractor") {
     const person = get("contractors", personId);
     if (person) {
-      person.paid = Math.max(0, num(person.paid) + (direction === "out" ? value : -value));
+      person.paid = num(person.paid) + (direction === "out" ? value : -value);
       save("contractors", person);
+    }
+    if (projectId) {
+      const project = get("projects", projectId);
+      if (project) {
+        const row = (project.contractors || []).find((c) => c.id === personId || c.contractorId === personId);
+        if (row) {
+          row.paid = num(row.paid) + (direction === "out" ? value : -value);
+          save("projects", project);
+        }
+      }
     }
   } else if (personType === "client") {
     const person = get("clients", personId);
     if (person) {
-      person.paid = Math.max(0, num(person.paid) + (direction === "in" ? value : -value));
+      person.paid = num(person.paid) + (direction === "in" ? value : -value);
       save("clients", person);
     }
   }
 
+  notifyDataChanged();
   return txn;
 }
 
@@ -126,7 +143,10 @@ export function addMaterialToProject(projectId, { name, supplierId, contractorId
     unitPrice: price,
     total,
     date: item.date,
+    createdAt: Date.now(),
   });
+
+  notifyDataChanged();
 
   return item;
 }
@@ -163,7 +183,10 @@ export function consumeMaterial(projectId, { name, quantity, unit, date }) {
     unitPrice: 0,
     total: 0,
     date: item.date,
+    createdAt: Date.now(),
   });
+
+  notifyDataChanged();
 
   return item;
 }
@@ -214,6 +237,8 @@ export function addContractorToProject(projectId, { name, role, total, paid, con
     }
   }
 
+  notifyDataChanged();
+
   return item;
 }
 
@@ -230,5 +255,6 @@ export function addOtherExpense(projectId, { label, amount }) {
     date: today(),
   });
   save("projects", project);
+  notifyDataChanged();
   return project;
 }

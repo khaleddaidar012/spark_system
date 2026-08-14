@@ -12,6 +12,9 @@ import {
   projectProfit,
   supplierPurchases,
   contractorProjectCounts,
+  moneyIn,
+  moneyOut,
+  materialPurchases,
   formatMoney,
   TYPE_LABELS,
 } from "../modules/calc.js";
@@ -37,6 +40,14 @@ function renderStats() {
   const completed = projects.filter((p) => p.status === "done").length;
   document.getElementById("reportTotalProjects").textContent = formatMoney(projects.length);
   document.getElementById("reportCompletedProjects").textContent = formatMoney(completed);
+
+  const txns = all("moneyTransactions");
+  const material = all("materialTransactions");
+  const incoming = moneyIn(txns);
+  const outgoing = moneyOut(txns) + materialPurchases(material);
+  document.getElementById("reportTotalIn").textContent = formatMoney(incoming);
+  document.getElementById("reportTotalOut").textContent = formatMoney(outgoing);
+  document.getElementById("reportNet").textContent = formatMoney(incoming - outgoing);
 }
 
 function renderRows(tbodyId, emptyId, rows, cells) {
@@ -102,4 +113,5 @@ document.addEventListener("DOMContentLoaded", async () => {
   initStore();
   await initLayout();
   renderReports();
+  window.addEventListener("spark:data-changed", renderReports);
 });

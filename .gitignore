@@ -9,6 +9,15 @@ npm-debug.log*
 # Backups
 Backups/*
 !Backups/.gitkeep
+backend/backups/*
+
+# Credentials
+cred.md
+credinal.md
+
+# Server logs
+server.err.log
+server.out.log
 
 # OS
 .DS_Store

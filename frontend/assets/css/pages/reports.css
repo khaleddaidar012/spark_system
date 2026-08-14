@@ -42,6 +42,29 @@
   color: var(--success);
 }
 
+.report-stat-icon.is-in {
+  background: var(--success-soft);
+  color: var(--success);
+}
+
+.report-stat-icon.is-out {
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
+.report-stat-icon.is-net {
+  background: var(--primary-soft);
+  color: var(--primary);
+}
+
+.report-stat-card.is-in .report-stat-value {
+  color: var(--success);
+}
+
+.report-stat-card.is-out .report-stat-value {
+  color: var(--danger);
+}
+
 .report-stat-label {
   font-size: var(--font-size-xs);
   color: var(--text-muted);

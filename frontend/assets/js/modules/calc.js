@@ -72,9 +72,22 @@ export function moneyBalance(txns) {
   return { incoming: moneyIn(txns), outgoing: moneyOut(txns) };
 }
 
+/* Newest first: createdAt (ms) desc, falling back to reverse insertion order. */
+export function sortNewestFirst(arr) {
+  return arr
+    .map((x, i) => ({ x, i }))
+    .sort((a, b) => (b.x.createdAt || 0) - (a.x.createdAt || 0) || b.i - a.i)
+    .map((o) => o.x);
+}
+
+/* Total value of materials purchased (incoming stock) across transactions. */
+export function materialPurchases(txns) {
+  return txns.filter((t) => t.direction === "in").reduce((s, t) => s + num(t.total), 0);
+}
+
 export function supplierBalance(supplier) {
-  const purchases = moneyOut(all("moneyTransactions").filter((t) => t.personType === "supplier" && t.personId === supplier.id));
-  const paid = Math.max(0, num(supplier.paid));
+  const purchases = Math.max(0, num(supplier.purchases));
+  const paid = num(supplier.paid);
   const diff = purchases - paid;
   return {
     purchases,
@@ -86,14 +99,12 @@ export function supplierBalance(supplier) {
 }
 
 export function supplierTransactions(supplierId) {
-  const money = all("moneyTransactions")
-    .filter((t) => t.personType === "supplier" && t.personId === supplierId)
-    .slice()
-    .sort((a, b) => (b.date || "").localeCompare(a.date || ""));
-  const material = all("materialTransactions")
-    .filter((t) => t.supplierId === supplierId)
-    .slice()
-    .sort((a, b) => (b.date || "").localeCompare(a.date || ""));
+  const money = sortNewestFirst(
+    all("moneyTransactions").filter((t) => t.personType === "supplier" && t.personId === supplierId)
+  );
+  const material = sortNewestFirst(
+    all("materialTransactions").filter((t) => t.supplierId === supplierId)
+  );
   return { money, material };
 }
 
@@ -105,7 +116,7 @@ export function supplierProjectName(projectId) {
 
 export function contractorBalance(contractor) {
   const total = num(contractor.total);
-  const paid = Math.max(0, num(contractor.paid));
+  const paid = num(contractor.paid);
   const diff = total - paid;
   return {
     total,
@@ -122,16 +133,26 @@ export function balanceDirection(b) {
     : { key: "balance.owedByUs", amount: b.dueToThem, paid: false };
 }
 
+export function contractorWorksOnProject(contractorId, projectId) {
+  if (!contractorId || !projectId) return false;
+  const p = all("projects").find((x) => x.id === projectId);
+  if (!p) return false;
+  return (
+    (p.contractors || []).some((c) => c.id === contractorId || c.contractorId === contractorId) ||
+    (p.materials || []).some((m) => m.contractorId === contractorId)
+  );
+}
+
 export function contractorProjects(contractorId) {
   return all("projects")
     .filter(
       (p) =>
-        (p.contractors || []).some((c) => c.id === contractorId) ||
+        (p.contractors || []).some((c) => c.id === contractorId || c.contractorId === contractorId) ||
         (p.materials || []).some((m) => m.contractorId === contractorId)
     )
     .map((p) => ({
       project: p,
-      contractor: (p.contractors || []).find((c) => c.id === contractorId) || null,
+      contractor: (p.contractors || []).find((c) => c.id === contractorId || c.contractorId === contractorId) || null,
       materials: (p.materials || []).filter((m) => m.contractorId === contractorId),
     }));
 }

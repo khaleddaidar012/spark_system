@@ -89,7 +89,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   deleteCancel?.addEventListener("click", closeDelete);
   deleteClose?.addEventListener("click", closeDelete);
 
-  deleteForm?.addEventListener("submit", (e) => {
+  deleteForm?.addEventListener("submit", async (e) => {
     e.preventDefault();
     deleteError.hidden = true;
     password1.classList.remove("is-invalid");
@@ -107,7 +107,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       password2.focus();
       return;
     }
-    if (!verifyAdminPassword(p1)) {
+    if (!(await verifyAdminPassword(p1))) {
       showError("settings.wrongPassword");
       password1.focus();
       return;
