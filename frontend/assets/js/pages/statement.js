@@ -1,5 +1,5 @@
-/* ============================================
-   Spark ERP — Project Statement of Account
+﻿/* ============================================
+   Spark ERP â€” Project Statement of Account
    Standalone print document. Lists every project
    material with cost, lets the owner attach a
    contractor + workmanship per material, mark
@@ -36,7 +36,7 @@ function renderMeta(p) {
     </div>
     <div class="statement-meta-item">
       <span class="statement-meta-label">${translate("statement.area")}</span>
-      <span class="statement-meta-value">${formatMoney(p.area)} m²</span>
+      <span class="statement-meta-value">${formatMoney(p.area)} mآ²</span>
     </div>
     <div class="statement-meta-item">
       <span class="statement-meta-label">${translate("statement.date")}</span>
@@ -58,7 +58,7 @@ function roleLabel(role) {
 
 function contractorOptions(selectedId) {
   return (
-    `<option value="">—</option>` +
+    `<option value="">â€”</option>` +
     peopleWithRole("contractor")
       .map(
         (c) =>
@@ -73,7 +73,7 @@ function rowHTML(m) {
   return `
     <tr data-material-id="${esc(m.id || "")}"${m.clientBought ? ' class="is-client-bought"' : ""}>
       <td>
-        <input class="form-input statement-row-name" data-field="name" type="text" value="${esc(m.name || "")}" placeholder="—" />
+        <input class="form-input statement-row-name" data-field="name" type="text" value="${esc(m.name || "")}" placeholder="â€”" />
       </td>
       <td>
         <div class="statement-qty-cell">
@@ -263,7 +263,7 @@ function render() {
 
 document.addEventListener("DOMContentLoaded", async () => {
   if (!requireAuth()) return;
-  initStore();
+  await initStore();
   await initI18n();
 
   current = get("projects", projectIdFromUrl());

@@ -1,0 +1,24 @@
+name = "spark-erp"
+compatibility_date = "2026-08-14"
+pages_build_output_dir = "./frontend"
+
+# Local development / wrangler pages deploy use these bindings.
+# For a Git-connected Cloudflare Pages project, recreate the SAME binding
+# names in the dashboard (Settings > Functions > Bindings):
+#   DB        -> D1 database
+#   BACKUP_KV -> KV namespace
+
+[[d1_databases]]
+binding = "DB"
+database_name = "spark-erp"
+database_id = "2a51d51c-d3f2-4b55-b4d2-9e3c5cd3741a"
+
+[[kv_namespaces]]
+binding = "BACKUP_KV"
+id = "3bda08081fc440f7b331345ebdd3d684"
+
+# Secrets are NOT stored here. Provide them in .dev.vars (local) and in the
+# Cloudflare Pages Environment Variables (production):
+#   SPARK_ADMIN_USERNAME
+#   SPARK_ADMIN_PASSWORD_HASH   (sha256 hex of the admin password)
+#   AUTH_SECRET                 (long random string used to sign login tokens)

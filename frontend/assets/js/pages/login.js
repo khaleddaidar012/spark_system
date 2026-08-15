@@ -5,7 +5,7 @@
 
 import { initTheme, toggleTheme } from "../modules/theme.js";
 import { initI18n, setLanguage, translate } from "../modules/i18n.js";
-import { ADMIN, verifyAdminPassword, createSession, isLoggedIn } from "../modules/auth.js";
+import { login, isLoggedIn } from "../modules/auth.js";
 
 const REMEMBER_KEY = "spark_remembered_user";
 
@@ -74,7 +74,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     errorBox.hidden = true;
 
     const username = usernameInput.value.trim();
-    const password = passwordInput.value.trim();
+    const password = passwordInput.value;
 
     usernameInput.classList.remove("is-invalid");
     passwordInput.classList.remove("is-invalid");
@@ -87,8 +87,9 @@ document.addEventListener("DOMContentLoaded", async () => {
       return;
     }
 
-    const valid = username === ADMIN.username && (await verifyAdminPassword(password));
-    if (!valid) {
+    try {
+      await login(username, password, rememberMe.checked);
+    } catch {
       showError("login.errorInvalid");
       usernameInput.classList.add("is-invalid");
       passwordInput.classList.add("is-invalid");
@@ -110,12 +111,10 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
     }
 
-    createSession(rememberMe.checked);
-
     loginBtn.disabled = true;
     loginBtn.textContent = translate("login.signingIn");
     setTimeout(() => {
       window.location.href = "./dashboard.html";
-    }, 700);
+    }, 300);
   });
 });

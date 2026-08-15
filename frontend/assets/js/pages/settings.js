@@ -6,16 +6,16 @@
 
 import { initLayout } from "../modules/layout.js";
 import { initStore, wipeAll } from "../modules/store.js";
+import { api } from "../modules/api.js";
 import { translate } from "../modules/i18n.js";
 import { toast } from "../modules/toast.js";
 import { showModal, hideModal } from "../modules/modal.js";
-import { verifyAdminPassword } from "../modules/auth.js";
 import { downloadBackup, restoreBackup, getLastBackupTime } from "../modules/backup.js";
 
 const lang = () => document.documentElement.lang;
 
 document.addEventListener("DOMContentLoaded", async () => {
-  initStore();
+  await initStore();
   await initLayout();
 
   const lastBackupEl = document.getElementById("lastBackupTime");
@@ -107,7 +107,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       password2.focus();
       return;
     }
-    if (!(await verifyAdminPassword(p1))) {
+    if (!(await api.verifyPassword(p1)).ok) {
       showError("settings.wrongPassword");
       password1.focus();
       return;
@@ -115,7 +115,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     deleteConfirm.disabled = true;
     downloadBackup();
-    wipeAll();
+    await wipeAll();
     toast(translate("settings.deleted"));
     setTimeout(() => {
       window.location.href = "./login.html";

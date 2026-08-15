@@ -1,5 +1,5 @@
-/* ============================================
-   Spark ERP — Financial Accounts Page Script
+﻿/* ============================================
+   Spark ERP â€” Financial Accounts Page Script
    Summary (in / out / net) + transaction history.
    ============================================ */
 
@@ -20,10 +20,10 @@ function esc(value) {
 }
 
 const PERSON_TYPE_LABELS = {
-  supplier: { en: "Supplier", ar: "مورد" },
-  contractor: { en: "Contractor", ar: "مقاول" },
-  client: { en: "Client", ar: "عميل" },
-  other: { en: "Other", ar: "أخرى" },
+  supplier: { en: "Supplier", ar: "ظ…ظˆط±ط¯" },
+  contractor: { en: "Contractor", ar: "ظ…ظ‚ط§ظˆظ„" },
+  client: { en: "Client", ar: "ط¹ظ…ظٹظ„" },
+  other: { en: "Other", ar: "ط£ط®ط±ظ‰" },
 };
 
 function renderSummary() {
@@ -47,7 +47,7 @@ function renderHistory() {
       isIn: t.direction === "in",
       amount: (t.direction === "in" ? "+" : "-") + formatMoney(t.amount),
       title: esc(t.personName),
-      sub: `${typeLabel[lang()] || typeLabel.en}${t.note ? " · " + esc(t.note) : ""}`,
+      sub: `${typeLabel[lang()] || typeLabel.en}${t.note ? " آ· " + esc(t.note) : ""}`,
       dateLabel: t.date || "",
     };
   });
@@ -61,7 +61,7 @@ function renderHistory() {
         isIn: false,
         amount: "-" + formatMoney(t.total),
         title: esc(t.materialName),
-        sub: `${translate("finance.purchase")} · ${formatMoney(t.quantity)} ${esc(t.unit || "")}${project ? " · " + translate("suppliers.project") + ": " + esc(project) : ""}`,
+        sub: `${translate("finance.purchase")} آ· ${formatMoney(t.quantity)} ${esc(t.unit || "")}${project ? " آ· " + translate("suppliers.project") + ": " + esc(project) : ""}`,
         dateLabel: t.date || "",
       };
     });
@@ -93,7 +93,7 @@ function renderHistory() {
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
-  initStore();
+  await initStore();
   await initLayout();
   renderSummary();
   renderHistory();

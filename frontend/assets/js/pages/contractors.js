@@ -1,5 +1,5 @@
-/* ============================================
-   Spark ERP — Contractors Page Script
+﻿/* ============================================
+   Spark ERP â€” Contractors Page Script
    Lists contractors with balances, records
    payments (settle account) and shows the
    projects + consumed materials per contractor.
@@ -26,12 +26,12 @@ function esc(value) {
 }
 
 const TYPE_LABELS = {
-  apartment: { en: "Apartment", ar: "شقة" },
-  villa: { en: "Villa", ar: "فيلا" },
-  clinic: { en: "Clinic", ar: "عيادة" },
-  office: { en: "Office", ar: "مكتب" },
-  shop: { en: "Shop", ar: "محل" },
-  other: { en: "Other", ar: "أخرى" },
+  apartment: { en: "Apartment", ar: "ط´ظ‚ط©" },
+  villa: { en: "Villa", ar: "ظپظٹظ„ط§" },
+  clinic: { en: "Clinic", ar: "ط¹ظٹط§ط¯ط©" },
+  office: { en: "Office", ar: "ظ…ظƒطھط¨" },
+  shop: { en: "Shop", ar: "ظ…ط­ظ„" },
+  other: { en: "Other", ar: "ط£ط®ط±ظ‰" },
 };
 
 function renderContractors() {
@@ -55,7 +55,7 @@ function renderContractors() {
         <div class="row-item">
           <div class="row-item-main">
             <div class="row-item-title">${esc(c.name)}</div>
-            <div class="row-item-sub">${roleName}${c.phone ? " · " + esc(c.phone) : ""}</div>
+            <div class="row-item-sub">${roleName}${c.phone ? " آ· " + esc(c.phone) : ""}</div>
           </div>
           <div class="row-item-stats">
             <div class="row-stat">
@@ -100,7 +100,7 @@ function renderAccount() {
   const direction = balanceDirection(b);
 
   document.getElementById("contractorAccountTitle").textContent =
-    `${translate("contractors.accountTitle")} — ${contractor.name}`;
+    `${translate("contractors.accountTitle")} â€” ${contractor.name}`;
 
   document.getElementById("contractorAccountSummary").innerHTML = `
     <div class="account-summary-grid">
@@ -136,12 +136,12 @@ function renderAccount() {
     .map((t) => {
       const isIn = t.direction === "in";
       const project = supplierProjectName(t.projectId);
-      const projectPart = project ? ` · ${translate("contractors.project")}: ${esc(project)}` : "";
+      const projectPart = project ? ` آ· ${translate("contractors.project")}: ${esc(project)}` : "";
       return `
         <div class="row-item">
           <div class="row-item-main">
             <div class="row-item-title">${isIn ? translate("finance.totalIn") : translate("finance.totalOut")}</div>
-            <div class="row-item-sub">${esc(t.date || "")}${projectPart}${t.note ? " · " + esc(t.note) : ""}</div>
+            <div class="row-item-sub">${esc(t.date || "")}${projectPart}${t.note ? " آ· " + esc(t.note) : ""}</div>
           </div>
           <div class="row-item-stats">
             <div class="row-stat">
@@ -233,7 +233,7 @@ function renderProjectsModal(id) {
       .map(({ project, contractor: row, materials }) => {
         const b = contractorBalance(row || { total: 0, paid: 0 });
         const direction = balanceDirection(b);
-        const type = (TYPE_LABELS[project.type] || TYPE_LABELS.other)[lang()] || "—";
+        const type = (TYPE_LABELS[project.type] || TYPE_LABELS.other)[lang()] || "â€”";
         const matRows = materials.length
           ? materials
               .map(
@@ -250,7 +250,7 @@ function renderProjectsModal(id) {
           <div class="modal-project">
             <div class="row-item-main">
               <div class="row-item-title">${esc(project.name)}</div>
-              <div class="row-item-sub">${esc(type)} · ${formatMoney(project.area)} m²</div>
+              <div class="row-item-sub">${esc(type)} آ· ${formatMoney(project.area)} mآ²</div>
             </div>
             <div class="row-item-stats">
               <div class="row-stat">
@@ -357,7 +357,7 @@ function initProjectsModal() {
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
-  initStore();
+  await initStore();
   await initLayout();
   renderContractors();
   initModal();

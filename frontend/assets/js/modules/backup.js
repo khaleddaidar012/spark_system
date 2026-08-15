@@ -1,9 +1,13 @@
 /* ============================================
    Spark ERP — Backup Module
-   Full snapshot export/restore of the local DB,
-   plus automatic twice-daily backups pushed to
-   the server (fallback: local download).
+   Full snapshot export/restore of the shared DB,
+   plus automatic twice-daily snapshots pushed to
+   the server (stored in Cloudflare KV; fallback:
+   local download).
    ============================================ */
+
+import { dbSnapshot } from "./store.js";
+import { api, getToken } from "./api.js";
 
 const DB_KEY = "spark_db_v1";
 const LAST_BACKUP_KEY = "spark_last_backup";
@@ -36,8 +40,7 @@ function safeRemove(key) {
 
 export function buildBackupData() {
   const keys = {};
-  const db = safeGet(DB_KEY);
-  if (db != null) keys[DB_KEY] = db;
+  keys[DB_KEY] = JSON.stringify(dbSnapshot());
   for (const k of PREF_KEYS) {
     const v = safeGet(k);
     if (v != null) keys[k] = v;
@@ -70,9 +73,9 @@ export function downloadBackup() {
   setLastBackupTime(Date.now());
 }
 
-export function restoreBackup(file, onOk, onError) {
+export async function restoreBackup(file, onOk, onError) {
   const reader = new FileReader();
-  reader.onload = () => {
+  reader.onload = async () => {
     try {
       const parsed = JSON.parse(String(reader.result));
       if (!parsed || parsed.app !== "spark-erp" || !parsed.keys) {
@@ -80,10 +83,15 @@ export function restoreBackup(file, onOk, onError) {
         return;
       }
       for (const [k, v] of Object.entries(parsed.keys)) {
-        try {
-          localStorage.setItem(k, v);
-        } catch {
-          /* storage unavailable */
+        if (k === DB_KEY) {
+          const db = JSON.parse(v);
+          if (db && typeof db === "object") await api.restore(db);
+        } else {
+          try {
+            localStorage.setItem(k, v);
+          } catch {
+            /* storage unavailable */
+          }
         }
       }
       onOk();
@@ -113,9 +121,12 @@ export function needsAutoBackup() {
    Returns true when the server accepted the backup. */
 export async function pushBackupToServer(data) {
   try {
+    const headers = { "Content-Type": "application/json" };
+    const token = getToken();
+    if (token) headers.Authorization = "Bearer " + token;
     const res = await fetch("/api/backup", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers,
       body: JSON.stringify(data),
     });
     if (!res.ok) return false;
