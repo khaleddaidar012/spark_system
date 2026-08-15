@@ -262,3 +262,13 @@
     height: 54px;
   }
 }
+
+/* On mobile, when a bottom-sheet modal is open, keep the Quick Add (+)
+   button visible ABOVE the sheet's action bar. The Save button then sits
+   below the + and never overlaps it or leaves the viewport. */
+@media (max-width: 640px) {
+  body:has(.modal-overlay.is-sheet:not([hidden])) .quick-add {
+    bottom: calc(var(--space-6) + 150px);
+    z-index: 270;
+  }
+}

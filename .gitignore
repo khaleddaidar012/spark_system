@@ -19,6 +19,7 @@ backend/backups/*
 # Credentials
 cred.md
 credinal.md
+backup.env
 
 # Server logs
 server.err.log

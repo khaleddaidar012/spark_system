@@ -61,7 +61,9 @@
   }
 
   .modal-overlay.is-sheet .modal-body {
-    padding: var(--space-6) var(--space-6) calc(var(--space-6) + 16px);
+    flex: 1;
+    min-height: 0;
+    padding: var(--space-6) var(--space-6) var(--space-4);
   }
 
   .modal-overlay.is-sheet .form-input,
@@ -70,8 +72,17 @@
     font-size: var(--font-size-lg);
   }
 
+  /* Pin Save / Cancel to the bottom of the sheet so they never
+     scroll away, overlap the FAB, or fall outside the viewport. */
   .modal-overlay.is-sheet .modal-actions {
+    position: sticky;
+    bottom: 0;
+    z-index: 1;
+    margin: 0;
     gap: var(--space-3);
+    padding: var(--space-4) var(--space-6) calc(var(--space-6) + env(safe-area-inset-bottom, 0px));
+    background: var(--surface);
+    border-top: 1px solid var(--border);
   }
 
   .modal-overlay.is-sheet .modal-actions .btn {
