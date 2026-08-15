@@ -15,7 +15,7 @@ database_id = "2a51d51c-d3f2-4b55-b4d2-9e3c5cd3741a"
 
 [[kv_namespaces]]
 binding = "BACKUP_KV"
-id = "3bda08081fc440f7b331345ebdd3d684"
+id = "374b596fafb6400da212525f5c20b611"
 
 # Secrets are NOT stored here. Provide them in .dev.vars (local) and in the
 # Cloudflare Pages Environment Variables (production):
