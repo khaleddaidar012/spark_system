@@ -1,5 +1,5 @@
 ﻿/* ============================================
-   Spark ERP â€” Suppliers Page Script
+   Spark ERP — Suppliers Page Script
    List, add, edit suppliers and view their
    account + transaction log (with the project
    each transaction belongs to).
@@ -29,7 +29,7 @@ let accountId = null;
 
 function splitSupplies(value) {
   return String(value || "")
-    .split(/[,طŒ]/)
+    .split(/[,،]/)
     .map((s) => s.trim())
     .filter(Boolean);
 }
@@ -54,7 +54,7 @@ function renderSuppliers() {
         <div class="row-item">
           <div class="row-item-main">
             <div class="row-item-title">${esc(s.name)}</div>
-            <div class="row-item-sub">${esc(s.phone || "â€”")}</div>
+            <div class="row-item-sub">${esc(s.phone || "—")}</div>
           </div>
           <div class="row-item-stats">
             <div class="row-stat">
@@ -154,7 +154,7 @@ function renderAccount() {
   const { money, material } = supplierTransactions(supplier.id);
 
   document.getElementById("supplierAccountTitle").textContent =
-    `${translate("suppliers.accountTitle")} â€” ${supplier.name}`;
+    `${translate("suppliers.accountTitle")} — ${supplier.name}`;
 
   document.getElementById("supplierAccountSummary").innerHTML = `
     <div class="account-summary-grid">
@@ -178,12 +178,12 @@ function renderAccount() {
   const moneyRows = money.map((t) => {
     const isIn = t.direction === "in";
     const project = supplierProjectName(t.projectId);
-    const projectPart = project ? ` آ· ${translate("suppliers.project")}: ${esc(project)}` : "";
+    const projectPart = project ? ` · ${translate("suppliers.project")}: ${esc(project)}` : "";
     return `
       <div class="row-item">
         <div class="row-item-main">
           <div class="row-item-title">${isIn ? translate("finance.totalIn") : translate("finance.totalOut")}</div>
-          <div class="row-item-sub">${esc(t.date || "")}${projectPart}${t.note ? " آ· " + esc(t.note) : ""}</div>
+          <div class="row-item-sub">${esc(t.date || "")}${projectPart}${t.note ? " · " + esc(t.note) : ""}</div>
         </div>
         <div class="row-item-stats">
           <div class="row-stat">
@@ -196,7 +196,7 @@ function renderAccount() {
 
   const materialRows = material.map((m) => {
     const project = supplierProjectName(m.projectId);
-    const projectPart = project ? ` آ· ${translate("suppliers.project")}: ${esc(project)}` : "";
+    const projectPart = project ? ` · ${translate("suppliers.project")}: ${esc(project)}` : "";
     return `
       <div class="row-item">
         <div class="row-item-main">

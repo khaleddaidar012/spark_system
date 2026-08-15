@@ -1,5 +1,5 @@
 ﻿/* ============================================
-   Spark ERP â€” Reports Page Script
+   Spark ERP — Reports Page Script
    Computes and renders the requested statistics:
    project counts, per-supplier purchases, profit
    per project, and contractor project counts.
@@ -88,7 +88,7 @@ function renderReports() {
         <tr>
           <td>
             <div class="report-project-name">${esc(p.name)}</div>
-            <div class="report-project-sub">${esc(local(TYPE_LABELS[p.type]))} آ· ${formatMoney(p.area)} mآ² آ· ${translate("reports.total")}: ${formatMoney(costs.total)}</div>
+            <div class="report-project-sub">${esc(local(TYPE_LABELS[p.type]))} · ${formatMoney(p.area)} m² · ${translate("reports.total")}: ${formatMoney(costs.total)}</div>
           </td>
           <td class="is-amount ${cls}">${formatMoney(profit)}</td>
         </tr>`;

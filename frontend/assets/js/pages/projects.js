@@ -1,5 +1,5 @@
 ﻿/* ============================================
-   Spark ERP â€” Projects Page Script
+   Spark ERP — Projects Page Script
    Renders project cards and handles the
    "Add Project" modal (name, type, area,
    advance payment).
@@ -50,7 +50,7 @@ function projectCardHTML(p) {
       </div>
       <div class="project-card-meta">
         <i data-lucide="ruler" class="icon"></i>
-        <span class="project-card-area">${formatMoney(p.area)} mآ²</span>
+        <span class="project-card-area">${formatMoney(p.area)} m²</span>
       </div>
       <div class="project-progress">
         <div class="project-progress-track"><span class="project-progress-bar" style="width:${progress}%"></span></div>

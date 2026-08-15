@@ -1,5 +1,5 @@
 ﻿/* ============================================
-   Spark ERP â€” Project Detail Page Script
+   Spark ERP — Project Detail Page Script
    Loads a project by id, renders general info,
    cost summary, analytics, contractors and
    materials. All totals are auto-calculated.
@@ -50,7 +50,7 @@ function renderHeader(p) {
     <div class="detail-meta">
       <span class="badge badge-primary">${local(TYPE_LABELS[p.type])}</span>
       <span class="project-card-status ${statusClass}">${statusLabel}</span>
-      <span class="badge badge-outline">${formatMoney(p.area)} mآ²</span>
+      <span class="badge badge-outline">${formatMoney(p.area)} m²</span>
     </div>`;
 }
 
@@ -68,14 +68,14 @@ function renderGeneral(p) {
     </div>
     <div class="detail-field">
       <span class="detail-field-label">${translate("project.fieldArea")}</span>
-      <span class="detail-field-value">${formatMoney(p.area)} mآ²</span>
+      <span class="detail-field-value">${formatMoney(p.area)} m²</span>
     </div>
     <div class="detail-field">
       <span class="detail-field-label">${translate("project.fieldAdvance")}</span>
       <span class="detail-field-value">${formatMoney(p.advancePayment)}</span>
     </div>
     <div class="detail-field is-wide">
-      <span class="detail-field-label">${translate("project.fieldProgress")} â€” ${Math.round(num(p.progress))}%</span>
+      <span class="detail-field-label">${translate("project.fieldProgress")} — ${Math.round(num(p.progress))}%</span>
       <div class="project-progress">
         <div class="project-progress-track"><span class="project-progress-bar" style="width:${Math.min(100, Math.max(0, Math.round(num(p.progress))))}%"></span></div>
       </div>
@@ -114,13 +114,13 @@ function renderAnalytics(p) {
     .slice()
     .reverse()
     .slice(0, 6)
-    .map((m) => `<span class="badge badge-outline">${esc(m.name)} آ· ${formatMoney(m.quantity)} ${esc(m.unit || "")}</span>`)
+    .map((m) => `<span class="badge badge-outline">${esc(m.name)} · ${formatMoney(m.quantity)} ${esc(m.unit || "")}</span>`)
     .join(" ");
 
   document.getElementById("analyticsGrid").innerHTML = `
     <div class="analytics-item">
       <div class="analytics-item-label">${translate("project.area")}</div>
-      <div class="analytics-item-value">${formatMoney(a.area)} mآ²</div>
+      <div class="analytics-item-value">${formatMoney(a.area)} m²</div>
     </div>
     <div class="analytics-item">
       <div class="analytics-item-label">${translate("project.materialTotal")}</div>
@@ -140,7 +140,7 @@ function renderAnalytics(p) {
     </div>
     <div class="analytics-item is-wide">
       <div class="analytics-item-label">${translate("project.consumed")}</div>
-      <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:8px;">${consumed || `<span class="badge badge-outline">â€”</span>`}</div>
+      <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:8px;">${consumed || `<span class="badge badge-outline">—</span>`}</div>
     </div>`;
 
   const rows = perMaterial.length
@@ -214,7 +214,7 @@ function renderMaterials(p) {
       <div class="row-item">
         <div class="row-item-main">
           <div class="row-item-title">${esc(m.name)}</div>
-          <div class="row-item-sub">${esc(m.supplierName || "â€”")}${m.contractorName ? ` آ· ${translate("project.formMatContractor")}: ${esc(m.contractorName)}` : ""} آ· ${esc(m.date || "")}</div>
+          <div class="row-item-sub">${esc(m.supplierName || "—")}${m.contractorName ? ` · ${translate("project.formMatContractor")}: ${esc(m.contractorName)}` : ""} · ${esc(m.date || "")}</div>
         </div>
         <div class="row-item-stats">
           <div class="row-stat">
@@ -261,7 +261,7 @@ function renderMoney(p) {
         <div class="row-item">
           <div class="row-item-main">
             <div class="row-item-title">${esc(t.personName)}</div>
-            <div class="row-item-sub">${esc(typeLabel)}${t.note ? " آ· " + esc(t.note) : ""}</div>
+            <div class="row-item-sub">${esc(typeLabel)}${t.note ? " · " + esc(t.note) : ""}</div>
           </div>
           <div class="row-item-stats">
             <div class="row-stat">
@@ -377,7 +377,7 @@ function fillMaterialSuppliers() {
     people
       .map((s) => {
         const roles = personRolesLabel(s, lang());
-        const label = roles ? `${esc(s.name)} â€” ${roles}` : esc(s.name);
+        const label = roles ? `${esc(s.name)} — ${roles}` : esc(s.name);
         return `<option value="${s.id}">${label}</option>`;
       })
       .join("");
