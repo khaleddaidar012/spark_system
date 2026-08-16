@@ -61,6 +61,8 @@
   "quick": {
     "money": "Quick Money",
     "moneyDesc": "Incoming / outgoing payment",
+    "moneySplit": "Quick Money Split",
+    "moneySplitDesc": "Split amount across projects",
     "materials": "Quick Materials",
     "materialsDesc": "Incoming / outgoing materials",
     "incoming": "Incoming",
@@ -73,6 +75,7 @@
     "personNamePh": "Person name",
     "amount": "Amount",
     "amountPh": "0",
+    "totalAmount": "Total Amount",
     "note": "Note (optional)",
     "notePh": "—",
     "choosePerson": "Choose person",
@@ -88,7 +91,15 @@
     "pricePh": "0",
     "save": "Save",
     "noProjects": "Create a project first",
-    "contractorNotOnProject": "{name} is not working on this project"
+    "contractorNotOnProject": "{name} is not working on this project",
+    "splitProjects": "Split Across Projects",
+    "splitHint": "Sum must equal total amount",
+    "addProjectRow": "+ Add Project",
+    "splitAllocated": "Allocated:",
+    "splitRemaining": "Remaining:",
+    "splitRequired": "At least one project is required",
+    "splitMismatch": "Allocated amount ({allocated}) does not match total ({total})",
+    "remove": "Remove"
   },
   "quickAdd": {
     "addSupplier": "Add Supplier",
@@ -209,6 +220,14 @@
     "moneyIn": "Total Incoming",
     "moneyOut": "Total Outgoing",
     "moneyNet": "Net",
+    "expectedProfit": "Expected Profit",
+    "netProfit": "Net Profit",
+    "addClientPayment": "Add Client Payment",
+    "clientPaymentAmount": "Amount",
+    "clientPaymentAmountPh": "0",
+    "clientPaymentDate": "Date",
+    "clientPaymentNote": "Note (optional)",
+    "clientPaymentNotePh": "—",
     "noMoney": "No money transactions for this project yet."
   },
   "suppliers": {

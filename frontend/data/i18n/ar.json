@@ -61,6 +61,8 @@
   "quick": {
     "money": "مال سريع",
     "moneyDesc": "قبض / صرف سريع",
+    "moneySplit": "تقسيم فلوس سريع",
+    "moneySplitDesc": "تقسيم المبلغ على عدة مشاريع",
     "materials": "خامات سريعة",
     "materialsDesc": "خامات واردة / صادرة",
     "incoming": "وارد",
@@ -73,6 +75,7 @@
     "personNamePh": "اسم الشخص",
     "amount": "المبلغ",
     "amountPh": "0",
+    "totalAmount": "المبلغ الإجمالي",
     "note": "ملاحظة (اختياري)",
     "notePh": "—",
     "choosePerson": "اختر الشخص",
@@ -88,7 +91,15 @@
     "pricePh": "0",
     "save": "حفظ",
     "noProjects": "أنشئ مشروعاً أولاً",
-    "contractorNotOnProject": "المقاول {name} مش شغال على المشروع دا"
+    "contractorNotOnProject": "المقاول {name} مش شغال على المشروع دا",
+    "splitProjects": "تقسيم على المشاريع",
+    "splitHint": "مجموع المبالغ يجب أن يساوي المبلغ الإجمالي",
+    "addProjectRow": "+ إضافة مشروع",
+    "splitAllocated": "الموزع:",
+    "splitRemaining": "المتبقي:",
+    "splitRequired": "يجب إضافة مشروع واحد على الأقل",
+    "splitMismatch": "المبلغ الموزع ({allocated}) لا يساوي المبلغ الإجمالي ({total})",
+    "remove": "حذف"
   },
   "quickAdd": {
     "addSupplier": "إضافة مورد",
@@ -209,6 +220,14 @@
     "moneyIn": "إجمالي الوارد",
     "moneyOut": "إجمالي الصادر",
     "moneyNet": "صافي الرصيد",
+    "expectedProfit": "الربح المتوقع",
+    "netProfit": "صافي الربح",
+    "addClientPayment": "إضافة دفعة عميل",
+    "clientPaymentAmount": "المبلغ",
+    "clientPaymentAmountPh": "0",
+    "clientPaymentDate": "التاريخ",
+    "clientPaymentNote": "ملاحظة (اختياري)",
+    "clientPaymentNotePh": "—",
     "noMoney": "لا توجد حركات مالية لهذا المشروع بعد."
   },
   "suppliers": {

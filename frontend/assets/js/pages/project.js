@@ -7,8 +7,8 @@
 
 import { initLayout } from "../modules/layout.js";
 import { initStore, all, get, save, peopleWithRole, findPersonById } from "../modules/store.js";
-import { projectCosts, projectAnalytics, materialAnalytics, formatMoney, TYPE_LABELS, STATUS_LABELS, num, contractorBalance, balanceDirection, moneyIn, moneyOut, sortNewestFirst } from "../modules/calc.js";
-import { addContractorToProject, addMaterialToProject } from "../modules/actions.js";
+import { projectCosts, projectAnalytics, materialAnalytics, formatMoney, TYPE_LABELS, STATUS_LABELS, num, contractorBalance, balanceDirection, moneyIn, moneyOut, sortNewestFirst, projectProfit } from "../modules/calc.js";
+import { addContractorToProject, addMaterialToProject, recordMoney } from "../modules/actions.js";
 import { openQuickAddSupplier, openQuickAddPerson } from "../modules/quick-add-person.js";
 import { personRolesLabel, personTypeLabel, contractorLabel, contractorSpecialty } from "../modules/person-roles.js";
 import { translate } from "../modules/i18n.js";
@@ -52,6 +52,52 @@ function renderHeader(p) {
       <span class="project-card-status ${statusClass}">${statusLabel}</span>
       <span class="badge badge-outline">${formatMoney(p.area)} m²</span>
     </div>`;
+}
+
+/* ---------- Project Summary ---------- */
+
+function renderProjectSummary(p) {
+  const txns = sortNewestFirst(
+    all("moneyTransactions").filter((t) => t.projectId === p.id)
+  );
+  const incoming = moneyIn(txns);
+  const outgoing = moneyOut(txns);
+  const net = incoming - outgoing;
+  const expectedProfit = num(p.expectedProfit || 0);
+  const finalProfit = net - expectedProfit;
+
+  document.getElementById("projectSummary").innerHTML = `
+    <div class="project-summary-grid">
+      <div class="project-summary-card is-in">
+        <span class="project-summary-icon" aria-hidden="true"><i data-lucide="arrow-down-circle" class="icon"></i></span>
+        <span class="project-summary-label" data-i18n="project.moneyIn">${translate("project.moneyIn")}</span>
+        <span class="project-summary-value">${formatMoney(incoming)}</span>
+      </div>
+      <div class="project-summary-card is-out">
+        <span class="project-summary-icon" aria-hidden="true"><i data-lucide="arrow-up-circle" class="icon"></i></span>
+        <span class="project-summary-label" data-i18n="project.moneyOut">${translate("project.moneyOut")}</span>
+        <span class="project-summary-value">${formatMoney(outgoing)}</span>
+      </div>
+      <div class="project-summary-card is-profit">
+        <span class="project-summary-icon" aria-hidden="true"><i data-lucide="target" class="icon"></i></span>
+        <span class="project-summary-label" data-i18n="project.expectedProfit">${translate("project.expectedProfit")}</span>
+        <input type="number" class="project-summary-input" id="expectedProfitInput" value="${expectedProfit}" step="0.01" min="0" aria-label="${translate("project.expectedProfit")}" />
+      </div>
+      <div class="project-summary-card is-net ${finalProfit >= 0 ? "is-positive" : "is-negative"}">
+        <span class="project-summary-icon" aria-hidden="true"><i data-lucide="scale" class="icon"></i></span>
+        <span class="project-summary-label" data-i18n="project.netProfit">${translate("project.netProfit")}</span>
+        <span class="project-summary-value" id="netProfitValue">${formatMoney(finalProfit)}</span>
+      </div>
+    </div>`;
+
+  document.getElementById("expectedProfitInput").addEventListener("change", (e) => {
+    const project = get("projects", p.id);
+    if (project) {
+      project.expectedProfit = num(e.target.value);
+      save("projects", project);
+      renderProjectSummary(project);
+    }
+  });
 }
 
 /* ---------- General info ---------- */
@@ -285,6 +331,7 @@ function renderAll() {
   }
   current = p;
   renderHeader(p);
+  renderProjectSummary(p);
   renderGeneral(p);
   renderCost(p);
   renderAnalytics(p);
@@ -455,6 +502,59 @@ function submitMaterial(event) {
   toast(translate("common.saved"));
 }
 
+/* ---------- Client Payment modal ---------- */
+
+function openClientPaymentModal() {
+  const dateInput = document.getElementById("clientPaymentDate");
+  if (!dateInput.value) dateInput.value = new Date().toISOString().slice(0, 10);
+  showModal(document.getElementById("clientPaymentModal"));
+  document.getElementById("clientPaymentAmount").focus();
+  window.lucide?.createIcons();
+}
+
+function closeClientPaymentModal() {
+  hideModal(document.getElementById("clientPaymentModal"));
+  document.getElementById("clientPaymentForm").reset();
+}
+
+function submitClientPayment(event) {
+  event.preventDefault();
+  const form = event.currentTarget;
+  const amount = num(form.amount.value);
+  const date = form.date.value;
+  const note = form.note.value.trim();
+
+  if (!amount || amount <= 0) {
+    form.amount.focus();
+    return;
+  }
+
+  // Find or create a client for this project
+  // For now, we'll use a generic "Client" entry
+  // In the future, we could link to a specific client
+  recordMoney({
+    direction: "in",
+    personType: "client",
+    personId: null,
+    personName: current.name + " - Client",
+    amount,
+    projectId: current.id,
+    note: note || `Payment received on ${date}`,
+  });
+
+  // Update the date of the transaction
+  const txns = all("moneyTransactions");
+  const lastTxn = txns[txns.length - 1];
+  if (lastTxn) {
+    lastTxn.date = date;
+    save("moneyTransactions", lastTxn);
+  }
+
+  closeClientPaymentModal();
+  renderAll();
+  toast(translate("common.saved"));
+}
+
 /* ---------- Init ---------- */
 
 document.addEventListener("DOMContentLoaded", async () => {
@@ -521,9 +621,17 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
   });
 
-  document.getElementById("matSupplier").addEventListener("change", (e) => {
+document.getElementById("matSupplier").addEventListener("change", (e) => {
     applySupplierSupplies(e.target.value);
   });
+
+  document.getElementById("addClientPaymentBtn").addEventListener("click", openClientPaymentModal);
+  document.getElementById("clientPaymentModalClose").addEventListener("click", closeClientPaymentModal);
+  document.getElementById("clientPaymentFormCancel").addEventListener("click", closeClientPaymentModal);
+  document.getElementById("clientPaymentModal").addEventListener("click", (e) => {
+    if (e.target === e.currentTarget) closeClientPaymentModal();
+  });
+  document.getElementById("clientPaymentForm").addEventListener("submit", submitClientPayment);
 
   window.addEventListener("spark:data-changed", renderAll);
 });

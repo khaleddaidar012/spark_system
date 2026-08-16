@@ -432,13 +432,314 @@ function initQuickMaterials() {
   });
 }
 
-/* ---------- Init ---------- */
+/* ---------- Quick Money Split ---------- */
+
+function fillMoneySplitPersonSelect() {
+  const type = document.querySelector("#moneySplitPersonType .chip.is-active")?.dataset.value || "supplier";
+  const select = document.getElementById("moneySplitPersonSelect");
+  const freeName = document.getElementById("moneySplitPersonName");
+  const addBtn = document.getElementById("moneySplitAddPersonBtn");
+
+  const collections = {
+    supplier: all("suppliers"),
+    contractor: all("contractors"),
+    client: all("clients"),
+  };
+
+  if (type === "other") {
+    select.hidden = true;
+    addBtn.hidden = true;
+    freeName.hidden = false;
+    freeName.focus();
+    return;
+  }
+
+  const list = collections[type] || [];
+  freeName.hidden = true;
+  select.hidden = false;
+  addBtn.hidden = false;
+  select.innerHTML =
+    `<option value="">${translate("quick.choosePerson")}</option>` +
+    list
+      .map((p) => {
+        const label =
+          type === "contractor"
+            ? contractorLabel(contractorSpecialty(p), p.name, lang())
+            : p.name;
+        return `<option value="${p.id}">${esc(label)}</option>`;
+      })
+      .join("");
+}
+
+function fillMoneySplitProjects() {
+  const container = document.getElementById("moneySplitProjectsContainer");
+  const projects = all("projects");
+  const rows = container.querySelectorAll(".split-project-row");
+  
+  // Save current values
+  const savedValues = [];
+  rows.forEach((row) => {
+    const projectId = row.querySelector(".split-project-select").value;
+    const amount = row.querySelector(".split-project-amount").value;
+    if (projectId) savedValues.push({ projectId, amount });
+  });
+
+  if (projects.length === 0) {
+    container.innerHTML = `<p class="split-empty">${translate("quick.noProjects")}</p>`;
+    return;
+  }
+
+  const projectOptions = projects.map((p) => `<option value="${p.id}">${esc(p.name)}</option>`).join("");
+
+  // Rebuild with saved values or one empty row
+  if (savedValues.length > 0) {
+    container.innerHTML = savedValues.map((v, i) => `
+      <div class="split-project-row" data-index="${i}">
+        <select class="form-input split-project-select" required>${projectOptions}</select>
+        <input class="form-input split-project-amount" type="number" min="0" step="0.01" placeholder="${translate("quick.amountPh")}" required />
+        <button type="button" class="btn btn-soft btn-icon split-project-remove" aria-label="${translate("quick.remove")}"><i data-lucide="trash-2" class="icon"></i></button>
+      </div>
+    `).join("");
+    // Restore values
+    savedValues.forEach((v, i) => {
+      const row = container.querySelector(`[data-index="${i}"]`);
+      if (row) {
+        row.querySelector(".split-project-select").value = v.projectId;
+        row.querySelector(".split-project-amount").value = v.amount;
+      }
+    });
+  } else {
+    container.innerHTML = `
+      <div class="split-project-row" data-index="0">
+        <select class="form-input split-project-select" required>${projectOptions}</select>
+        <input class="form-input split-project-amount" type="number" min="0" step="0.01" placeholder="${translate("quick.amountPh")}" required />
+        <button type="button" class="btn btn-soft btn-icon split-project-remove" aria-label="${translate("quick.remove")}"><i data-lucide="trash-2" class="icon"></i></button>
+      </div>`;
+  }
+
+  updateMoneySplitSummary();
+  window.lucide?.createIcons();
+}
+
+function updateMoneySplitSummary() {
+  const totalAmount = num(document.getElementById("moneySplitTotalAmount").value);
+  const rows = document.querySelectorAll("#moneySplitProjectsContainer .split-project-row");
+  let allocated = 0;
+  rows.forEach((row) => {
+    allocated += num(row.querySelector(".split-project-amount").value);
+  });
+  const remaining = totalAmount - allocated;
+
+  const summary = document.getElementById("moneySplitSummary");
+  const allocatedEl = document.getElementById("moneySplitAllocated");
+  const remainingEl = document.getElementById("moneySplitRemaining");
+
+  allocatedEl.textContent = formatMoney(allocated);
+  remainingEl.textContent = formatMoney(remaining);
+  remainingEl.classList.toggle("is-remaining", remaining > 0);
+  remainingEl.classList.toggle("is-negative", remaining < 0);
+  remainingEl.classList.toggle("is-zero", remaining === 0);
+
+  if (rows.length > 0) summary.hidden = false;
+}
+
+function resetQuickMoneySplit() {
+  const dir = document.getElementById("moneySplitDirection");
+  if (dir) {
+    dir.setAttribute("data-value-state", "out");
+    dir.querySelectorAll(".segmented-btn").forEach((b) =>
+      b.classList.toggle("is-active", b.dataset.value === "out")
+    );
+  }
+  const typeBox = document.getElementById("moneySplitPersonType");
+  if (typeBox) {
+    typeBox.querySelectorAll(".chip").forEach((c) =>
+      c.classList.toggle("is-active", c.dataset.value === "supplier")
+    );
+  }
+  const form = document.getElementById("quickMoneySplitForm");
+  if (form) form.reset();
+  const nameInput = document.getElementById("moneySplitPersonName");
+  const select = document.getElementById("moneySplitPersonSelect");
+  const addBtn = document.getElementById("moneySplitAddPersonBtn");
+  if (nameInput) nameInput.hidden = true;
+  if (select) {
+    select.hidden = false;
+    select.value = "";
+  }
+  if (addBtn) addBtn.hidden = false;
+  fillMoneySplitPersonSelect();
+  fillMoneySplitProjects();
+}
+
+function initQuickMoneySplit() {
+  document.getElementById("fabMoneySplit").addEventListener("click", () => {
+    closeFabMenu(true);
+    openModal("quickMoneySplitModal");
+    resetQuickMoneySplit();
+    const amount = document.getElementById("moneySplitTotalAmount");
+    if (amount) amount.focus();
+  });
+
+  document.getElementById("moneySplitPersonType").addEventListener("click", (e) => {
+    const chip = e.target.closest(".chip");
+    if (!chip) return;
+    document.querySelectorAll("#moneySplitPersonType .chip").forEach((c) => c.classList.toggle("is-active", c === chip));
+    fillMoneySplitPersonSelect();
+  });
+
+  document.getElementById("moneySplitAddPersonBtn").addEventListener("click", () => {
+    const type = document.querySelector("#moneySplitPersonType .chip.is-active").dataset.value;
+    openQuickAddPerson({
+      title: translate("quickAdd.addPerson"),
+      defaults: type === "supplier" ? { purchases: 0, paid: 0 } : type === "client" ? { paid: 0, remaining: 0 } : { total: 0, paid: 0 },
+      initialType: type,
+      onCreated: (person) => {
+        fillMoneySplitPersonSelect();
+        const expected = type;
+        if (person.roles.includes(expected)) {
+          document.getElementById("moneySplitPersonSelect").value = person.id;
+          toast(translate("common.saved"));
+        } else {
+          const label = personTypeLabel(person.roles[0], lang());
+          toast(translate("quickAdd.notSupplierMessage").replace("{type}", label), "info");
+        }
+      },
+    });
+  });
+
+  document.getElementById("quickMoneySplitClose").addEventListener("click", () => closeModal("quickMoneySplitModal"));
+  document.getElementById("quickMoneySplitCancel").addEventListener("click", () => closeModal("quickMoneySplitModal"));
+  document.getElementById("quickMoneySplitModal").addEventListener("click", (e) => {
+    if (e.target === e.currentTarget) closeModal("quickMoneySplitModal");
+  });
+
+  document.getElementById("moneySplitAddProject").addEventListener("click", () => {
+    fillMoneySplitProjects();
+  });
+
+  document.getElementById("moneySplitProjectsContainer").addEventListener("input", (e) => {
+    if (e.target.matches(".split-project-amount")) {
+      updateMoneySplitSummary();
+    }
+  });
+
+  document.getElementById("moneySplitProjectsContainer").addEventListener("change", (e) => {
+    if (e.target.matches(".split-project-select")) {
+      updateMoneySplitSummary();
+    }
+  });
+
+  document.getElementById("moneySplitProjectsContainer").addEventListener("click", (e) => {
+    const btn = e.target.closest(".split-project-remove");
+    if (btn) {
+      const row = btn.closest(".split-project-row");
+      const container = document.getElementById("moneySplitProjectsContainer");
+      const rows = container.querySelectorAll(".split-project-row");
+      if (rows.length > 1) {
+        row.remove();
+        // Re-index
+        container.querySelectorAll(".split-project-row").forEach((r, i) => r.dataset.index = i);
+      } else {
+        // Clear the single row
+        row.querySelector(".split-project-select").value = "";
+        row.querySelector(".split-project-amount").value = "";
+      }
+      updateMoneySplitSummary();
+    }
+  });
+
+  document.getElementById("moneySplitTotalAmount").addEventListener("input", updateMoneySplitSummary);
+
+  document.getElementById("quickMoneySplitForm").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const direction = document.getElementById("moneySplitDirection").getAttribute("data-value-state") || "out";
+    const type = document.querySelector("#moneySplitPersonType .chip.is-active").dataset.value;
+    const totalAmount = num(document.getElementById("moneySplitTotalAmount").value);
+
+    let personId = null;
+    let personName = "";
+    if (type === "other") {
+      personName = document.getElementById("moneySplitPersonName").value.trim();
+      if (!personName) {
+        document.getElementById("moneySplitPersonName").focus();
+        return;
+      }
+    } else {
+      personId = document.getElementById("moneySplitPersonSelect").value;
+      const person = get(
+        type === "supplier" ? "suppliers" : type === "contractor" ? "contractors" : "clients",
+        personId
+      );
+      if (!person) {
+        toast(translate("quick.choosePerson"), "danger");
+        return;
+      }
+      personName = person.name;
+    }
+
+    const note = document.getElementById("moneySplitNote").value.trim();
+
+    // Collect project splits
+    const rows = document.querySelectorAll("#moneySplitProjectsContainer .split-project-row");
+    const splits = [];
+    let allocated = 0;
+    rows.forEach((row) => {
+      const projectId = row.querySelector(".split-project-select").value;
+      const amount = num(row.querySelector(".split-project-amount").value);
+      if (projectId && amount > 0) {
+        splits.push({ projectId, amount });
+        allocated += amount;
+      }
+    });
+
+    if (splits.length === 0) {
+      toast(translate("quick.splitRequired"), "danger");
+      return;
+    }
+
+    if (allocated !== totalAmount) {
+      toast(translate("quick.splitMismatch").replace("{allocated}", formatMoney(allocated)).replace("{total}", formatMoney(totalAmount)), "danger");
+      return;
+    }
+
+    // Validate contractor on project if applicable
+    if (type === "contractor" && personId) {
+      for (const split of splits) {
+        if (!contractorWorksOnProject(personId, split.projectId)) {
+          toast(translate("quick.contractorNotOnProject").replace("{name}", personName), "info");
+          return;
+        }
+      }
+    }
+
+    // Record money for each split
+    splits.forEach((split) => {
+      recordMoney({
+        direction,
+        personType: type,
+        personId,
+        personName,
+        amount: split.amount,
+        projectId: split.projectId,
+        note,
+      });
+    });
+
+    document.getElementById("quickMoneySplitForm").reset();
+    resetQuickMoneySplit();
+    closeModal("quickMoneySplitModal");
+    toast(translate("common.saved"));
+  });
+}
 
 export function initQuickAdd() {
   if (!document.getElementById("quickAdd") || !document.getElementById("fab")) return;
   initFab();
   initQuickMoney();
+  initQuickMoneySplit();
   initQuickMaterials();
   bindSegmented("moneyDirection");
+  bindSegmented("moneySplitDirection");
   bindSegmented("matDirection");
 }

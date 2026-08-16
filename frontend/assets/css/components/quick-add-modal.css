@@ -96,3 +96,96 @@
   from { transform: translateY(100%); }
   to { transform: translateY(0); }
 }
+
+/* ---------- Quick Money Split ---------- */
+
+.modal-lg {
+  max-width: 600px;
+}
+
+.form-field-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-2);
+}
+
+.form-hint {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+}
+
+.split-projects-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.split-project-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.split-project-row .form-input {
+  flex: 1;
+}
+
+.split-project-row .split-project-select {
+  min-width: 180px;
+}
+
+.split-project-row .split-project-amount {
+  width: 120px;
+}
+
+.split-project-remove {
+  flex-shrink: 0;
+}
+
+.split-empty {
+  font-size: var(--font-size-sm);
+  color: var(--text-muted);
+  padding: var(--space-3) 0;
+  text-align: center;
+}
+
+.split-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  margin-top: var(--space-3);
+}
+
+.split-summary-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--font-size-sm);
+}
+
+.split-summary-value {
+  font-weight: 700;
+}
+
+.split-summary-value.is-remaining {
+  color: var(--warning);
+}
+
+.split-summary-value.is-negative {
+  color: var(--danger);
+}
+
+.split-summary-value.is-zero {
+  color: var(--success);
+}
+
+/* FAB menu item for money split */
+.fab-menu-item.fab-money-split .fab-menu-icon .icon {
+  color: var(--purple, #8b5cf6);
+}

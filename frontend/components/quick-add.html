@@ -13,6 +13,13 @@
         <small data-i18n="quick.moneyDesc">Incoming / outgoing payment</small>
       </span>
     </button>
+    <button class="fab-menu-item fab-money-split" id="fabMoneySplit" type="button">
+      <span class="fab-menu-icon" aria-hidden="true"><i data-lucide="split-square-vertical" class="icon"></i></span>
+      <span class="fab-menu-label">
+        <strong data-i18n="quick.moneySplit">Quick Money Split</strong>
+        <small data-i18n="quick.moneySplitDesc">Split payment across projects</small>
+      </span>
+    </button>
     <button class="fab-menu-item fab-materials" id="fabMaterials" type="button">
       <span class="fab-menu-icon" aria-hidden="true"><i data-lucide="package" class="icon"></i></span>
       <span class="fab-menu-label">
@@ -154,6 +161,83 @@
 
       <div class="modal-actions">
         <button class="btn btn-ghost" id="quickMatCancel" type="button" data-i18n="projects.cancel">Cancel</button>
+        <button class="btn btn-primary" type="submit" data-i18n="quick.save">Save</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Quick Money Split modal -->
+<div class="modal-overlay is-sheet" id="quickMoneySplitModal" hidden>
+  <div class="modal modal-lg" role="dialog" aria-modal="true" aria-labelledby="quickMoneySplitTitle">
+    <div class="modal-header">
+      <h2 class="modal-title" id="quickMoneySplitTitle" data-i18n="quick.moneySplit">Quick Money Split</h2>
+      <button class="btn btn-icon modal-close" id="quickMoneySplitClose" type="button" aria-label="Close">
+        <i data-lucide="x" class="icon"></i>
+      </button>
+    </div>
+    <form id="quickMoneySplitForm" class="modal-body form-stack" novalidate>
+      <div class="segmented" id="moneySplitDirection" role="group" aria-label="Direction">
+        <button class="segmented-btn" type="button" data-value="in">
+          <i data-lucide="arrow-down-circle" class="icon"></i>
+          <span data-i18n="quick.incoming">Incoming</span>
+        </button>
+        <button class="segmented-btn is-active" type="button" data-value="out">
+          <i data-lucide="arrow-up-circle" class="icon"></i>
+          <span data-i18n="quick.outgoing">Outgoing</span>
+        </button>
+      </div>
+
+      <div class="chip-row" id="moneySplitPersonType" role="group" aria-label="Person type">
+        <button class="chip is-active" type="button" data-value="supplier"><i data-lucide="truck" class="icon"></i><span data-i18n="quick.supplier">Supplier</span></button>
+        <button class="chip" type="button" data-value="contractor"><i data-lucide="hard-hat" class="icon"></i><span data-i18n="quick.contractor">Contractor</span></button>
+        <button class="chip" type="button" data-value="client"><i data-lucide="user" class="icon"></i><span data-i18n="quick.client">Client</span></button>
+        <button class="chip" type="button" data-value="other"><i data-lucide="more-horizontal" class="icon"></i><span data-i18n="quick.other">Other</span></button>
+      </div>
+
+      <div class="form-field" id="moneySplitPersonField">
+        <label class="form-label" data-i18n="quick.person">Person</label>
+        <div class="field-with-action">
+          <select class="form-input" id="moneySplitPersonSelect"></select>
+          <button class="btn btn-soft btn-icon" id="moneySplitAddPersonBtn" type="button" data-i18n-aria="quickAdd.add" aria-label="Quick add person" title="Quick add person">
+            <i data-lucide="plus" class="icon"></i>
+          </button>
+        </div>
+        <input class="form-input" id="moneySplitPersonName" type="text" hidden data-i18n-ph="quick.personNamePh" placeholder="Person name" />
+      </div>
+
+      <div class="form-field">
+        <label class="form-label" for="moneySplitTotalAmount" data-i18n="quick.totalAmount">Total Amount</label>
+        <input class="form-input" id="moneySplitTotalAmount" name="totalAmount" type="number" min="0" step="0.01" required data-i18n-ph="quick.amountPh" placeholder="0" />
+      </div>
+
+      <div class="form-field">
+        <label class="form-label" for="moneySplitNote" data-i18n="quick.note">Note (optional)</label>
+        <input class="form-input" id="moneySplitNote" name="note" type="text" data-i18n-ph="quick.notePh" placeholder="—" />
+      </div>
+
+      <div class="form-field">
+        <div class="form-field-head">
+          <label class="form-label" data-i18n="quick.splitProjects">Split Across Projects</label>
+          <span class="form-hint" data-i18n="quick.splitHint">Sum must equal total amount</span>
+        </div>
+        <div id="moneySplitProjectsContainer" class="split-projects-container"></div>
+        <button type="button" class="btn btn-soft btn-sm" id="moneySplitAddProject" data-i18n="quick.addProjectRow">+ Add Project</button>
+      </div>
+
+      <div class="split-summary" id="moneySplitSummary" hidden>
+        <div class="split-summary-row">
+          <span data-i18n="quick.splitAllocated">Allocated:</span>
+          <span id="moneySplitAllocated" class="split-summary-value">0</span>
+        </div>
+        <div class="split-summary-row">
+          <span data-i18n="quick.splitRemaining">Remaining:</span>
+          <span id="moneySplitRemaining" class="split-summary-value is-remaining">0</span>
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn btn-ghost" id="quickMoneySplitCancel" type="button" data-i18n="projects.cancel">Cancel</button>
         <button class="btn btn-primary" type="submit" data-i18n="quick.save">Save</button>
       </div>
     </form>

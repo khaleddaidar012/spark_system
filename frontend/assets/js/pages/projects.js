@@ -7,7 +7,7 @@
 
 import { initLayout } from "../modules/layout.js";
 import { initStore, all, get, save, uid } from "../modules/store.js";
-import { projectCosts, formatMoney, TYPE_LABELS, STATUS_LABELS, num } from "../modules/calc.js";
+import { projectCosts, formatMoney, TYPE_LABELS, STATUS_LABELS, num, moneyIn, moneyOut, sortNewestFirst } from "../modules/calc.js";
 import { translate } from "../modules/i18n.js";
 import { toast } from "../modules/toast.js";
 import { showModal, hideModal } from "../modules/modal.js";
@@ -39,6 +39,13 @@ function projectCardHTML(p) {
   const detailUrl = `./project.html?id=${encodeURIComponent(p.id)}`;
   const statementUrl = `./statement.html?id=${encodeURIComponent(p.id)}`;
 
+  // Calculate money in/out for this project
+  const txns = sortNewestFirst(
+    all("moneyTransactions").filter((t) => t.projectId === p.id)
+  );
+  const incoming = moneyIn(txns);
+  const outgoing = moneyOut(txns);
+
   return `
     <div class="project-card${done ? " is-done" : ""}">
       <div class="project-card-top">
@@ -59,6 +66,16 @@ function projectCardHTML(p) {
       <div class="project-cost">
         <span class="cost-item-label">${translate("projects.costTotal")}</span>
         <span class="cost-item-value is-total">${formatMoney(costs.total)}</span>
+      </div>
+      <div class="project-money-summary">
+        <div class="project-money-item is-in">
+          <i data-lucide="arrow-down-circle" class="icon"></i>
+          <span class="project-money-value">${formatMoney(incoming)}</span>
+        </div>
+        <div class="project-money-item is-out">
+          <i data-lucide="arrow-up-circle" class="icon"></i>
+          <span class="project-money-value">${formatMoney(outgoing)}</span>
+        </div>
       </div>
       <div class="project-card-actions">
         <a class="btn btn-outline btn-sm project-card-view" href="${detailUrl}">
