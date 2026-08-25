@@ -13,7 +13,7 @@
     })();
   </script>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <meta name="description" content="Spark Engineering ERP System — Settings" />
   <title>Settings | Spark ERP</title>
   <link rel="icon" type="image/svg+xml" href="../assets/icons/favicon.svg" />
@@ -28,10 +28,16 @@
 
       <main class="app-main">
         <div class="app-content">
-          <header class="page-header">
-            <div>
-              <h1 class="page-title" data-i18n="settings.title">Settings</h1>
-              <p class="page-subtitle text-muted" data-i18n="settings.subtitle">Manage data backups and application data.</p>
+          <header class="page-header page-header-row">
+            <div style="display:flex; align-items:center; gap:12px;">
+              <button class="btn btn-ghost btn-sm page-back-btn" onclick="history.length > 1 ? history.back() : window.location.href='./dashboard.html'" type="button" title="رجوع للخلف">
+                <i data-lucide="arrow-right" class="icon"></i>
+                <span data-i18n="common.backStep">رجوع</span>
+              </button>
+              <div>
+                <h1 class="page-title" data-i18n="settings.title">Settings</h1>
+                <p class="page-subtitle text-muted" data-i18n="settings.subtitle">Manage data backups and application data.</p>
+              </div>
             </div>
           </header>
 

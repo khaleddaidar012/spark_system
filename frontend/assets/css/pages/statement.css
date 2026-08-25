@@ -361,3 +361,350 @@
     opacity: 1;
   }
 }
+
+/* ============================================
+   Spark ERP — Person Statement Modal & Print
+   ============================================ */
+
+.statement-modal-container {
+  max-width: 950px;
+  width: 95vw;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.statement-print-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  border-bottom: 2px solid var(--primary);
+  padding-bottom: var(--space-4);
+  margin-bottom: var(--space-4);
+  gap: var(--space-4);
+}
+
+.statement-print-header .company-name {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--primary);
+  margin: 0 0 4px;
+}
+
+.statement-print-header .company-tagline {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.statement-meta-box {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.85rem;
+  background: var(--surface-2);
+  padding: 8px 14px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+}
+
+.statement-info-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.statement-filter-bar {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--space-3);
+  background: var(--surface-2);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  margin-bottom: var(--space-4);
+  flex-wrap: wrap;
+}
+
+.statement-filter-bar .form-field {
+  margin-bottom: 0;
+  flex: 1;
+  min-width: 140px;
+}
+
+.statement-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+
+.statement-kpi-card {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 10px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.statement-kpi-title {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.statement-kpi-val {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.statement-kpi-card.is-dues .statement-kpi-val {
+  color: var(--primary);
+}
+
+.statement-kpi-card.is-paid .statement-kpi-val {
+  color: var(--success);
+}
+
+.statement-kpi-card.is-deduction .statement-kpi-val {
+  color: var(--danger);
+}
+
+.statement-kpi-card.is-final.is-due-them {
+  background: rgba(34, 197, 94, 0.1);
+  border-color: var(--success);
+}
+
+.statement-kpi-card.is-final.is-due-them .statement-kpi-val {
+  color: var(--success);
+}
+
+.statement-kpi-card.is-final.is-due-us {
+  background: rgba(239, 68, 68, 0.1);
+  border-color: var(--danger);
+}
+
+.statement-kpi-card.is-final.is-due-us .statement-kpi-val {
+  color: var(--danger);
+}
+
+.statement-table-wrapper {
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--space-4);
+}
+
+.statement-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+  text-align: start;
+}
+
+.statement-table th {
+  background: var(--surface-2);
+  padding: 10px 12px;
+  font-weight: 600;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.statement-table td {
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+}
+
+.statement-table tr:last-child td {
+  border-bottom: none;
+}
+
+.statement-table .num-cell {
+  text-align: end;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.statement-table .num-cell.is-due {
+  font-weight: 600;
+  color: var(--primary);
+}
+
+.statement-table .num-cell.is-paid {
+  font-weight: 600;
+  color: var(--success);
+}
+
+.statement-table .num-cell.is-deduction {
+  font-weight: 600;
+  color: var(--danger);
+}
+
+.statement-table .statement-balance-cell {
+  background: rgba(99, 102, 241, 0.05);
+  font-weight: 700;
+}
+
+.statement-total-row {
+  background: var(--surface-2);
+  font-weight: 700;
+}
+
+.statement-final-cell {
+  color: var(--primary);
+  font-size: 1rem;
+}
+
+.statement-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.statement-badge.work,
+.statement-badge.delivery {
+  background: var(--primary-soft);
+  color: var(--primary);
+}
+
+.statement-badge.payment {
+  background: var(--success-soft);
+  color: var(--success);
+}
+
+.statement-badge.deduction {
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
+.statement-badge.opening {
+  background: var(--surface-3, #e2e8f0);
+  color: var(--text);
+}
+
+.statement-deductions-section {
+  margin-top: var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+}
+
+.statement-print-footer {
+  display: none;
+  margin-top: 30px;
+  padding-top: 20px;
+  border-top: 1px solid #ccc;
+  justify-content: space-between;
+}
+
+.statement-print-footer .sig-box {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* Print Overrides for Person Statement */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  
+  #personStatementModal,
+  #personStatementModal * {
+    visibility: visible;
+  }
+
+  #personStatementModal {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    background: #fff !important;
+    display: block !important;
+  }
+
+  .statement-modal-container {
+    max-width: 100% !important;
+    width: 100% !important;
+    max-height: none !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+  .statement-print-footer {
+    display: flex !important;
+  }
+
+  .statement-table th,
+  .statement-table td {
+    border: 1px solid #999 !important;
+    color: #000 !important;
+  }
+
+  .statement-kpi-card {
+    border: 1px solid #999 !important;
+    background: #fff !important;
+    color: #000 !important;
+  }
+
+  .statement-kpi-val {
+    color: #000 !important;
+  }
+}
+
+/* Mobile & iPhone Responsive Optimization for Statement */
+@media (max-width: 640px) {
+  .statement-page {
+    padding: var(--space-2);
+  }
+
+  .statement-sheet {
+    padding: var(--space-4) var(--space-3);
+    border-radius: var(--radius-md);
+  }
+
+  .statement-header {
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+
+  .statement-meta {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .statement-kpi-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: var(--space-2);
+  }
+
+  .statement-table-wrap,
+  .statement-table-scroll {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    margin: 0 calc(var(--space-3) * -1);
+    padding: 0 var(--space-3);
+  }
+
+  .statement-table {
+    min-width: 620px;
+  }
+}
+

@@ -74,8 +74,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 4px;
-  border-radius: 50%;
+  padding: 2px;
+  border-radius: 9999px;
   border: 1px solid transparent;
   transition: background-color var(--transition-fast) var(--ease),
     border-color var(--transition-fast) var(--ease);
@@ -87,16 +87,20 @@
 }
 
 .navbar-avatar {
-  width: 34px;
+  min-width: 34px;
   height: 34px;
-  display: flex;
+  padding: 0 10px;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  border-radius: 50%;
+  border-radius: 9999px;
   background: linear-gradient(135deg, var(--accent), var(--accent-hover));
   color: #ffffff;
-  font-size: var(--font-size-xs);
-  font-weight: 700;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 /* ---------- Mobile ---------- */

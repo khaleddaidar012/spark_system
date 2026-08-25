@@ -13,6 +13,7 @@ import { toast } from "./toast.js";
 import { showModal, hideModal } from "./modal.js";
 import { openQuickAddSupplier, openQuickAddPerson } from "./quick-add-person.js";
 import { personRolesLabel, personTypeLabel, contractorLabel, contractorSpecialty } from "./person-roles.js";
+import { getActivePhases, getProjectPhases, addFinanceToPhaseLog } from "./project-phases.js";
 
 function esc(value) {
   return String(value == null ? "" : value)
@@ -107,6 +108,151 @@ function initFab() {
   closeFabMenu = closeMenu;
 }
 
+/* ---------- Invoice Attachment ---------- */
+
+const INVOICE_MAX_WARN  = 3 * 1024 * 1024;  // 3 MB — warn
+const INVOICE_MAX_BLOCK = 10 * 1024 * 1024; // 10 MB — reject
+
+const ALLOWED_TYPES = [
+  "image/jpeg", "image/png", "image/webp", "image/gif",
+  "image/heic", "image/heif", "application/pdf",
+];
+
+// Module-level invoice state per modal
+let moneyInvoice  = null;  // { data, type, name } or null
+let matInvoice    = null;
+
+function readFileAsDataURL(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload  = (e) => resolve(e.target.result);
+    reader.onerror = ()  => reject(new Error("read-failed"));
+    reader.readAsDataURL(file);
+  });
+}
+
+function validateInvoiceFile(file) {
+  if (!ALLOWED_TYPES.includes(file.type)) {
+    toast("يُسمح فقط بالصور وملفات PDF / Only images and PDFs are allowed", "danger");
+    return false;
+  }
+  if (file.size > INVOICE_MAX_BLOCK) {
+    toast("الملف أكبر من الحد المسموح (10 ميجا) / File too large — max 10 MB", "danger");
+    return false;
+  }
+  if (file.size > INVOICE_MAX_WARN) {
+    toast("الملف كبير — قد يؤثر على سرعة المزامنة / Large file — may slow sync", "info");
+  }
+  return true;
+}
+
+function showInvoicePreview({ previewId, thumbId, pdfIconId, pdfNameId, removeId }, invoice) {
+  const preview = document.getElementById(previewId);
+  const thumb   = document.getElementById(thumbId);
+  const pdfIcon = document.getElementById(pdfIconId);
+  const pdfName = document.getElementById(pdfNameId);
+  if (!preview) return;
+
+  const isImage = invoice.type.startsWith("image/");
+  preview.hidden = false;
+  if (isImage) {
+    thumb.src    = invoice.data;
+    thumb.hidden = false;
+    pdfIcon.hidden = true;
+  } else {
+    thumb.hidden   = true;
+    pdfIcon.hidden = false;
+    pdfName.textContent = invoice.name.length > 28
+      ? invoice.name.slice(0, 25) + "…"
+      : invoice.name;
+  }
+  window.lucide?.createIcons();
+}
+
+function clearInvoicePreview({ previewId, thumbId, pdfIconId, fileId, cameraId }) {
+  const preview = document.getElementById(previewId);
+  if (preview) preview.hidden = true;
+  const thumb = document.getElementById(thumbId);
+  if (thumb) { thumb.src = ""; thumb.hidden = true; }
+  const pdfIcon = document.getElementById(pdfIconId);
+  if (pdfIcon) pdfIcon.hidden = true;
+  const fileInput   = document.getElementById(fileId);
+  const cameraInput = document.getElementById(cameraId);
+  if (fileInput)   fileInput.value   = "";
+  if (cameraInput) cameraInput.value = "";
+}
+
+async function handleInvoiceFileChange(file, setFn, uiIds) {
+  if (!file) return;
+  if (!validateInvoiceFile(file)) return;
+  try {
+    const data = await readFileAsDataURL(file);
+    const invoice = { data, type: file.type, name: file.name };
+    setFn(invoice);
+    showInvoicePreview(uiIds, invoice);
+  } catch {
+    toast("فشل قراءة الملف — حاول مرة أخرى / Failed to read file", "danger");
+  }
+}
+
+function initInvoiceInputs({ fileId, cameraId, removeId, previewId, thumbId, pdfIconId, pdfNameId }, setFn, getFn) {
+  const uiIds = { previewId, thumbId, pdfIconId, pdfNameId, removeId, fileId, cameraId };
+
+  document.getElementById(fileId)?.addEventListener("change", (e) => {
+    handleInvoiceFileChange(e.target.files[0], setFn, uiIds);
+  });
+  document.getElementById(cameraId)?.addEventListener("change", (e) => {
+    handleInvoiceFileChange(e.target.files[0], setFn, uiIds);
+  });
+  document.getElementById(removeId)?.addEventListener("click", () => {
+    setFn(null);
+    clearInvoicePreview(uiIds);
+  });
+}
+
+// ---------- Invoice Lightbox ----------
+
+export function openInvoiceLightbox({ data, type, name }) {
+  const lb   = document.getElementById("invoiceLightbox");
+  const body = document.getElementById("invoiceLightboxBody");
+  const dl   = document.getElementById("invoiceLightboxDownload");
+  if (!lb || !body || !dl) return;
+
+  dl.href     = data;
+  dl.download = name || "invoice";
+
+  if (type.startsWith("image/")) {
+    body.innerHTML = `<img src="${data}" alt="invoice" class="invoice-lightbox-img" />`;
+  } else {
+    // PDF — try embed, fallback to download prompt
+    body.innerHTML = `
+      <object data="${data}" type="application/pdf" class="invoice-lightbox-pdf">
+        <p class="invoice-lightbox-fallback">
+          تعذّر عرض PDF في المتصفح —
+          <a href="${data}" download="${name || 'invoice.pdf'}" class="btn btn-primary btn-sm">تحميل PDF</a>
+        </p>
+      </object>`;
+  }
+
+  lb.hidden = false;
+  window.lucide?.createIcons();
+}
+
+function initInvoiceLightbox() {
+  const lb = document.getElementById("invoiceLightbox");
+  if (!lb) return;
+  document.getElementById("invoiceLightboxClose")?.addEventListener("click", () => {
+    lb.hidden = true;
+    document.getElementById("invoiceLightboxBody").innerHTML = "";
+  });
+  lb.addEventListener("click", (e) => {
+    if (e.target === lb) {
+      lb.hidden = true;
+      document.getElementById("invoiceLightboxBody").innerHTML = "";
+    }
+  });
+}
+
 /* ---------- Quick Money ---------- */
 
 function fillPersonSelect() {
@@ -146,6 +292,83 @@ function fillPersonSelect() {
       .join("");
 }
 
+function updateMoneyPhases() {
+  const projSelect = document.getElementById("moneyProject");
+  const phaseField = document.getElementById("moneyPhaseField");
+  const phaseSelect = document.getElementById("moneyPhase");
+  const subphaseField = document.getElementById("moneySubphaseField");
+  const subphaseSelect = document.getElementById("moneySubphase");
+  if (!projSelect || !phaseField || !phaseSelect) return;
+
+  const projectId = projSelect.value;
+  if (!projectId) {
+    phaseField.hidden = true;
+    if (subphaseField) subphaseField.hidden = true;
+    phaseSelect.innerHTML = '<option value="">— اختر المرحلة —</option>';
+    return;
+  }
+
+  const phases = getProjectPhases(projectId) || [];
+  if (phases.length === 0) {
+    phaseField.hidden = true;
+    if (subphaseField) subphaseField.hidden = true;
+    return;
+  }
+
+  phaseField.hidden = false;
+  let activePhaseId = "";
+  const activePhases = getActivePhases(projectId);
+  if (activePhases.length > 0) {
+    activePhaseId = activePhases[0].id;
+  }
+
+  phaseSelect.innerHTML =
+    '<option value="">— اختر المرحلة —</option>' +
+    phases
+      .map((ph) => {
+        const isAct = ph.status === "active";
+        const tag = isAct ? " (نشطة حالياً)" : ph.status === "done" ? " (مكتملة)" : "";
+        return `<option value="${ph.id}"${ph.id === activePhaseId ? " selected" : ""}>${esc(ph.label)}${tag}</option>`;
+      })
+      .join("");
+
+  updateMoneySubphases(projectId, phaseSelect.value);
+}
+
+function updateMoneySubphases(projectId, phaseId) {
+  const subphaseField = document.getElementById("moneySubphaseField");
+  const subphaseSelect = document.getElementById("moneySubphase");
+  if (!subphaseField || !subphaseSelect) return;
+
+  if (!projectId || !phaseId) {
+    subphaseField.hidden = true;
+    subphaseSelect.innerHTML = '<option value="">— اختر المرحلة الفرعية —</option>';
+    return;
+  }
+
+  const phases = getProjectPhases(projectId) || [];
+  const phase = phases.find((p) => p.id === phaseId);
+  const subs = (phase && phase.subPhases) || [];
+
+  if (subs.length === 0) {
+    subphaseField.hidden = true;
+    subphaseSelect.innerHTML = '<option value="">— اختر المرحلة الفرعية —</option>';
+    return;
+  }
+
+  subphaseField.hidden = false;
+  const activeSubId = phase.activeSubPhaseId || "";
+  subphaseSelect.innerHTML =
+    '<option value="">— بدون مرحلة فرعية —</option>' +
+    subs
+      .map((s) => {
+        const isAct = s.status === "active";
+        const tag = isAct ? " (نشطة)" : s.status === "done" ? " (مكتملة)" : "";
+        return `<option value="${s.id}"${s.id === activeSubId ? " selected" : ""}>${esc(s.label)}${tag}</option>`;
+      })
+      .join("");
+}
+
 function fillMoneyProjectSelect() {
   const select = document.getElementById("moneyProject");
   if (!select) return;
@@ -155,6 +378,7 @@ function fillMoneyProjectSelect() {
     projects
       .map((p) => `<option value="${p.id}">${esc(p.name)}</option>`)
       .join("");
+  updateMoneyPhases();
 }
 
 /* Reset every dynamic part of the Quick Money modal so a fresh,
@@ -198,6 +422,21 @@ function initQuickMoney() {
     const amount = document.getElementById("moneyAmount");
     if (amount) amount.focus();
   });
+
+  const moneyProjSelect = document.getElementById("moneyProject");
+  if (moneyProjSelect) {
+    moneyProjSelect.addEventListener("change", () => {
+      updateMoneyPhases();
+    });
+  }
+
+  const moneyPhaseSelect = document.getElementById("moneyPhase");
+  if (moneyPhaseSelect) {
+    moneyPhaseSelect.addEventListener("change", () => {
+      const projId = document.getElementById("moneyProject")?.value;
+      updateMoneySubphases(projId, moneyPhaseSelect.value);
+    });
+  }
 
   document.getElementById("moneyPersonType").addEventListener("click", (e) => {
     const chip = e.target.closest(".chip");
@@ -264,21 +503,85 @@ function initQuickMoney() {
       toast(translate("quick.contractorNotOnProject").replace("{name}", personName), "info");
     }
 
-    recordMoney({
+    const phaseId = document.getElementById("moneyPhase")?.value || null;
+    const subPhaseId = document.getElementById("moneySubphase")?.value || null;
+
+    const txnData = {
       direction,
       personType: type,
       personId,
       personName,
       amount,
       projectId,
+      phaseId,
+      subPhaseId,
       note: document.getElementById("moneyNote").value.trim(),
-    });
+    };
+    if (moneyInvoice) {
+      txnData.invoiceData = moneyInvoice.data;
+      txnData.invoiceType = moneyInvoice.type;
+      txnData.invoiceName = moneyInvoice.name;
+    }
+
+    recordMoney(txnData);
+
+    // Link money transaction to selected phase or active phase
+    if (projectId && phaseId) {
+      const txns = all("moneyTransactions");
+      const savedTxn = txns[txns.length - 1];
+      addFinanceToPhaseLog(projectId, {
+        transactionId: savedTxn ? savedTxn.id : "txn_" + Date.now(),
+        phaseId,
+        subPhaseId,
+        direction,
+        amount: Number(amount) || 0,
+        note: document.getElementById("moneyNote").value.trim() || `${personName} (${type})`,
+      });
+    } else if (projectId) {
+      const activePhases = getActivePhases(projectId);
+      if (activePhases.length > 0) {
+        const ph = activePhases[0];
+        const txns = all("moneyTransactions");
+        const savedTxn = txns[txns.length - 1];
+        addFinanceToPhaseLog(projectId, {
+          transactionId: savedTxn ? savedTxn.id : "txn_" + Date.now(),
+          phaseId: ph.id,
+          subPhaseId: ph.activeSubPhaseId || null,
+          direction,
+          amount: Number(amount) || 0,
+          note: document.getElementById("moneyNote").value.trim() || `${personName} (${type})`,
+        });
+      }
+    }
+
+    // Reset invoice state
+    moneyInvoice = null;
+    clearInvoicePreview({ previewId: "moneyInvoicePreview", thumbId: "moneyInvoiceThumb", pdfIconId: "moneyInvoicePdfIcon", fileId: "moneyInvoiceFile", cameraId: "moneyInvoiceCamera" });
 
     document.getElementById("quickMoneyForm").reset();
     resetQuickMoney();
     closeModal("quickMoneyModal");
     toast(translate("common.saved"));
   });
+
+  // Also clear invoice state when modal is dismissed without saving
+  document.getElementById("quickMoneyClose").addEventListener("click", () => {
+    moneyInvoice = null;
+    clearInvoicePreview({ previewId: "moneyInvoicePreview", thumbId: "moneyInvoiceThumb", pdfIconId: "moneyInvoicePdfIcon", fileId: "moneyInvoiceFile", cameraId: "moneyInvoiceCamera" });
+  }, { capture: true });
+  document.getElementById("quickMoneyCancel").addEventListener("click", () => {
+    moneyInvoice = null;
+    clearInvoicePreview({ previewId: "moneyInvoicePreview", thumbId: "moneyInvoiceThumb", pdfIconId: "moneyInvoicePdfIcon", fileId: "moneyInvoiceFile", cameraId: "moneyInvoiceCamera" });
+  }, { capture: true });
+
+  // Wire invoice file inputs for Quick Money
+  initInvoiceInputs(
+    { fileId: "moneyInvoiceFile", cameraId: "moneyInvoiceCamera", removeId: "moneyInvoiceRemove",
+      previewId: "moneyInvoicePreview", thumbId: "moneyInvoiceThumb",
+      pdfIconId: "moneyInvoicePdfIcon", pdfNameId: "moneyInvoicePdfName" },
+    (v) => { moneyInvoice = v; },
+    () => moneyInvoice
+  );
 }
 
 /* ---------- Quick Materials ---------- */
@@ -408,7 +711,7 @@ function initQuickMaterials() {
     }
 
     if (direction === "in") {
-      addMaterialToProject(projectId, {
+      const matData = {
         name,
         supplierId: document.getElementById("qmSupplier").value || null,
         contractorId: document.getElementById("qmContractor").value || null,
@@ -416,7 +719,27 @@ function initQuickMaterials() {
         unit: document.getElementById("qmUnit").value,
         unitPrice: document.getElementById("qmPrice").value,
         date: new Date().toISOString().slice(0, 10),
-      });
+      };
+      if (matInvoice) {
+        matData.invoiceData = matInvoice.data;
+        matData.invoiceType = matInvoice.type;
+        matData.invoiceName = matInvoice.name;
+      }
+      addMaterialToProject(projectId, matData);
+
+      // Task 08: Link material transaction to active phases
+      const activePhases = getActivePhases(projectId);
+      const totalAmount = Number(matData.quantity) * Number(matData.unitPrice);
+      for (const ph of activePhases) {
+        addFinanceToPhaseLog(projectId, {
+          transactionId: "mat_" + Date.now(),
+          phaseId: ph.id,
+          subPhaseId: ph.activeSubPhaseId || null,
+          direction: "out",
+          amount: totalAmount,
+          note: `${name} (${matData.quantity} ${matData.unit})`,
+        });
+      }
     } else {
       consumeMaterial(projectId, {
         name,
@@ -426,10 +749,33 @@ function initQuickMaterials() {
       });
     }
 
+    // Reset invoice state
+    matInvoice = null;
+    clearInvoicePreview({ previewId: "matInvoicePreview", thumbId: "matInvoiceThumb", pdfIconId: "matInvoicePdfIcon", fileId: "matInvoiceFile", cameraId: "matInvoiceCamera" });
+
     document.getElementById("quickMatForm").reset();
     closeModal("quickMatModal");
     toast(translate("common.saved"));
   });
+
+  // Clear invoice state on modal dismiss
+  document.getElementById("quickMatClose").addEventListener("click", () => {
+    matInvoice = null;
+    clearInvoicePreview({ previewId: "matInvoicePreview", thumbId: "matInvoiceThumb", pdfIconId: "matInvoicePdfIcon", fileId: "matInvoiceFile", cameraId: "matInvoiceCamera" });
+  }, { capture: true });
+  document.getElementById("quickMatCancel").addEventListener("click", () => {
+    matInvoice = null;
+    clearInvoicePreview({ previewId: "matInvoicePreview", thumbId: "matInvoiceThumb", pdfIconId: "matInvoicePdfIcon", fileId: "matInvoiceFile", cameraId: "matInvoiceCamera" });
+  }, { capture: true });
+
+  // Wire invoice file inputs for Quick Materials
+  initInvoiceInputs(
+    { fileId: "matInvoiceFile", cameraId: "matInvoiceCamera", removeId: "matInvoiceRemove",
+      previewId: "matInvoicePreview", thumbId: "matInvoiceThumb",
+      pdfIconId: "matInvoicePdfIcon", pdfNameId: "matInvoicePdfName" },
+    (v) => { matInvoice = v; },
+    () => matInvoice
+  );
 }
 
 /* ---------- Quick Money Split ---------- */
@@ -724,6 +1070,23 @@ function initQuickMoneySplit() {
         projectId: split.projectId,
         note,
       });
+
+      // Task 08: Link money transaction to active phases
+      if (split.projectId) {
+        const activePhases = getActivePhases(split.projectId);
+        const txns = all("moneyTransactions");
+        const savedTxn = txns[txns.length - 1];
+        for (const ph of activePhases) {
+          addFinanceToPhaseLog(split.projectId, {
+            transactionId: savedTxn ? savedTxn.id : "txn_" + Date.now(),
+            phaseId: ph.id,
+            subPhaseId: ph.activeSubPhaseId || null,
+            direction,
+            amount: Number(split.amount) || 0,
+            note: note || `${personName} (${type})`,
+          });
+        }
+      }
     });
 
     document.getElementById("quickMoneySplitForm").reset();
@@ -739,6 +1102,7 @@ export function initQuickAdd() {
   initQuickMoney();
   initQuickMoneySplit();
   initQuickMaterials();
+  initInvoiceLightbox();
   bindSegmented("moneyDirection");
   bindSegmented("moneySplitDirection");
   bindSegmented("matDirection");

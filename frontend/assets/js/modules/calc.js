@@ -251,3 +251,308 @@ export function materialAnalytics(project) {
 export function formatMoney(n) {
   return new Intl.NumberFormat("en-US", { maximumFractionDigits: 0 }).format(num(n));
 }
+
+/* Return today's date string in local time: YYYY-MM-DD */
+function localDateStr(d = new Date()) {
+  return d.getFullYear() + "-" +
+    String(d.getMonth() + 1).padStart(2, "0") + "-" +
+    String(d.getDate()).padStart(2, "0");
+}
+
+/* Total outgoing money transactions whose date falls within [from, to] (inclusive, YYYY-MM-DD). */
+export function expensesBetween(txns, from, to) {
+  return txns
+    .filter((t) => t.direction === "out" && t.date >= from && t.date <= to)
+    .reduce((s, t) => s + num(t.amount), 0);
+}
+
+/* Today's outgoing expenses. */
+export function dailyExpenses(txns) {
+  const d = localDateStr();
+  return expensesBetween(txns, d, d);
+}
+
+/* Current ISO-week outgoing expenses (Mon–Sun). */
+export function weeklyExpenses(txns) {
+  const now = new Date();
+  const day = now.getDay(); // 0=Sun
+  const diff = (day === 0 ? -6 : 1 - day); // shift to Monday
+  const mon = new Date(now);
+  mon.setDate(now.getDate() + diff);
+  const sun = new Date(mon);
+  sun.setDate(mon.getDate() + 6);
+  return expensesBetween(txns, localDateStr(mon), localDateStr(sun));
+}
+
+/* Current calendar-month outgoing expenses. */
+export function monthlyExpenses(txns) {
+  const now = new Date();
+  const y = now.getFullYear();
+  const m = String(now.getMonth() + 1).padStart(2, "0");
+  const from = `${y}-${m}-01`;
+  const lastDay = new Date(y, now.getMonth() + 1, 0).getDate();
+  const to = `${y}-${m}-${String(lastDay).padStart(2, "0")}`;
+  return expensesBetween(txns, from, to);
+}
+
+/* ============================================================
+   Income Summary Calculations
+   ============================================================ */
+
+/* Total incoming money transactions whose date falls within [from, to] (inclusive, YYYY-MM-DD). */
+export function incomeBetween(txns, from, to) {
+  return (txns || [])
+    .filter((t) => t.direction === "in" && (!from || t.date >= from) && (!to || t.date <= to))
+    .reduce((s, t) => s + num(t.amount), 0);
+}
+
+/* Today's incoming transactions. */
+export function dailyIncome(txns) {
+  const d = localDateStr();
+  return incomeBetween(txns, d, d);
+}
+
+/* Current ISO-week incoming transactions (Mon–Sun). */
+export function weeklyIncome(txns) {
+  const now = new Date();
+  const day = now.getDay();
+  const diff = (day === 0 ? -6 : 1 - day);
+  const mon = new Date(now);
+  mon.setDate(now.getDate() + diff);
+  const sun = new Date(mon);
+  sun.setDate(mon.getDate() + 6);
+  return incomeBetween(txns, localDateStr(mon), localDateStr(sun));
+}
+
+/* Current calendar-month incoming transactions. */
+export function monthlyIncome(txns) {
+  const now = new Date();
+  const y = now.getFullYear();
+  const m = String(now.getMonth() + 1).padStart(2, "0");
+  const from = `${y}-${m}-01`;
+  const lastDay = new Date(y, now.getMonth() + 1, 0).getDate();
+  const to = `${y}-${m}-${String(lastDay).padStart(2, "0")}`;
+  return incomeBetween(txns, from, to);
+}
+
+export function incomeByPeriod(txns) {
+  const list = txns || all("moneyTransactions");
+  return {
+    today: dailyIncome(list),
+    week: weeklyIncome(list),
+    month: monthlyIncome(list),
+    total: moneyIn(list),
+  };
+}
+
+/* ============================================================
+   Phase Cost & Breakdown Calculations
+   ============================================================ */
+
+export function phaseCost(project, phaseId) {
+  if (!project || !phaseId) return 0;
+  let sum = 0;
+  // 1. Sum from phaseLog entries
+  for (const entry of project.phaseLog || []) {
+    if (entry.type === "finance" && entry.direction === "out" && entry.phaseId === phaseId) {
+      sum += num(entry.amount);
+    }
+  }
+  // 2. Sum from otherExpenses if tagged with phase_id and not already in phaseLog
+  for (const exp of project.otherExpenses || []) {
+    if (exp.phase_id === phaseId && !exp.__loggedToPhase) {
+      // If otherExpenses are logged separately, add if not duplicated
+    }
+  }
+  return sum;
+}
+
+export function allPhasesCosts(project) {
+  if (!project) return {};
+  const costs = {};
+  for (const ph of project.phases || []) {
+    costs[ph.id] = phaseCost(project, ph.id);
+  }
+  return costs;
+}
+
+/* ============================================================
+   Projects Overview Financial KPI Header Calculations
+   ============================================================ */
+
+export function projectsSummaryStats() {
+  const projects = all("projects") || [];
+  const moneyTxns = all("moneyTransactions") || [];
+
+  // Total Inflow: All money received across the system / projects
+  const totalInflow = moneyIn(moneyTxns);
+
+  // Total Outflow: All project costs + outgoing money
+  const projectOutflows = projects.reduce((s, p) => s + projectCost(p), 0);
+  const generalOutflows = moneyOut(moneyTxns.filter((t) => !t.projectId));
+  const totalOutflow = Math.max(projectOutflows + generalOutflows, moneyOut(moneyTxns));
+
+  // Difference: Inflow - Outflow
+  const netDifference = totalInflow - totalOutflow;
+
+  // Expected Profit: Sum of all user-entered project expected profits
+  const expectedProfit = projects.reduce((s, p) => s + num(p.expectedProfit), 0);
+
+  // Actual Profit Formula: Expected Profit + (Inflow - Outflow)
+  const actualProfit = expectedProfit + netDifference;
+
+  return {
+    totalInflow,
+    totalOutflow,
+    netDifference,
+    expectedProfit,
+    actualProfit,
+  };
+}
+
+/* ============================================================
+   Person (Contractor / Supplier) Statement of Account
+   ============================================================ */
+
+export function personAccountStatement({ personId, personType, fromDate = "", toDate = "" }) {
+  const moneyTxns = all("moneyTransactions") || [];
+  const matTxns = all("materialTransactions") || [];
+  const deductions = all("deductions") || [];
+  const projects = all("projects") || [];
+
+  const getProjectName = (pId) => {
+    if (!pId) return "—";
+    const p = projects.find((x) => x.id === pId);
+    return p ? p.name : "—";
+  };
+
+  const rows = [];
+  let openingDues = 0;
+  let openingPaid = 0;
+  let openingDeductions = 0;
+
+  // 1. Process Material Transactions (for Suppliers)
+  if (personType === "supplier") {
+    for (const mt of matTxns) {
+      if (mt.supplierId !== personId) continue;
+      const date = mt.date || (mt.createdAt ? new Date(mt.createdAt).toISOString().slice(0, 10) : "");
+      const amount = num(mt.total);
+      if (fromDate && date < fromDate) {
+        openingDues += amount;
+      } else if (!toDate || date <= toDate) {
+        rows.push({
+          id: mt.id,
+          date,
+          type: "delivery",
+          typeLabel: "توريد بضاعة",
+          desc: mt.materialName || mt.notes || "توريد خامات",
+          projectId: mt.projectId,
+          projectName: getProjectName(mt.projectId),
+          due: amount,
+          paid: 0,
+          deduction: 0,
+        });
+      }
+    }
+  }
+
+  // 2. Process Contractor Project Assignments / Dues (for Contractors)
+  if (personType === "contractor") {
+    for (const p of projects) {
+      // Dues from project contractor entries
+      for (const c of p.contractors || []) {
+        if (c.id === personId) {
+          const totalVal = num(c.total);
+          // If date not available, treat as current period
+          rows.push({
+            id: "work_" + p.id + "_" + c.id,
+            date: p.createdAt ? p.createdAt.slice(0, 10) : "",
+            type: "work",
+            typeLabel: "مستخلص / عمل",
+            desc: c.role ? `أعمال ${c.role}` : "أعمال مقاولة",
+            projectId: p.id,
+            projectName: p.name,
+            due: totalVal,
+            paid: 0,
+            deduction: 0,
+          });
+        }
+      }
+    }
+  }
+
+  // 3. Process Money Transactions (Payments / Advances)
+  for (const t of moneyTxns) {
+    if (t.personId !== personId) continue;
+    const date = t.date || (t.createdAt ? new Date(t.createdAt).toISOString().slice(0, 10) : "");
+    const amount = num(t.amount);
+    if (fromDate && date < fromDate) {
+      if (t.direction === "out") openingPaid += amount;
+      else openingDues += amount;
+    } else if (!toDate || date <= toDate) {
+      rows.push({
+        id: t.id,
+        date,
+        type: t.direction === "out" ? "payment" : "receipt",
+        typeLabel: t.direction === "out" ? "دفعة مسددة" : "مبلغ مسترد",
+        desc: t.notes || (t.direction === "out" ? "سداد دفعة نقدية" : "استرداد"),
+        projectId: t.projectId,
+        projectName: getProjectName(t.projectId),
+        due: t.direction === "in" ? amount : 0,
+        paid: t.direction === "out" ? amount : 0,
+        deduction: 0,
+      });
+    }
+  }
+
+  // 4. Process Deductions
+  for (const d of deductions) {
+    if (d.personId !== personId) continue;
+    const date = d.date || (d.createdAt ? new Date(d.createdAt).toISOString().slice(0, 10) : "");
+    const amount = num(d.amount);
+    if (fromDate && date < fromDate) {
+      openingDeductions += amount;
+    } else if (!toDate || date <= toDate) {
+      rows.push({
+        id: d.id,
+        date,
+        type: "deduction",
+        typeLabel: "خصم",
+        desc: d.reason || "خصم مالي",
+        projectId: d.projectId,
+        projectName: getProjectName(d.projectId),
+        due: 0,
+        paid: 0,
+        deduction: amount,
+      });
+    }
+  }
+
+  // Sort rows chronologically
+  rows.sort((a, b) => (a.date || "").localeCompare(b.date || "") || a.type.localeCompare(b.type));
+
+  // Compute running balance
+  const openingBalance = openingDues - openingPaid - openingDeductions;
+  let currentBalance = openingBalance;
+  for (const r of rows) {
+    currentBalance += (r.due - r.paid - r.deduction);
+    r.balance = currentBalance;
+  }
+
+  const periodDues = rows.reduce((s, r) => s + r.due, 0);
+  const periodPaid = rows.reduce((s, r) => s + r.paid, 0);
+  const periodDeductions = rows.reduce((s, r) => s + r.deduction, 0);
+  const finalBalance = currentBalance;
+
+  return {
+    openingBalance,
+    periodDues,
+    periodPaid,
+    periodDeductions,
+    finalBalance,
+    rows,
+    fromDate,
+    toDate,
+  };
+}
+

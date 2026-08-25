@@ -1,4 +1,4 @@
-﻿/* ============================================
+/* ============================================
    Spark ERP — Suppliers Page Script
    List, add, edit suppliers and view their
    account + transaction log (with the project
@@ -12,6 +12,7 @@ import { recordMoney } from "../modules/actions.js";
 import { translate } from "../modules/i18n.js";
 import { toast } from "../modules/toast.js";
 import { showModal, hideModal } from "../modules/modal.js";
+import { openPersonStatement, initStatementModal } from "../modules/person-statement.js";
 
 const lang = () => document.documentElement.lang;
 
@@ -50,11 +51,12 @@ function renderSuppliers() {
     .map((s) => {
       const b = supplierBalance(s);
       const direction = balanceDirection(b);
+      const subParts = [s.phone, Array.isArray(s.supplies) && s.supplies.length ? s.supplies.join(", ") : "", s.notes].filter(Boolean);
       return `
         <div class="row-item">
           <div class="row-item-main">
             <div class="row-item-title">${esc(s.name)}</div>
-            <div class="row-item-sub">${esc(s.phone || "—")}</div>
+            <div class="row-item-sub">${esc(subParts.join(" · ") || "—")}</div>
           </div>
           <div class="row-item-stats">
             <div class="row-stat">
@@ -71,6 +73,10 @@ function renderSuppliers() {
             </div>
           </div>
           <div class="row-item-actions">
+            <button class="btn btn-primary btn-sm" type="button" data-statement="${esc(s.id)}">
+              <i data-lucide="file-text" class="icon"></i>
+              <span>${translate("suppliers.statementBtn") || "كشف حساب"}</span>
+            </button>
             <button class="btn btn-soft btn-sm" type="button" data-settle="${esc(s.id)}">
               <i data-lucide="wallet" class="icon"></i>
               <span>${translate("suppliers.settleAccount")}</span>
@@ -311,6 +317,11 @@ function initModal() {
   initSettleModal();
 
   document.getElementById("suppliersList").addEventListener("click", (e) => {
+    const statementBtn = e.target.closest("[data-statement]");
+    if (statementBtn) {
+      openPersonStatement({ personId: statementBtn.dataset.statement, personType: "supplier" });
+      return;
+    }
     const settleBtn = e.target.closest("[data-settle]");
     if (settleBtn) {
       openSettleModal(settleBtn.dataset.settle);
@@ -332,6 +343,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   await initLayout();
   renderSuppliers();
   initModal();
+  initStatementModal();
   window.addEventListener("spark:data-changed", () => {
     renderSuppliers();
     if (accountId) renderAccount();

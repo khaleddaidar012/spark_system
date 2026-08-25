@@ -111,6 +111,93 @@
   color: var(--info);
 }
 
+/* ---------- Phase badge on card ---------- */
+
+.phase-badge-container {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.phase-badge {
+  --phase-color: #6366f1;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  background: color-mix(in srgb, var(--phase-color) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--phase-color) 30%, transparent);
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  color: var(--phase-color);
+  max-width: 100%;
+  transition: all var(--transition-fast) var(--ease);
+}
+
+.phase-badge-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: var(--radius-full);
+  background-color: var(--phase-color);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--phase-color) 25%, transparent);
+  flex-shrink: 0;
+  animation: phase-pulse 2s infinite ease-in-out;
+}
+
+@keyframes phase-pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--phase-color) 25%, transparent);
+  }
+  50% {
+    transform: scale(1.15);
+    opacity: 0.85;
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--phase-color) 10%, transparent);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .phase-badge-dot {
+    animation: none;
+  }
+}
+
+.phase-badge-label {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.phase-badge-sub {
+  display: inline-flex;
+  align-items: center;
+  font-weight: 500;
+  opacity: 0.88;
+}
+
+.phase-badge-sub::before {
+  content: "/";
+  margin: 0 4px;
+  opacity: 0.6;
+}
+
+.phase-badge-more {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px 7px;
+  background: var(--surface-2);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-full);
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  cursor: default;
+}
+
 /* ---------- Progress ---------- */
 
 .project-progress {
@@ -264,3 +351,108 @@
     width: 100%;
   }
 }
+
+/* ============================================
+   Projects Top Financial Summary Header (5 Cards)
+   ============================================ */
+
+.projects-financial-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: var(--space-3);
+  margin-bottom: var(--space-6);
+}
+
+.proj-fin-card {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  transition: transform var(--transition-fast) var(--ease),
+              box-shadow var(--transition-fast) var(--ease),
+              border-color var(--transition-fast) var(--ease);
+}
+
+.proj-fin-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.proj-fin-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: var(--radius-md);
+  flex-shrink: 0;
+}
+
+.proj-fin-card.is-in .proj-fin-icon {
+  background: rgba(34, 197, 94, 0.15);
+  color: var(--success);
+}
+
+.proj-fin-card.is-out .proj-fin-icon {
+  background: rgba(239, 68, 68, 0.15);
+  color: var(--danger);
+}
+
+.proj-fin-card.is-diff .proj-fin-icon {
+  background: rgba(139, 92, 246, 0.15);
+  color: #8b5cf6;
+}
+
+.proj-fin-card.is-expected .proj-fin-icon {
+  background: rgba(59, 130, 246, 0.15);
+  color: var(--primary);
+}
+
+.proj-fin-card.is-actual .proj-fin-icon {
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.2), rgba(59, 130, 246, 0.2));
+  color: var(--primary);
+}
+
+.proj-fin-meta {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  gap: 2px;
+}
+
+.proj-fin-label {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.proj-fin-value {
+  font-size: var(--font-size-md);
+  font-weight: 700;
+  color: var(--text);
+  white-space: nowrap;
+}
+
+.proj-fin-card.is-in .proj-fin-value {
+  color: var(--success);
+}
+
+.proj-fin-card.is-out .proj-fin-value {
+  color: var(--danger);
+}
+
+.proj-fin-card.is-expected .proj-fin-value {
+  color: var(--primary);
+}
+
+.proj-fin-card.is-actual .proj-fin-value {
+  color: #059669;
+}
+

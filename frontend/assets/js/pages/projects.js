@@ -1,4 +1,4 @@
-﻿/* ============================================
+/* ============================================
    Spark ERP — Projects Page Script
    Renders project cards and handles the
    "Add Project" modal (name, type, area,
@@ -6,11 +6,13 @@
    ============================================ */
 
 import { initLayout } from "../modules/layout.js";
-import { initStore, all, get, save, uid } from "../modules/store.js";
-import { projectCosts, formatMoney, TYPE_LABELS, STATUS_LABELS, num, moneyIn, moneyOut, sortNewestFirst } from "../modules/calc.js";
+import { initStore, all, get, save, uid, setProjectExpectedProfit } from "../modules/store.js";
+import { projectCosts, formatMoney, TYPE_LABELS, STATUS_LABELS, num, moneyIn, moneyOut, sortNewestFirst, projectsSummaryStats } from "../modules/calc.js";
 import { translate } from "../modules/i18n.js";
 import { toast } from "../modules/toast.js";
 import { showModal, hideModal } from "../modules/modal.js";
+import { getPrimaryActivePhase, getActivePhases } from "../modules/project-phases.js";
+import { seedPhases } from "../modules/phases-catalog.js";
 
 const lang = () => document.documentElement.lang;
 
@@ -25,6 +27,42 @@ function esc(value) {
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#39;");
+}
+
+/* ---------- Phase badge helper ---------- */
+
+function renderPhaseBadge(p) {
+  if (p.status === "done") return "";
+  const activePhases = getActivePhases(p.id);
+  if (!activePhases || activePhases.length === 0) return "";
+
+  const primary = getPrimaryActivePhase(p.id);
+  if (!primary || primary.status !== "active") return "";
+
+  let subLabel = "";
+  if (primary.activeSubPhaseId && Array.isArray(primary.subPhases)) {
+    const sub = primary.subPhases.find((s) => s.id === primary.activeSubPhaseId);
+    if (sub) {
+      subLabel = lang() === "en" && sub.labelEn ? sub.labelEn : sub.label;
+    }
+  }
+
+  const primaryLabel = lang() === "en" && primary.labelEn ? primary.labelEn : primary.label;
+  const moreCount = activePhases.length > 1 ? `+${activePhases.length - 1}` : "";
+  const otherNames = activePhases
+    .filter((ph) => ph.id !== primary.id)
+    .map((ph) => (lang() === "en" && ph.labelEn ? ph.labelEn : ph.label))
+    .join(", ");
+
+  return `
+    <div class="phase-badge-container">
+      <div class="phase-badge" style="--phase-color: ${esc(primary.color || '#6366f1')}">
+        <span class="phase-badge-dot"></span>
+        <span class="phase-badge-label">${esc(primaryLabel)}</span>
+        ${subLabel ? `<span class="phase-badge-sub">${esc(subLabel)}</span>` : ""}
+      </div>
+      ${moreCount ? `<span class="phase-badge-more" title="${esc(otherNames)}">${esc(moreCount)}</span>` : ""}
+    </div>`;
 }
 
 /* ---------- Rendering ---------- */
@@ -43,7 +81,7 @@ function projectCardHTML(p) {
   const txns = sortNewestFirst(
     all("moneyTransactions").filter((t) => t.projectId === p.id)
   );
-  const incoming = moneyIn(txns);
+  const incoming = moneyIn(txns) + num(p.advancePayment);
   const outgoing = moneyOut(txns);
 
   return `
@@ -59,6 +97,7 @@ function projectCardHTML(p) {
         <i data-lucide="ruler" class="icon"></i>
         <span class="project-card-area">${formatMoney(p.area)} m²</span>
       </div>
+      ${renderPhaseBadge(p)}
       <div class="project-progress">
         <div class="project-progress-track"><span class="project-progress-bar" style="width:${progress}%"></span></div>
         <span class="project-progress-value">${progress}%</span>
@@ -163,6 +202,7 @@ function submitProject(event) {
   const type = form.elements["type"].value;
   const area = Number(form.elements["area"].value);
   const advancePayment = Number(form.elements["advancePayment"].value || 0);
+  const expectedProfit = Number(form.elements["expectedProfit"]?.value || 0);
 
   if (!name || !area || area <= 0) {
     form.elements["name"].focus();
@@ -175,12 +215,15 @@ function submitProject(event) {
     type,
     area,
     advancePayment,
+    expectedProfit,
     status: "active",
     progress: 0,
     createdAt: new Date().toISOString().slice(0, 10),
     contractors: [],
     materials: [],
     otherExpenses: [],
+    phases: seedPhases(),
+    phaseLog: [],
   });
 
   closeModal();

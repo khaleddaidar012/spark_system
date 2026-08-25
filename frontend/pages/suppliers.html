@@ -13,7 +13,7 @@
     })();
   </script>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <meta name="description" content="Spark Engineering ERP System — Suppliers" />
   <title>Suppliers | Spark ERP</title>
   <link rel="icon" type="image/svg+xml" href="../assets/icons/favicon.svg" />
@@ -29,9 +29,15 @@
       <main class="app-main">
         <div class="app-content">
           <header class="page-header page-header-row">
-            <div>
-              <h1 class="page-title" data-i18n="suppliers.title">Suppliers</h1>
-              <p class="page-subtitle text-muted" data-i18n="suppliers.subtitle">Manage suppliers and material purchases.</p>
+            <div style="display:flex; align-items:center; gap:12px;">
+              <button class="btn btn-ghost btn-sm page-back-btn" onclick="history.length > 1 ? history.back() : window.location.href='./dashboard.html'" type="button" title="رجوع للخلف">
+                <i data-lucide="arrow-right" class="icon"></i>
+                <span data-i18n="common.backStep">رجوع</span>
+              </button>
+              <div>
+                <h1 class="page-title" data-i18n="suppliers.title">Suppliers</h1>
+                <p class="page-subtitle text-muted" data-i18n="suppliers.subtitle">Manage suppliers and material purchases.</p>
+              </div>
             </div>
             <button class="btn btn-primary" id="addSupplierBtn" type="button">
               <i data-lucide="plus" class="icon"></i>
@@ -121,6 +127,105 @@
         <h3 class="detail-section-title" data-i18n="suppliers.transactions">Transactions</h3>
         <div id="supplierAccountList" class="rows-list"></div>
         <p class="row-empty" id="supplierAccountEmpty" hidden data-i18n="suppliers.noTransactions">No transactions yet.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Person Statement of Account Modal (Printable PDF Ready) -->
+  <div class="modal-overlay" id="personStatementModal" hidden>
+    <div class="modal modal-lg statement-modal-container" role="dialog" aria-modal="true" aria-labelledby="personStatementTitle">
+      <div class="modal-header no-print">
+        <h2 class="modal-title" id="personStatementTitle">كشف حساب</h2>
+        <div class="header-actions" style="display:flex;align-items:center;gap:8px;">
+          <button class="btn btn-primary btn-sm" id="statementPrintBtn" type="button">
+            <i data-lucide="printer" class="icon"></i>
+            <span>طباعة PDF</span>
+          </button>
+          <button class="btn btn-icon modal-close" id="personStatementClose" type="button" aria-label="Close">
+            <i data-lucide="x" class="icon"></i>
+          </button>
+        </div>
+      </div>
+      <div class="modal-body" id="personStatementPrintableArea">
+        <!-- Printable Header -->
+        <div class="statement-print-header">
+          <div class="company-brand">
+            <h1 class="company-name">شركة سبارك للأعمال الهندسية</h1>
+            <p class="company-tagline">Spark Engineering ERP — كشف حساب رسمي</p>
+          </div>
+          <div class="statement-meta-box" id="statementPersonInfo"></div>
+        </div>
+
+        <!-- Filter Controls (Hidden in Print) -->
+        <div class="statement-filter-bar no-print">
+          <div class="form-field">
+            <label class="form-label" for="statementFromDate">من تاريخ</label>
+            <input class="form-input" id="statementFromDate" type="date" />
+          </div>
+          <div class="form-field">
+            <label class="form-label" for="statementToDate">إلى تاريخ</label>
+            <input class="form-input" id="statementToDate" type="date" />
+          </div>
+          <div class="filter-actions" style="display:flex;align-items:flex-end;gap:6px;">
+            <button class="btn btn-soft btn-sm" id="statementApplyFilterBtn" type="button">
+              <i data-lucide="filter" class="icon"></i>
+              <span>تطبيق الفترة</span>
+            </button>
+            <button class="btn btn-ghost btn-sm" id="statementResetFilterBtn" type="button">
+              <span>كل المدة</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- KPI Cards Summary -->
+        <div class="statement-kpi-grid" id="statementKpis"></div>
+
+        <!-- Transactions Ledger Table -->
+        <div class="statement-table-wrapper">
+          <table class="statement-table" id="statementTable">
+            <thead>
+              <tr>
+                <th>التاريخ</th>
+                <th>نوع العملية</th>
+                <th>البيان / الوصف</th>
+                <th>المشروع</th>
+                <th>مستحق (له)</th>
+                <th>مدفوع (منه/له)</th>
+                <th>خصم</th>
+                <th>الرصيد التراكمي</th>
+              </tr>
+            </thead>
+            <tbody id="statementTableBody"></tbody>
+            <tfoot id="statementTableFoot"></tfoot>
+          </table>
+        </div>
+
+        <!-- Deduction Sub-section -->
+        <div class="statement-deductions-section">
+          <div class="deductions-form-box no-print">
+            <h3 class="deductions-title" style="margin-bottom:8px;font-size:0.95rem;">تطبيق خصم جديد</h3>
+            <form id="statementDeductionForm" class="deductions-inline-form" style="display:flex;gap:8px;flex-wrap:wrap;">
+              <input class="form-input" id="statementDeductionAmount" type="number" min="0" step="0.01" required placeholder="مبلغ الخصم (ج.م)" style="flex:1;min-width:140px;" />
+              <input class="form-input" id="statementDeductionReason" type="text" required placeholder="سبب الخصم (تأخير / تلفيات / غرامة)" style="flex:2;min-width:200px;" />
+              <button class="btn btn-danger btn-sm" type="submit">
+                <i data-lucide="scissors" class="icon"></i>
+                <span>خصم من الحساب</span>
+              </button>
+            </form>
+          </div>
+        </div>
+
+        <!-- Print Footer Signatures -->
+        <div class="statement-print-footer">
+          <div class="sig-box">
+            <span>توقيع المحاسب / المسئول:</span>
+            <div class="sig-line">........................................</div>
+          </div>
+          <div class="sig-box">
+            <span>توقيع صاحب الحساب / المقاول / المورد:</span>
+            <div class="sig-line">........................................</div>
+          </div>
+        </div>
       </div>
     </div>
   </div>

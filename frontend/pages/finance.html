@@ -13,7 +13,7 @@
     })();
   </script>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <meta name="description" content="Spark Engineering ERP System — Financial Accounts" />
   <title>Financial Accounts | Spark ERP</title>
   <link rel="icon" type="image/svg+xml" href="../assets/icons/favicon.svg" />
@@ -28,9 +28,17 @@
 
       <main class="app-main">
         <div class="app-content">
-          <header class="page-header">
-            <h1 class="page-title" data-i18n="finance.title">Financial Accounts</h1>
-            <p class="page-subtitle text-muted" data-i18n="finance.subtitle">Monitor income, expenses and cash flow.</p>
+          <header class="page-header page-header-row">
+            <div style="display:flex; align-items:center; gap:12px;">
+              <button class="btn btn-ghost btn-sm page-back-btn" onclick="history.length > 1 ? history.back() : window.location.href='./dashboard.html'" type="button" title="رجوع للخلف">
+                <i data-lucide="arrow-right" class="icon"></i>
+                <span data-i18n="common.backStep">رجوع</span>
+              </button>
+              <div>
+                <h1 class="page-title" data-i18n="finance.title">Financial Accounts</h1>
+                <p class="page-subtitle text-muted" data-i18n="finance.subtitle">Monitor income, expenses and cash flow.</p>
+              </div>
+            </div>
           </header>
 
           <section class="finance-summary" aria-label="Financial summary">
@@ -51,6 +59,48 @@
             </div>
           </section>
 
+          <section class="expense-summary-section" aria-label="Income summary" style="margin-bottom: var(--space-5);">
+            <h2 class="detail-section-title" data-i18n="finance.incomeSummaryTitle">Income Summary</h2>
+            <div class="expense-summary-grid">
+              <button class="expense-card is-income-card" id="incomeCardToday" type="button" data-period="today" aria-label="Today's income">
+                <span class="expense-card-icon" style="background:rgba(34, 197, 94, 0.15); color:var(--success);" aria-hidden="true"><i data-lucide="sun" class="icon"></i></span>
+                <span class="expense-card-label" data-i18n="finance.incomeToday">Today</span>
+                <span class="expense-card-value is-paid" id="incomeToday">0</span>
+              </button>
+              <button class="expense-card is-income-card" id="incomeCardWeek" type="button" data-period="week" aria-label="This week's income">
+                <span class="expense-card-icon" style="background:rgba(34, 197, 94, 0.15); color:var(--success);" aria-hidden="true"><i data-lucide="calendar-days" class="icon"></i></span>
+                <span class="expense-card-label" data-i18n="finance.incomeWeek">This Week</span>
+                <span class="expense-card-value is-paid" id="incomeWeek">0</span>
+              </button>
+              <button class="expense-card is-income-card" id="incomeCardMonth" type="button" data-period="month" aria-label="This month's income">
+                <span class="expense-card-icon" style="background:rgba(34, 197, 94, 0.15); color:var(--success);" aria-hidden="true"><i data-lucide="calendar" class="icon"></i></span>
+                <span class="expense-card-label" data-i18n="finance.incomeMonth">This Month</span>
+                <span class="expense-card-value is-paid" id="incomeMonth">0</span>
+              </button>
+            </div>
+          </section>
+
+          <section class="expense-summary-section" aria-label="Expense summary">
+            <h2 class="detail-section-title" data-i18n="finance.expenseSummaryTitle">Expense Summary</h2>
+            <div class="expense-summary-grid">
+              <button class="expense-card" id="expenseCardToday" type="button" data-period="today" aria-label="Today's expenses">
+                <span class="expense-card-icon" aria-hidden="true"><i data-lucide="sun" class="icon"></i></span>
+                <span class="expense-card-label" data-i18n="finance.expenseToday">Today</span>
+                <span class="expense-card-value" id="expenseToday">0</span>
+              </button>
+              <button class="expense-card" id="expenseCardWeek" type="button" data-period="week" aria-label="This week's expenses">
+                <span class="expense-card-icon" aria-hidden="true"><i data-lucide="calendar-days" class="icon"></i></span>
+                <span class="expense-card-label" data-i18n="finance.expenseWeek">This Week</span>
+                <span class="expense-card-value" id="expenseWeek">0</span>
+              </button>
+              <button class="expense-card" id="expenseCardMonth" type="button" data-period="month" aria-label="This month's expenses">
+                <span class="expense-card-icon" aria-hidden="true"><i data-lucide="calendar" class="icon"></i></span>
+                <span class="expense-card-label" data-i18n="finance.expenseMonth">This Month</span>
+                <span class="expense-card-value" id="expenseMonth">0</span>
+              </button>
+            </div>
+          </section>
+
           <section class="card detail-section detail-section-block">
             <h2 class="detail-section-title" data-i18n="finance.history">Transaction History</h2>
             <div id="financeList" class="rows-list"></div>
@@ -61,6 +111,46 @@
           </section>
         </div>
       </main>
+    </div>
+  </div>
+
+  <!-- Expense Breakdown Modal -->
+  <div class="modal-overlay" id="expenseBreakdownModal" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="expenseBreakdownTitle">
+      <div class="modal-header">
+        <h2 class="modal-title" id="expenseBreakdownTitle" data-i18n="finance.expenseBreakdownTitle">Expense Breakdown</h2>
+        <button class="btn btn-icon modal-close" id="expenseBreakdownClose" type="button" aria-label="Close">
+          <i data-lucide="x" class="icon"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="expense-breakdown-summary">
+          <span data-i18n="finance.totalOut">Total Outgoing</span>
+          <span class="expense-breakdown-total" id="expenseBreakdownTotal">0</span>
+        </div>
+        <div id="expenseBreakdownList" class="rows-list"></div>
+        <p id="expenseBreakdownEmpty" class="row-empty" hidden data-i18n="finance.noExpenses">No expenses for this period.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Income Breakdown Modal -->
+  <div class="modal-overlay" id="incomeBreakdownModal" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="incomeBreakdownTitle">
+      <div class="modal-header">
+        <h2 class="modal-title" id="incomeBreakdownTitle" data-i18n="finance.incomeBreakdownTitle">Income Breakdown</h2>
+        <button class="btn btn-icon modal-close" id="incomeBreakdownClose" type="button" aria-label="Close">
+          <i data-lucide="x" class="icon"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="expense-breakdown-summary" style="background: rgba(34, 197, 94, 0.1);">
+          <span data-i18n="finance.totalIn">Total Incoming</span>
+          <span class="expense-breakdown-total is-paid" id="incomeBreakdownTotal" style="color:var(--success);">0</span>
+        </div>
+        <div id="incomeBreakdownList" class="rows-list"></div>
+        <p id="incomeBreakdownEmpty" class="row-empty" hidden data-i18n="finance.noIncome">No income for this period.</p>
+      </div>
     </div>
   </div>
 

@@ -101,6 +101,17 @@ ul, ol {
   outline-offset: 2px;
 }
 
+/* Mobile & iOS Tweaks */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+@media (max-width: 768px) {
+  input, select, textarea {
+    font-size: 16px !important;
+  }
+}
+
 .visually-hidden {
   position: absolute;
   width: 1px;

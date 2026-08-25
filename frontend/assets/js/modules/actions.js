@@ -34,13 +34,13 @@ export function recordMoney({ direction, personType, personId, personName, amoun
   if (personType === "supplier") {
     const person = get("suppliers", personId);
     if (person) {
-      person.paid = num(person.paid) + (direction === "out" ? value : -value);
+      person.paid = Math.max(0, num(person.paid) + (direction === "out" ? value : -value));
       save("suppliers", person);
     }
   } else if (personType === "contractor") {
     const person = get("contractors", personId);
     if (person) {
-      person.paid = num(person.paid) + (direction === "out" ? value : -value);
+      person.paid = Math.max(0, num(person.paid) + (direction === "out" ? value : -value));
       save("contractors", person);
     }
     if (projectId) {
@@ -48,7 +48,7 @@ export function recordMoney({ direction, personType, personId, personName, amoun
       if (project) {
         const row = (project.contractors || []).find((c) => c.id === personId || c.contractorId === personId);
         if (row) {
-          row.paid = num(row.paid) + (direction === "out" ? value : -value);
+          row.paid = Math.max(0, num(row.paid) + (direction === "out" ? value : -value));
           save("projects", project);
         }
       }
@@ -56,7 +56,7 @@ export function recordMoney({ direction, personType, personId, personName, amoun
   } else if (personType === "client") {
     const person = get("clients", personId);
     if (person) {
-      person.paid = num(person.paid) + (direction === "in" ? value : -value);
+      person.paid = Math.max(0, num(person.paid) + (direction === "in" ? value : -value));
       save("clients", person);
     }
   }

@@ -74,3 +74,117 @@
     gap: var(--space-4);
   }
 }
+
+/* ---------- Expense Summary Cards ---------- */
+
+.expense-summary-section {
+  margin-bottom: var(--space-6);
+}
+
+.expense-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-4);
+  margin-top: var(--space-3);
+}
+
+.expense-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-5) var(--space-4);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  cursor: pointer;
+  transition: transform 120ms ease, box-shadow 120ms ease, border-color 120ms ease;
+  text-align: center;
+  width: 100%;
+}
+
+.expense-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--danger);
+}
+
+.expense-card:active {
+  transform: translateY(0);
+}
+
+.expense-card-icon {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-md);
+  background: var(--danger-soft);
+  color: var(--danger);
+  margin-bottom: var(--space-1);
+}
+
+.expense-card-icon .icon {
+  width: 20px;
+  height: 20px;
+}
+
+.expense-card-label {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.expense-card-value {
+  font-size: var(--font-size-lg);
+  font-weight: 700;
+  color: var(--danger);
+}
+
+/* ---------- Expense Breakdown Modal ---------- */
+
+.expense-breakdown-summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-3) var(--space-4);
+  background: var(--danger-soft);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--space-4);
+  font-size: var(--font-size-sm);
+  color: var(--text-muted);
+}
+
+.expense-breakdown-total {
+  font-size: var(--font-size-lg);
+  font-weight: 700;
+  color: var(--danger);
+}
+
+@media (max-width: 640px) {
+  .expense-summary-grid {
+    grid-template-columns: 1fr;
+    gap: var(--space-3);
+  }
+}
+
+/* ---------- Income Summary Cards (Green theme) ---------- */
+
+.expense-card.is-income-card:hover,
+.expense-card.is-income-card:focus {
+  border-color: var(--success) !important;
+  box-shadow: 0 6px 20px rgba(34, 197, 94, 0.3) !important;
+}
+
+.expense-card.is-income-card .expense-card-icon {
+  background: rgba(34, 197, 94, 0.15) !important;
+  color: var(--success) !important;
+}
+
+.expense-card.is-income-card .expense-card-value {
+  color: var(--success) !important;
+}
+
+

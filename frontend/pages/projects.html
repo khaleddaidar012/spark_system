@@ -13,7 +13,7 @@
     })();
   </script>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <meta name="description" content="Spark Engineering ERP System — Projects" />
   <title>Projects | Spark ERP</title>
   <link rel="icon" type="image/svg+xml" href="../assets/icons/favicon.svg" />
@@ -29,9 +29,15 @@
       <main class="app-main">
         <div class="app-content">
           <header class="page-header page-header-row">
-            <div>
-              <h1 class="page-title" data-i18n="projects.title">Projects</h1>
-              <p class="page-subtitle text-muted" data-i18n="projects.subtitle">Plan, track and deliver engineering projects.</p>
+            <div style="display:flex; align-items:center; gap:12px;">
+              <button class="btn btn-ghost btn-sm page-back-btn" onclick="history.length > 1 ? history.back() : window.location.href='./dashboard.html'" type="button" title="رجوع للخلف">
+                <i data-lucide="arrow-right" class="icon"></i>
+                <span data-i18n="common.backStep">رجوع</span>
+              </button>
+              <div>
+                <h1 class="page-title" data-i18n="projects.title">Projects</h1>
+                <p class="page-subtitle text-muted" data-i18n="projects.subtitle">Plan, track and deliver engineering projects.</p>
+              </div>
             </div>
             <button class="btn btn-primary btn-lg" id="addProjectBtn" type="button">
               <i data-lucide="plus" class="icon"></i>
@@ -115,6 +121,10 @@
             <label class="form-label" for="projAdvance" data-i18n="projects.formAdvance">Advance Payment</label>
             <input class="form-input" id="projAdvance" name="advancePayment" type="number" min="0" step="0.01" data-i18n-ph="projects.formAdvancePh" placeholder="0" />
           </div>
+        </div>
+        <div class="form-field">
+          <label class="form-label" for="projExpectedProfit" data-i18n="projects.expectedProfit">الربح المتوقع</label>
+          <input class="form-input" id="projExpectedProfit" name="expectedProfit" type="number" min="0" step="0.01" placeholder="0" />
         </div>
         <div class="modal-actions">
           <button class="btn btn-ghost" id="projectFormCancel" type="button" data-i18n="projects.cancel">Cancel</button>

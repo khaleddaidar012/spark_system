@@ -1,4 +1,4 @@
-﻿/* ============================================
+/* ============================================
    Spark ERP — Contractors Page Script
    Lists contractors with balances, records
    payments (settle account) and shows the
@@ -13,6 +13,7 @@ import { recordMoney } from "../modules/actions.js";
 import { translate } from "../modules/i18n.js";
 import { toast } from "../modules/toast.js";
 import { showModal, hideModal } from "../modules/modal.js";
+import { openPersonStatement, initStatementModal } from "../modules/person-statement.js";
 
 const lang = () => document.documentElement.lang;
 
@@ -72,6 +73,10 @@ function renderContractors() {
             </div>
           </div>
           <div class="row-item-actions">
+            <button class="btn btn-primary btn-sm" type="button" data-statement="${c.id}">
+              <i data-lucide="file-text" class="icon"></i>
+              <span>${translate("contractors.statementBtn") || "كشف حساب"}</span>
+            </button>
             <button class="btn btn-soft btn-sm" type="button" data-settle="${c.id}">
               <i data-lucide="wallet" class="icon"></i>
               <span>${translate("contractors.settleAccount")}</span>
@@ -364,8 +369,14 @@ document.addEventListener("DOMContentLoaded", async () => {
   initSettleModal();
   initProjectsModal();
   initAccountModal();
+  initStatementModal();
 
   document.getElementById("contractorsList").addEventListener("click", (e) => {
+    const statementBtn = e.target.closest("[data-statement]");
+    if (statementBtn) {
+      openPersonStatement({ personId: statementBtn.dataset.statement, personType: "contractor" });
+      return;
+    }
     const settleBtn = e.target.closest("[data-settle]");
     if (settleBtn) {
       openSettleModal(settleBtn.dataset.settle);

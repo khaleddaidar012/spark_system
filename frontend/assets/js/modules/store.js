@@ -20,6 +20,7 @@ export const COLLECTIONS = {
   materials: "materials",
   moneyTransactions: "moneyTransactions",
   materialTransactions: "materialTransactions",
+  deductions: "deductions",
 };
 
 export const PEOPLE_COLLECTIONS = ["suppliers", "contractors", "clients", "others"];
@@ -43,6 +44,7 @@ const cache = {
   materials: [],
   moneyTransactions: [],
   materialTransactions: [],
+  deductions: [],
 };
 
 let loaded = false;
@@ -64,6 +66,7 @@ export async function initStore({ force = false } = {}) {
     cache[key] = Array.isArray(data[key]) ? data[key] : [];
   }
   loaded = true;
+  seedDefaultData();
 }
 
 export function isStoreLoaded() {
@@ -148,4 +151,149 @@ export async function clearAll() {
   await api.reset();
   await api.seed();
   await initStore({ force: true });
+}
+
+/* ============================================================
+   Default seed data — contractors & suppliers
+   Non-destructive: only inserts records that are not already
+   present (matched by name). Safe to call on every app start.
+   ============================================================ */
+
+const DEFAULT_CONTRACTORS = [
+  /* Lean */
+  { name: "مقاول لين", role: "lean" },
+  /* Wood doors / cladding */
+  { name: "محمد سلطان", role: "wooddoors" },
+  { name: "نصار الديب", role: "woodcladding" },
+  /* Marble */
+  { name: "محمد الحمشبي", role: "marble" },
+  /* Demolition / cleanup */
+  { name: "مصطفى (تكسير)", role: "demolition" },
+  /* Insulation */
+  { name: "عم زكريا", role: "insulation" },
+  { name: "مصطفى (عزل)", role: "insulation" },
+  /* Insulation + plumbing */
+  { name: "عم هاني السباك", role: "insulplumb" },
+  { name: "عم هاني (مقاول سباكة)", role: "plumbing" },
+  /* Fire safety */
+  { name: "محمد بلال", role: "fireworks" },
+  /* Carpentry / ironwork */
+  { name: "أحمد وهبة", role: "ironwork" },
+  { name: "عبد الرحمن", role: "carpentry" },
+  /* Electrical */
+  { name: "إبراهيم السيد أحمد", role: "electrical" },
+  /* Gypsum */
+  { name: "حامد العلمي", role: "gypsum" },
+  { name: "أبو هبة (جبس)", role: "gypsum" },
+  /* Painting */
+  { name: "أبو يوسف", role: "painting" },
+  { name: "عبده الفار", role: "painting" },
+  { name: "حسام عبد الواحد", role: "painting" },
+  { name: "حسام الزرقا", role: "painting" },
+  /* Plastering */
+  { name: "إيهاب جمعة", role: "plastering" },
+  { name: "محمود الحفية", role: "plastering" },
+  { name: "سرور (محارة)", role: "plastering" },
+  { name: "عم سليمان البحري", role: "plastering" },
+  /* Masonry */
+  { name: "إبراهيم (مباني)", role: "masonry" },
+  { name: "عم سرور (مباني)", role: "masonry" },
+  /* HVAC */
+  { name: "شركة الأقصى", role: "hvac" },
+  /* Tiles */
+  { name: "كريم الشناوي", role: "tiles" },
+  { name: "إبراهيم (مبلط)", role: "tiles" },
+  /* Aluminum & kitchens */
+  { name: "السعيد", role: "aluminum" },
+  { name: "معتز", role: "aluminum" },
+  { name: "ميكانيوم", role: "kitchens" },
+];
+
+const DEFAULT_SUPPLIERS = [
+  /* Plumbing */
+  { name: "هيثم أبو العنيين", supplies: ["بضاعة سباكة"], notes: "دمياط" },
+  { name: "عبد العزيز السلاب", supplies: ["بضاعة سباكة"], notes: "القاهرة" },
+  /* Electrical */
+  { name: "هشام الشربيني", supplies: ["توريدات كهرباء"] },
+  /* Insulation */
+  { name: "ألفا", supplies: ["مواد عزل"] },
+  { name: "محمد أشرف", supplies: ["مواد عزل"] },
+  /* Ceramics — each as a separate record */
+  { name: "مورد سيراميك علوان", supplies: ["سيراميك"] },
+  { name: "القطان", supplies: ["سيراميك"] },
+  { name: "أبو العز", supplies: ["سيراميك"] },
+  { name: "أبو الهدى", supplies: ["سيراميك"] },
+  { name: "الشربيني (سيراميك)", supplies: ["سيراميك"] },
+];
+
+export function seedDefaultData() {
+  const existingContractorNames = new Set(all("contractors").map((c) => c.name));
+  for (const c of DEFAULT_CONTRACTORS) {
+    if (!existingContractorNames.has(c.name)) {
+      save("contractors", {
+        id: uid(),
+        name: c.name,
+        role: c.role,
+        phone: "",
+        total: 0,
+        paid: 0,
+      });
+    }
+  }
+
+  const existingSupplierNames = new Set(all("suppliers").map((s) => s.name));
+  for (const s of DEFAULT_SUPPLIERS) {
+    if (!existingSupplierNames.has(s.name)) {
+      save("suppliers", {
+        id: uid(),
+        name: s.name,
+        phone: "",
+        notes: s.notes || "",
+        supplies: s.supplies || [],
+        purchases: 0,
+        paid: 0,
+      });
+    }
+  }
+}
+
+/* ---------- Deductions Helpers ---------- */
+
+export function addDeduction({ personId, personType, amount, reason, date, projectId }) {
+  const item = {
+    id: uid(),
+    personId: personId || "",
+    personType: personType || "contractor",
+    amount: Number(amount) || 0,
+    reason: reason || "",
+    date: date || today(),
+    projectId: projectId || "",
+    createdAt: Date.now(),
+  };
+  save("deductions", item);
+  return item;
+}
+
+export function deleteDeduction(id) {
+  return remove("deductions", id);
+}
+
+export function getDeductionsByPerson(personId, personType, fromDate, toDate) {
+  return all("deductions").filter((d) => {
+    if (d.personId !== personId) return false;
+    if (personType && d.personType !== personType) return false;
+    if (fromDate && d.date && d.date < fromDate) return false;
+    if (toDate && d.date && d.date > toDate) return false;
+    return true;
+  });
+}
+
+/* ---------- Expected Profit Helpers ---------- */
+
+export function setProjectExpectedProfit(projectId, amount) {
+  const project = get("projects", projectId);
+  if (!project) return false;
+  project.expectedProfit = Number(amount) || 0;
+  save("projects", project);
+  return true;
 }

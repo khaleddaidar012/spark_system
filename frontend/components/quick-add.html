@@ -58,6 +58,20 @@
         </select>
       </div>
 
+      <div class="form-field" id="moneyPhaseField" hidden>
+        <label class="form-label" for="moneyPhase">مرحلة المشروع / Phase</label>
+        <select class="form-input" id="moneyPhase">
+          <option value="">— اختر المرحلة / Choose Phase —</option>
+        </select>
+      </div>
+
+      <div class="form-field" id="moneySubphaseField" hidden>
+        <label class="form-label" for="moneySubphase">المرحلة الفرعية / Sub-phase</label>
+        <select class="form-input" id="moneySubphase">
+          <option value="">— اختر المرحلة الفرعية —</option>
+        </select>
+      </div>
+
       <div class="chip-row" id="moneyPersonType" role="group" aria-label="Person type">
         <button class="chip is-active" type="button" data-value="supplier"><i data-lucide="truck" class="icon"></i><span data-i18n="quick.supplier">Supplier</span></button>
         <button class="chip" type="button" data-value="contractor"><i data-lucide="hard-hat" class="icon"></i><span data-i18n="quick.contractor">Contractor</span></button>
@@ -84,6 +98,31 @@
       <div class="form-field">
         <label class="form-label" for="moneyNote" data-i18n="quick.note">Note (optional)</label>
         <input class="form-input" id="moneyNote" name="note" type="text" data-i18n-ph="quick.notePh" placeholder="—" />
+      </div>
+
+      <!-- Invoice Attachment -->
+      <div class="invoice-upload-section">
+        <span class="invoice-upload-label">فاتورة (اختياري) / Invoice (optional)</span>
+        <div class="invoice-upload-btns">
+          <label class="btn btn-soft btn-sm invoice-pick-btn" title="اختيار من المعرض / Gallery" aria-label="Attach image or PDF">
+            <i data-lucide="paperclip" class="icon"></i>
+            <input type="file" id="moneyInvoiceFile" accept="image/*,application/pdf" hidden />
+          </label>
+          <label class="btn btn-soft btn-sm invoice-pick-btn" title="التقاط صورة / Camera" aria-label="Take photo">
+            <i data-lucide="camera" class="icon"></i>
+            <input type="file" id="moneyInvoiceCamera" accept="image/*" capture="environment" hidden />
+          </label>
+        </div>
+        <div class="invoice-preview" id="moneyInvoicePreview" hidden>
+          <img id="moneyInvoiceThumb" src="" alt="Invoice preview" class="invoice-thumb" hidden />
+          <span id="moneyInvoicePdfIcon" class="invoice-pdf-icon" hidden>
+            <i data-lucide="file-text" class="icon"></i>
+            <span id="moneyInvoicePdfName" class="invoice-pdf-name"></span>
+          </span>
+          <button type="button" class="invoice-remove-btn" id="moneyInvoiceRemove" aria-label="Remove invoice">
+            <i data-lucide="x" class="icon"></i>
+          </button>
+        </div>
       </div>
 
       <div class="modal-actions">
@@ -157,6 +196,31 @@
       <div class="form-field" id="qmPriceField">
         <label class="form-label" for="qmPrice" data-i18n="quick.price">Unit Price</label>
         <input class="form-input" id="qmPrice" name="unitPrice" type="number" min="0" step="0.01" required data-i18n-ph="quick.pricePh" placeholder="0" />
+      </div>
+
+      <!-- Invoice Attachment -->
+      <div class="invoice-upload-section">
+        <span class="invoice-upload-label">فاتورة (اختياري) / Invoice (optional)</span>
+        <div class="invoice-upload-btns">
+          <label class="btn btn-soft btn-sm invoice-pick-btn" title="اختيار من المعرض / Gallery" aria-label="Attach image or PDF">
+            <i data-lucide="paperclip" class="icon"></i>
+            <input type="file" id="matInvoiceFile" accept="image/*,application/pdf" hidden />
+          </label>
+          <label class="btn btn-soft btn-sm invoice-pick-btn" title="التقاط صورة / Camera" aria-label="Take photo">
+            <i data-lucide="camera" class="icon"></i>
+            <input type="file" id="matInvoiceCamera" accept="image/*" capture="environment" hidden />
+          </label>
+        </div>
+        <div class="invoice-preview" id="matInvoicePreview" hidden>
+          <img id="matInvoiceThumb" src="" alt="Invoice preview" class="invoice-thumb" hidden />
+          <span id="matInvoicePdfIcon" class="invoice-pdf-icon" hidden>
+            <i data-lucide="file-text" class="icon"></i>
+            <span id="matInvoicePdfName" class="invoice-pdf-name"></span>
+          </span>
+          <button type="button" class="invoice-remove-btn" id="matInvoiceRemove" aria-label="Remove invoice">
+            <i data-lucide="x" class="icon"></i>
+          </button>
+        </div>
       </div>
 
       <div class="modal-actions">
@@ -241,5 +305,26 @@
         <button class="btn btn-primary" type="submit" data-i18n="quick.save">Save</button>
       </div>
     </form>
+  </div>
+</div>
+
+<!-- Invoice Lightbox Viewer (shared — opened by JS openInvoiceLightbox()) -->
+<div class="modal-overlay" id="invoiceLightbox" hidden>
+  <div class="modal modal-lg invoice-lightbox-modal" role="dialog" aria-modal="true" aria-label="Invoice viewer">
+    <div class="modal-header">
+      <h2 class="modal-title" id="invoiceLightboxTitle">الفاتورة / Invoice</h2>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <a id="invoiceLightboxDownload" class="btn btn-soft btn-sm" download="invoice" aria-label="Download invoice">
+          <i data-lucide="download" class="icon"></i>
+          <span>تحميل</span>
+        </a>
+        <button class="btn btn-icon modal-close" id="invoiceLightboxClose" type="button" aria-label="Close">
+          <i data-lucide="x" class="icon"></i>
+        </button>
+      </div>
+    </div>
+    <div class="modal-body invoice-lightbox-body" id="invoiceLightboxBody">
+      <!-- filled dynamically by openInvoiceLightbox() -->
+    </div>
   </div>
 </div>

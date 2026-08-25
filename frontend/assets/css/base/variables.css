@@ -126,3 +126,25 @@
 [dir="rtl"] {
   --font-size-base: 14px;
 }
+
+/* ============================================
+   Project Phase Color Tokens
+   Matches the colors defined in phases-catalog.js
+   ============================================ */
+
+:root {
+  --phase-land:     #f59e0b;
+  --phase-license:  #10b981;
+  --phase-concrete: #6366f1;
+  --phase-elec:     #f97316;
+  --phase-plumb:    #0ea5e9;
+  --phase-freon:    #06b6d4;
+  --phase-plaster:  #84cc16;
+  --phase-tiles:    #ec4899;
+  --phase-gypsum:   #a78bfa;
+  --phase-marble:   #e879f9;
+  --phase-insul:    #f43f5e;
+
+  /* Dynamic phase color — set inline as --phase-color on phase badge/dot elements */
+  --phase-color: #64748b;  /* default neutral if no phase is active */
+}

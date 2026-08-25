@@ -13,7 +13,7 @@
     })();
   </script>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <meta name="description" content="Spark Engineering ERP System — Project Details" />
   <title>Project | Spark ERP</title>
   <link rel="icon" type="image/svg+xml" href="../assets/icons/favicon.svg" />
@@ -28,10 +28,16 @@
 
       <main class="app-main">
         <div class="app-content">
-          <a class="btn btn-ghost back-link" href="./projects.html">
-            <i data-lucide="arrow-left" class="icon"></i>
-            <span data-i18n="project.back">Back to Projects</span>
-          </a>
+          <div class="page-top-nav" style="display:flex; align-items:center; gap:10px; margin-bottom:16px;">
+            <button class="btn btn-ghost page-back-btn" onclick="history.length > 1 ? history.back() : window.location.href='./projects.html'" type="button" title="رجوع للخلف">
+              <i data-lucide="arrow-right" class="icon"></i>
+              <span data-i18n="common.backStep">رجوع</span>
+            </button>
+            <a class="btn btn-soft page-projects-btn" href="./projects.html">
+              <i data-lucide="folder-kanban" class="icon"></i>
+              <span data-i18n="project.back">الرجوع للمشاريع</span>
+            </a>
+          </div>
 
           <header class="detail-header" id="detailHeader"></header>
 
@@ -119,6 +125,26 @@
               </div>
             </div>
             <div id="moneyList" class="rows-list"></div>
+          </section>
+
+          <!-- Project Phases section -->
+          <section class="card detail-section detail-section-block" id="phasesSection">
+            <div class="detail-section-head">
+              <h2 class="detail-section-title" data-i18n="project.phasesTitle">مراحل المشروع / Project Phases</h2>
+              <button class="btn btn-primary btn-sm" id="addPhaseBtn" type="button">
+                <i data-lucide="plus" class="icon"></i>
+                <span data-i18n="project.addPhase">إضافة مرحلة</span>
+              </button>
+            </div>
+            <div id="phasesList" class="phases-list"></div>
+          </section>
+
+          <!-- Phase History Log section -->
+          <section class="card detail-section detail-section-block" id="phaseLogSection">
+            <div class="detail-section-head">
+              <h2 class="detail-section-title" data-i18n="project.phaseLogTitle">سجل المراحل / Phase History</h2>
+            </div>
+            <div id="phaseLogList" class="phase-log-list"></div>
           </section>
         </div>
       </main>
@@ -269,7 +295,87 @@
     </div>
   </div>
 
+  <!-- Phase completion confirmation modal -->
+  <div class="modal-overlay" id="phaseCompleteModal" hidden>
+    <div class="modal modal-sm" role="dialog" aria-modal="true" aria-labelledby="phaseCompleteTitle">
+      <div class="modal-header">
+        <h2 class="modal-title" id="phaseCompleteTitle">إتمام المرحلة / Complete Phase</h2>
+        <button class="btn btn-icon modal-close" id="phaseCompleteClose" type="button" aria-label="Close">
+          <i data-lucide="x" class="icon"></i>
+        </button>
+      </div>
+      <div class="modal-body form-stack">
+        <p id="phaseCompleteDesc" class="confirm-desc"></p>
+        <div id="phaseCompleteActiveList" class="phase-active-others"></div>
+        <div class="form-field" id="phaseCompleteNextField">
+          <label class="form-label" for="phaseCompleteNextSelect">تفعيل المرحلة التالية (اختياري)</label>
+          <select class="form-input" id="phaseCompleteNextSelect"></select>
+        </div>
+        <div class="modal-actions">
+          <button class="btn btn-ghost" id="phaseCompleteCancel" type="button" data-i18n="projects.cancel">Cancel</button>
+          <button class="btn btn-primary" id="phaseCompleteConfirm" type="button">
+            <i data-lucide="check" class="icon"></i>
+            <span>تأكيد الإتمام</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add custom phase modal -->
+  <div class="modal-overlay" id="addPhaseModal" hidden>
+    <div class="modal modal-md" role="dialog" aria-modal="true" aria-labelledby="addPhaseModalTitle">
+      <div class="modal-header">
+        <h2 class="modal-title" id="addPhaseModalTitle">إضافة مرحلة مخصصة / Add Custom Phase</h2>
+        <button class="btn btn-icon modal-close" id="addPhaseModalClose" type="button" aria-label="Close">
+          <i data-lucide="x" class="icon"></i>
+        </button>
+      </div>
+      <form id="addPhaseForm" class="modal-body form-stack" novalidate>
+        <div class="form-field">
+          <label class="form-label" for="customPhaseName">اسم المرحلة (بالعربية) <span class="required-star">*</span></label>
+          <input class="form-input" id="customPhaseName" name="label" type="text" required placeholder="مثال: أعمال الديكور" />
+        </div>
+        <div class="form-field">
+          <label class="form-label" for="customPhaseNameEn">اسم المرحلة (بالإنجليزية / اختياري)</label>
+          <input class="form-input" id="customPhaseNameEn" name="labelEn" type="text" placeholder="e.g. Decoration" />
+        </div>
+        <div class="form-field">
+          <label class="form-label">لون المرحلة / Phase Color</label>
+          <div class="phase-color-picker" id="customPhaseColorPicker">
+            <label class="color-swatch-label"><input type="radio" name="phaseColor" value="#f59e0b" checked /><span class="color-swatch" style="background:#f59e0b"></span></label>
+            <label class="color-swatch-label"><input type="radio" name="phaseColor" value="#10b981" /><span class="color-swatch" style="background:#10b981"></span></label>
+            <label class="color-swatch-label"><input type="radio" name="phaseColor" value="#6366f1" /><span class="color-swatch" style="background:#6366f1"></span></label>
+            <label class="color-swatch-label"><input type="radio" name="phaseColor" value="#f97316" /><span class="color-swatch" style="background:#f97316"></span></label>
+            <label class="color-swatch-label"><input type="radio" name="phaseColor" value="#0ea5e9" /><span class="color-swatch" style="background:#0ea5e9"></span></label>
+            <label class="color-swatch-label"><input type="radio" name="phaseColor" value="#06b6d4" /><span class="color-swatch" style="background:#06b6d4"></span></label>
+            <label class="color-swatch-label"><input type="radio" name="phaseColor" value="#84cc16" /><span class="color-swatch" style="background:#84cc16"></span></label>
+            <label class="color-swatch-label"><input type="radio" name="phaseColor" value="#ec4899" /><span class="color-swatch" style="background:#ec4899"></span></label>
+            <label class="color-swatch-label"><input type="radio" name="phaseColor" value="#a78bfa" /><span class="color-swatch" style="background:#a78bfa"></span></label>
+            <label class="color-swatch-label"><input type="radio" name="phaseColor" value="#e879f9" /><span class="color-swatch" style="background:#e879f9"></span></label>
+            <label class="color-swatch-label"><input type="radio" name="phaseColor" value="#f43f5e" /><span class="color-swatch" style="background:#f43f5e"></span></label>
+          </div>
+        </div>
+        <div class="form-field">
+          <div class="form-field-head">
+            <label class="form-label">المراحل الفرعية (اختياري) / Sub-phases</label>
+          </div>
+          <div id="customSubPhasesContainer" class="custom-subs-container"></div>
+          <button type="button" class="btn btn-soft btn-sm" id="addCustomSubBtn" style="margin-top:6px;">
+            <i data-lucide="plus" class="icon"></i>
+            <span>إضافة مرحلة فرعية / Add Sub-phase</span>
+          </button>
+        </div>
+        <div class="modal-actions">
+          <button class="btn btn-ghost" id="addPhaseCancel" type="button" data-i18n="projects.cancel">Cancel</button>
+          <button class="btn btn-primary" type="submit" data-i18n="projects.save">Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <script src="../assets/vendor/lucide/lucide.min.js"></script>
   <script type="module" src="../assets/js/pages/project.js"></script>
 </body>
 </html>
+

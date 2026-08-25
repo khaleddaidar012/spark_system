@@ -13,7 +13,7 @@
     })();
   </script>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <meta name="description" content="Spark Engineering Co. — Statement of Account" />
   <title>Statement | Spark ERP</title>
   <link rel="icon" type="image/svg+xml" href="../assets/icons/favicon.svg" />
@@ -22,10 +22,16 @@
 </head>
 <body data-page="statement">
   <div class="statement-toolbar no-print">
-    <a class="btn btn-ghost" id="statementBack" href="./projects.html">
-      <i data-lucide="arrow-left" class="icon"></i>
-      <span data-i18n="statement.back">Back to Projects</span>
-    </a>
+    <div style="display:flex; align-items:center; gap:8px;">
+      <button class="btn btn-ghost" onclick="history.length > 1 ? history.back() : window.location.href='./projects.html'" type="button" title="رجوع للخلف">
+        <i data-lucide="arrow-right" class="icon"></i>
+        <span data-i18n="common.backStep">رجوع</span>
+      </button>
+      <a class="btn btn-soft" id="statementBack" href="./projects.html">
+        <i data-lucide="folder-kanban" class="icon"></i>
+        <span data-i18n="statement.back">الرجوع للمشاريع</span>
+      </a>
+    </div>
     <div class="statement-toolbar-actions">
       <button class="btn btn-primary" id="statementSave" type="button">
         <i data-lucide="save" class="icon"></i>

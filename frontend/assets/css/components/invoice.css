@@ -1,0 +1,251 @@
+/* ============================================
+   Spark ERP — Invoice Attachment Styles
+   Upload section in modals, thumbnails in rows,
+   and full-screen lightbox viewer.
+   ============================================ */
+
+/* ---------- Upload section (inside modals) ---------- */
+
+.invoice-upload-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  background: var(--surface-2);
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius-md);
+  transition: border-color var(--transition-fast) var(--ease);
+}
+
+.invoice-upload-section:focus-within {
+  border-color: var(--primary);
+}
+
+.invoice-upload-label {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  font-weight: 600;
+  letter-spacing: 0.03em;
+}
+
+.invoice-upload-btns {
+  display: flex;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.invoice-pick-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  cursor: pointer;
+  min-width: 44px;
+  min-height: 44px;
+}
+
+/* Hide the native file input */
+.invoice-pick-btn input[type="file"] {
+  display: none;
+}
+
+/* ---------- Preview area ---------- */
+
+.invoice-preview {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  margin-top: var(--space-1);
+}
+
+.invoice-thumb {
+  width: 72px;
+  height: 72px;
+  object-fit: cover;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.invoice-pdf-icon {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--danger);
+  font-size: var(--font-size-sm);
+  flex: 1;
+  min-width: 0;
+}
+
+.invoice-pdf-icon .icon {
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+}
+
+.invoice-pdf-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 160px;
+  color: var(--text);
+  font-weight: 500;
+}
+
+.invoice-remove-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: var(--danger-soft);
+  color: var(--danger);
+  cursor: pointer;
+  flex-shrink: 0;
+  margin-left: auto;
+  transition: background var(--transition-fast) var(--ease);
+}
+
+[dir="rtl"] .invoice-remove-btn {
+  margin-left: 0;
+  margin-right: auto;
+}
+
+.invoice-remove-btn:hover {
+  background: var(--danger);
+  color: #fff;
+}
+
+.invoice-remove-btn .icon {
+  width: 16px;
+  height: 16px;
+}
+
+/* ---------- Thumbnail in transaction rows ---------- */
+
+.invoice-row-thumb {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+  cursor: pointer;
+  overflow: hidden;
+  padding: 0;
+  flex-shrink: 0;
+  transition: transform var(--transition-fast) var(--ease),
+              box-shadow var(--transition-fast) var(--ease),
+              border-color var(--transition-fast) var(--ease);
+}
+
+.invoice-row-thumb:hover {
+  transform: scale(1.08);
+  box-shadow: var(--shadow-md);
+  border-color: var(--primary);
+}
+
+.invoice-thumb-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.invoice-row-thumb--pdf {
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--space-1);
+  background: var(--danger-soft);
+  border-color: color-mix(in srgb, var(--danger) 30%, transparent);
+  color: var(--danger);
+}
+
+.invoice-row-thumb--pdf .icon {
+  width: 18px;
+  height: 18px;
+}
+
+.invoice-pdf-row-name {
+  font-size: 0.6rem;
+  line-height: 1.1;
+  text-align: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 40px;
+}
+
+/* ---------- Lightbox ---------- */
+
+.invoice-lightbox-modal {
+  max-width: 840px;
+  width: 95vw;
+}
+
+.invoice-lightbox-body {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 320px;
+  padding: var(--space-4);
+  overflow: auto;
+}
+
+.invoice-lightbox-img {
+  max-width: 100%;
+  max-height: 72vh;
+  border-radius: var(--radius-md);
+  display: block;
+  margin: 0 auto;
+  box-shadow: var(--shadow-lg);
+}
+
+.invoice-lightbox-pdf {
+  width: 100%;
+  height: 70vh;
+  border: none;
+  border-radius: var(--radius-md);
+}
+
+.invoice-lightbox-fallback {
+  text-align: center;
+  color: var(--text-muted);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+/* ---------- Responsive ---------- */
+
+@media (max-width: 480px) {
+  .invoice-upload-btns {
+    flex-direction: row;
+    width: 100%;
+  }
+
+  .invoice-pick-btn {
+    flex: 1;
+    justify-content: center;
+  }
+
+  .invoice-pdf-name {
+    max-width: 100px;
+  }
+
+  .invoice-lightbox-img {
+    max-height: 60vh;
+  }
+
+  .invoice-lightbox-pdf {
+    height: 55vh;
+  }
+}

@@ -65,6 +65,30 @@ body.sidebar-collapsed .app-main {
   }
 
   .app-content {
-    padding: var(--space-5);
+    padding: var(--space-4) var(--space-3);
+    padding-bottom: max(var(--space-6), env(safe-area-inset-bottom));
+  }
+}
+
+@media (max-width: 640px) {
+  .page-header-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--space-3);
+  }
+
+  .page-header-row .btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .page-top-nav {
+    flex-wrap: wrap;
+    width: 100%;
+  }
+
+  .page-top-nav .btn {
+    flex: 1 1 auto;
+    justify-content: center;
   }
 }

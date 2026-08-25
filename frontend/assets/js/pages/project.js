@@ -1,4 +1,4 @@
-﻿/* ============================================
+/* ============================================
    Spark ERP — Project Detail Page Script
    Loads a project by id, renders general info,
    cost summary, analytics, contractors and
@@ -14,6 +14,22 @@ import { personRolesLabel, personTypeLabel, contractorLabel, contractorSpecialty
 import { translate } from "../modules/i18n.js";
 import { toast } from "../modules/toast.js";
 import { showModal, hideModal } from "../modules/modal.js";
+import { openInvoiceLightbox } from "../modules/quick-add.js";
+import {
+  getProjectPhases,
+  getActivePhases,
+  activatePhase,
+  completePhase,
+  activateSubPhase,
+  completeSubPhase,
+  addCustomPhase,
+  removeCustomPhase,
+  getPhaseLog,
+  addFinanceToPhaseLog,
+  phaseCostSummary,
+  getCompletionCandidates,
+  getPendingPhasesAfter
+} from "../modules/project-phases.js";
 
 const lang = () => document.documentElement.lang;
 
@@ -32,7 +48,359 @@ function esc(value) {
 
 let current = null;
 
-/* ---------- URL ---------- */
+/* ---------- Invoice thumbnail helper ---------- */
+
+function invoiceThumbnailHTML(txn, context) {
+  if (!txn.invoiceData) return "";
+  const isImage = txn.invoiceType && txn.invoiceType.startsWith("image/");
+  const safeName = (txn.invoiceName || "invoice").replace(/"/g, "&quot;");
+  const dataAttr = `data-invoice-ctx="${context}" data-invoice-id="${txn.id}"`;
+  if (isImage) {
+    return `<button type="button" class="invoice-row-thumb" ${dataAttr} aria-label="View invoice">
+      <img src="${txn.invoiceData}" alt="" class="invoice-thumb-img" />
+    </button>`;
+  }
+  return `<button type="button" class="invoice-row-thumb invoice-row-thumb--pdf" ${dataAttr} aria-label="View PDF invoice">
+    <i data-lucide="file-text" class="icon"></i>
+    <span class="invoice-pdf-row-name">${safeName.length > 18 ? safeName.slice(0, 16) + "…" : safeName}</span>
+  </button>`;
+}
+
+/* ---------- Project Phases Section ---------- */
+
+const PHASE_STATUS_LABELS = {
+  pending: { ar: "قيد الانتظار", en: "Pending" },
+  active:  { ar: "جاري",         en: "In Progress" },
+  done:    { ar: "مكتمل",        en: "Completed" },
+};
+
+function renderPhasesList(p) {
+  const container = document.getElementById("phasesList");
+  if (!container) return;
+
+  const phases = getProjectPhases(p.id) || [];
+  if (!phases.length) {
+    container.innerHTML = `<p class="row-empty">لا توجد مراحل محددة / No phases defined</p>`;
+    return;
+  }
+
+  const costMap = {};
+  for (const item of phaseCostSummary(p.id)) {
+    costMap[item.phaseId] = item.totalCost;
+  }
+
+  // Sort: active first, then pending, then done
+  const rank = (s) => (s === "active" ? 0 : s === "pending" ? 1 : 2);
+  const sorted = [...phases].sort((a, b) => rank(a.status) - rank(b.status) || a.order - b.order);
+
+  container.innerHTML = sorted.map((phase) => {
+    const isDone = phase.status === "done";
+    const isActive = phase.status === "active";
+    const isPending = phase.status === "pending";
+    const phaseColor = phase.color || "#6366f1";
+    const statusLabel = local(PHASE_STATUS_LABELS[phase.status]) || phase.status;
+    const cost = costMap[phase.id] || 0;
+    const phaseLabel = lang() === "en" && phase.labelEn ? phase.labelEn : phase.label;
+
+    let subPhasesHTML = "";
+    if (Array.isArray(phase.subPhases) && phase.subPhases.length > 0) {
+      const subsHTML = phase.subPhases.map((sub) => {
+        const subIsDone = sub.status === "done";
+        const subIsActive = sub.status === "active";
+        const subLabel = lang() === "en" && sub.labelEn ? sub.labelEn : sub.label;
+        const subStatusLabel = local(PHASE_STATUS_LABELS[sub.status]) || sub.status;
+
+        let subActions = "";
+        if (isActive) {
+          if (sub.status === "pending") {
+            subActions = `<button type="button" class="btn btn-ghost btn-xs sub-activate-btn" data-phase-id="${esc(phase.id)}" data-sub-id="${esc(sub.id)}">تفعيل</button>`;
+          } else if (subIsActive) {
+            subActions = `<button type="button" class="btn btn-soft btn-xs sub-done-btn" data-phase-id="${esc(phase.id)}" data-sub-id="${esc(sub.id)}"><i data-lucide="check" class="icon"></i> تم</button>`;
+          }
+        }
+
+        return `
+          <div class="phase-sub-row ${subIsActive ? "phase-sub-row--active" : subIsDone ? "phase-sub-row--done" : ""}">
+            <span class="phase-sub-dot" style="background-color: ${esc(sub.color || phaseColor)}"></span>
+            <span class="phase-sub-label">${esc(subLabel)}</span>
+            <span class="phase-badge-more" style="font-size:0.65rem;">${esc(subStatusLabel)}</span>
+            <div class="phase-sub-actions">${subActions}</div>
+          </div>`;
+      }).join("");
+
+      subPhasesHTML = `<div class="phase-sub-list">${subsHTML}</div>`;
+    }
+
+    let actionsHTML = "";
+    if (isPending) {
+      actionsHTML = `<button type="button" class="btn btn-soft btn-xs phase-activate-btn" data-phase-id="${esc(phase.id)}"><i data-lucide="play" class="icon"></i> تفعيل</button>`;
+      if (phase.isCustom) {
+        actionsHTML += `<button type="button" class="btn btn-ghost btn-xs phase-delete-btn" data-phase-id="${esc(phase.id)}" style="color:var(--danger)"><i data-lucide="trash-2" class="icon"></i></button>`;
+      }
+    } else if (isActive) {
+      actionsHTML = `<button type="button" class="btn btn-primary btn-xs phase-done-btn" data-phase-id="${esc(phase.id)}"><i data-lucide="check" class="icon"></i> تم</button>`;
+    }
+
+    return `
+      <div class="phase-row ${isActive ? "phase-row--active" : isPending ? "phase-row--pending" : "phase-row--done"}" style="--phase-color: ${esc(phaseColor)}" data-phase-id="${esc(phase.id)}">
+        <div class="phase-row-header">
+          <span class="phase-row-dot"></span>
+          <div class="phase-row-title-wrap">
+            <span class="phase-row-label">${esc(phaseLabel)}</span>
+            <span class="phase-row-order">#${phase.order}${phase.isCustom ? " · مخصصة" : ""}</span>
+          </div>
+          ${cost > 0 ? `<span class="phase-row-cost" title="إجمالي تكلفة المرحلة">تكلفة المرحلة: <strong>${formatMoney(cost)} ج.م</strong></span>` : `<span class="phase-row-cost phase-row-cost--zero" style="opacity:0.6;font-size:0.8rem;">0 ج.م</span>`}
+          <div class="phase-row-actions">${actionsHTML}</div>
+          <span class="phase-row-status-badge ${isActive ? "status-badge--active" : isPending ? "status-badge--pending" : "status-badge--done"}">
+            ${isDone ? '<i data-lucide="check" class="icon"></i>' : ""} ${esc(statusLabel)}
+          </span>
+        </div>
+        ${subPhasesHTML}
+      </div>`;
+  }).join("");
+
+  // Wire phase buttons
+  container.querySelectorAll(".phase-activate-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const res = activatePhase(p.id, btn.dataset.phaseId);
+      if (res.success) {
+        toast("تم تفعيل المرحلة");
+        renderAll();
+      } else {
+        toast(res.error || "تعذّر التفعيل", "danger");
+      }
+    });
+  });
+
+  container.querySelectorAll(".phase-done-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      openCompletePhaseModal(btn.dataset.phaseId);
+    });
+  });
+
+  container.querySelectorAll(".phase-delete-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const res = removeCustomPhase(p.id, btn.dataset.phaseId);
+      if (res.success) {
+        toast("تم حذف المرحلة");
+        renderAll();
+      } else {
+        toast(res.error || "تعذّر الحذف", "danger");
+      }
+    });
+  });
+
+  container.querySelectorAll(".sub-activate-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const res = activateSubPhase(p.id, btn.dataset.phaseId, btn.dataset.subId);
+      if (res.success) {
+        toast("تم تفعيل المرحلة الفرعية");
+        renderAll();
+      } else {
+        toast(res.error || "تعذّر التفعيل", "danger");
+      }
+    });
+  });
+
+  container.querySelectorAll(".sub-done-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const res = completeSubPhase(p.id, btn.dataset.phaseId, btn.dataset.subId);
+      if (res.success) {
+        toast("تم إتمام المرحلة الفرعية");
+        if (res.allSubsDone) {
+          toast("اكتملت جميع المراحل الفرعية لهذه المرحلة", "info");
+        }
+        renderAll();
+      } else {
+        toast(res.error || "تعذّر الإتمام", "danger");
+      }
+    });
+  });
+
+  window.lucide?.createIcons();
+}
+
+/* ---------- Phase History Log ---------- */
+
+function renderPhaseLog(p) {
+  const container = document.getElementById("phaseLogList");
+  if (!container) return;
+
+  const log = getPhaseLog(p.id);
+  if (!log || !log.length) {
+    container.innerHTML = `<p class="row-empty">لا توجد سجلات للمراحل بعد / No phase history yet</p>`;
+    return;
+  }
+
+  const phases = getProjectPhases(p.id) || [];
+  const phaseMap = {};
+  for (const ph of phases) phaseMap[ph.id] = ph;
+
+  container.innerHTML = log.map((entry) => {
+    const ph = phaseMap[entry.phaseId] || { label: entry.phaseId, color: "#6366f1" };
+    const phLabel = lang() === "en" && ph.labelEn ? ph.labelEn : ph.label;
+    const timeStr = entry.timestamp ? new Date(entry.timestamp).toLocaleString(lang() === "ar" ? "ar-EG" : "en-US", { dateStyle: "short", timeStyle: "short" }) : "";
+
+    if (entry.type === "finance") {
+      const isOut = entry.direction === "out";
+      return `
+        <div class="phase-log-item">
+          <span class="phase-log-dot is-finance" style="background:${esc(ph.color || 'var(--accent)')}"></span>
+          <div class="phase-log-content">
+            <div class="phase-log-head">
+              <span class="phase-log-title">${esc(phLabel)}</span>
+              <span class="phase-log-amount ${isOut ? "is-out" : "is-in"}">${isOut ? "-" : "+"}${formatMoney(entry.amount)}</span>
+            </div>
+            <div class="phase-log-desc">${isOut ? "مصروفات" : "مقبوضات"}${entry.note ? " · " + esc(entry.note) : ""}</div>
+            <div class="phase-log-time">${esc(timeStr)}</div>
+          </div>
+        </div>`;
+    }
+
+    // Status change
+    const fromLabel = local(PHASE_STATUS_LABELS[entry.fromStatus]) || entry.fromStatus;
+    const toLabel = local(PHASE_STATUS_LABELS[entry.toStatus]) || entry.toStatus;
+    const isDone = entry.toStatus === "done";
+
+    return `
+      <div class="phase-log-item">
+        <span class="phase-log-dot ${isDone ? "is-done" : ""}" style="background:${esc(ph.color || 'var(--primary)')}"></span>
+        <div class="phase-log-content">
+          <div class="phase-log-head">
+            <span class="phase-log-title">${esc(phLabel)}</span>
+            <span class="phase-log-time">${esc(timeStr)}</span>
+          </div>
+          <div class="phase-log-desc">تغيير الحالة: من <b>${esc(fromLabel)}</b> إلى <b>${esc(toLabel)}</b>${entry.note ? " · " + esc(entry.note) : ""}</div>
+        </div>
+      </div>`;
+  }).join("");
+
+  window.lucide?.createIcons();
+}
+
+/* ---------- Phase Completion Modal ---------- */
+
+let completingPhaseId = null;
+
+function openCompletePhaseModal(phaseId) {
+  completingPhaseId = phaseId;
+  const project = current;
+  if (!project) return;
+
+  const phases = getProjectPhases(project.id) || [];
+  const phase = phases.find((ph) => ph.id === phaseId);
+  if (!phase) return;
+
+  const phaseLabel = lang() === "en" && phase.labelEn ? phase.labelEn : phase.label;
+  document.getElementById("phaseCompleteDesc").textContent = `هل أنت متأكد من إتمام مرحلة "${phaseLabel}"؟`;
+
+  // List other active phases
+  const otherActives = getCompletionCandidates(project.id, phaseId);
+  const activeListEl = document.getElementById("phaseCompleteActiveList");
+  if (otherActives.length > 0) {
+    activeListEl.innerHTML = `
+      <div style="font-size:0.75rem;color:var(--text-muted);margin-bottom:4px;">المراحل النشطة الأخرى:</div>
+      ${otherActives.map((o) => `<span class="phase-active-chip" style="border-color:${esc(o.color)}">${esc(lang() === "en" && o.labelEn ? o.labelEn : o.label)}</span>`).join("")}
+    `;
+    activeListEl.hidden = false;
+  } else {
+    activeListEl.innerHTML = "";
+    activeListEl.hidden = true;
+  }
+
+  // Populate next phase select
+  const nextSelect = document.getElementById("phaseCompleteNextSelect");
+  const pendingPhases = getPendingPhasesAfter(project.id, phaseId);
+  nextSelect.innerHTML = `<option value="">— لا شيء (بدون تفعيل تلقائي) —</option>` +
+    pendingPhases.map((p) => `<option value="${p.id}">${esc(lang() === "en" && p.labelEn ? p.labelEn : p.label)}</option>`).join("");
+
+  showModal(document.getElementById("phaseCompleteModal"));
+  window.lucide?.createIcons();
+}
+
+function closeCompletePhaseModal() {
+  completingPhaseId = null;
+  hideModal(document.getElementById("phaseCompleteModal"));
+}
+
+function confirmCompletePhase() {
+  if (!completingPhaseId || !current) return;
+  const nextId = document.getElementById("phaseCompleteNextSelect").value || undefined;
+  const res = completePhase(current.id, completingPhaseId, nextId);
+  if (res.success) {
+    toast("تم إتمام المرحلة بنجاح");
+    closeCompletePhaseModal();
+    renderAll();
+  } else {
+    toast(res.error || "تعذّر إتمام المرحلة", "danger");
+  }
+}
+
+/* ---------- Add Custom Phase Modal ---------- */
+
+function openAddPhaseModal() {
+  const modal = document.getElementById("addPhaseModal");
+  document.getElementById("addPhaseForm").reset();
+  document.getElementById("customSubPhasesContainer").innerHTML = "";
+  showModal(modal);
+  document.getElementById("customPhaseName").focus();
+  window.lucide?.createIcons();
+}
+
+function closeAddPhaseModal() {
+  hideModal(document.getElementById("addPhaseModal"));
+  document.getElementById("addPhaseForm").reset();
+  document.getElementById("customSubPhasesContainer").innerHTML = "";
+}
+
+function addCustomSubRow() {
+  const container = document.getElementById("customSubPhasesContainer");
+  const row = document.createElement("div");
+  row.className = "custom-sub-row";
+  row.innerHTML = `
+    <input type="text" class="form-input custom-sub-name" placeholder="اسم المرحلة الفرعية (عربي)" required />
+    <input type="text" class="form-input custom-sub-name-en" placeholder="Sub-phase name (EN)" />
+    <button type="button" class="btn btn-icon btn-soft custom-sub-remove" style="color:var(--danger)" aria-label="Remove">
+      <i data-lucide="trash-2" class="icon"></i>
+    </button>
+  `;
+  row.querySelector(".custom-sub-remove").addEventListener("click", () => row.remove());
+  container.appendChild(row);
+  window.lucide?.createIcons();
+}
+
+function submitAddPhase(event) {
+  event.preventDefault();
+  if (!current) return;
+
+  const label = document.getElementById("customPhaseName").value.trim();
+  const labelEn = document.getElementById("customPhaseNameEn").value.trim();
+  const color = document.querySelector('input[name="phaseColor"]:checked')?.value || "#6366f1";
+
+  if (!label) {
+    document.getElementById("customPhaseName").focus();
+    return;
+  }
+
+  const subPhases = [];
+  document.querySelectorAll("#customSubPhasesContainer .custom-sub-row").forEach((row) => {
+    const sLabel = row.querySelector(".custom-sub-name").value.trim();
+    const sLabelEn = row.querySelector(".custom-sub-name-en").value.trim();
+    if (sLabel) {
+      subPhases.push({ label: sLabel, labelEn: sLabelEn, color });
+    }
+  });
+
+  const res = addCustomPhase(current.id, { label, labelEn, color, subPhases });
+  if (res.success) {
+    toast("تمت إضافة المرحلة بنجاح");
+    closeAddPhaseModal();
+    renderAll();
+  } else {
+    toast(res.error || "تعذّر إضافة المرحلة", "danger");
+  }
+}
+
 
 function projectIdFromUrl() {
   return new URLSearchParams(window.location.search).get("id");
@@ -60,33 +428,39 @@ function renderProjectSummary(p) {
   const txns = sortNewestFirst(
     all("moneyTransactions").filter((t) => t.projectId === p.id)
   );
-  const incoming = moneyIn(txns);
+  // الدفعة الاولية تُحتسب ضمن الوارد
+  const incoming = moneyIn(txns) + num(p.advancePayment);
   const outgoing = moneyOut(txns);
-  const net = incoming - outgoing;
+  const diff = incoming - outgoing;
   const expectedProfit = num(p.expectedProfit || 0);
-  const finalProfit = net - expectedProfit;
+  const actualProfit = expectedProfit + diff;
 
   document.getElementById("projectSummary").innerHTML = `
     <div class="project-summary-grid">
       <div class="project-summary-card is-in">
         <span class="project-summary-icon" aria-hidden="true"><i data-lucide="arrow-down-circle" class="icon"></i></span>
-        <span class="project-summary-label" data-i18n="project.moneyIn">${translate("project.moneyIn")}</span>
+        <span class="project-summary-label">إجمالي الوارد</span>
         <span class="project-summary-value">${formatMoney(incoming)}</span>
       </div>
       <div class="project-summary-card is-out">
         <span class="project-summary-icon" aria-hidden="true"><i data-lucide="arrow-up-circle" class="icon"></i></span>
-        <span class="project-summary-label" data-i18n="project.moneyOut">${translate("project.moneyOut")}</span>
+        <span class="project-summary-label">إجمالي الصادر</span>
         <span class="project-summary-value">${formatMoney(outgoing)}</span>
+      </div>
+      <div class="project-summary-card is-net ${diff >= 0 ? "is-positive" : "is-negative"}">
+        <span class="project-summary-icon" aria-hidden="true"><i data-lucide="scale" class="icon"></i></span>
+        <span class="project-summary-label">الفرق</span>
+        <span class="project-summary-value">${(diff >= 0 ? "+" : "") + formatMoney(diff)}</span>
       </div>
       <div class="project-summary-card is-profit">
         <span class="project-summary-icon" aria-hidden="true"><i data-lucide="target" class="icon"></i></span>
-        <span class="project-summary-label" data-i18n="project.expectedProfit">${translate("project.expectedProfit")}</span>
-        <input type="number" class="project-summary-input" id="expectedProfitInput" value="${expectedProfit}" step="0.01" min="0" aria-label="${translate("project.expectedProfit")}" />
+        <span class="project-summary-label">الربح المتوقع</span>
+        <input type="number" class="project-summary-input" id="expectedProfitInput" value="${expectedProfit}" step="0.01" min="0" placeholder="0" />
       </div>
-      <div class="project-summary-card is-net ${finalProfit >= 0 ? "is-positive" : "is-negative"}">
-        <span class="project-summary-icon" aria-hidden="true"><i data-lucide="scale" class="icon"></i></span>
-        <span class="project-summary-label" data-i18n="project.netProfit">${translate("project.netProfit")}</span>
-        <span class="project-summary-value" id="netProfitValue">${formatMoney(finalProfit)}</span>
+      <div class="project-summary-card is-actual ${actualProfit >= 0 ? "is-positive" : "is-negative"}" title="الربح الفعلي = الربح المتوقع + (الوارد - الصادر)">
+        <span class="project-summary-icon" aria-hidden="true"><i data-lucide="trending-up" class="icon"></i></span>
+        <span class="project-summary-label">الربح الفعلي</span>
+        <span class="project-summary-value">${formatMoney(actualProfit)}</span>
       </div>
     </div>`;
 
@@ -99,6 +473,7 @@ function renderProjectSummary(p) {
     }
   });
 }
+
 
 /* ---------- General info ---------- */
 
@@ -263,6 +638,7 @@ function renderMaterials(p) {
           <div class="row-item-sub">${esc(m.supplierName || "—")}${m.contractorName ? ` · ${translate("project.formMatContractor")}: ${esc(m.contractorName)}` : ""} · ${esc(m.date || "")}</div>
         </div>
         <div class="row-item-stats">
+          ${invoiceThumbnailHTML(m, "material")}
           <div class="row-stat">
             <span class="row-stat-label">${translate("project.qty")}</span>
             <span class="row-stat-value">${formatMoney(m.quantity)} ${esc(m.unit || "")}</span>
@@ -278,6 +654,16 @@ function renderMaterials(p) {
         </div>
       </div>`)
     .join("");
+
+  // Wire lightbox clicks on material invoice thumbnails
+  list.querySelectorAll(".invoice-row-thumb").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const txnId = btn.dataset.invoiceId;
+      const mat   = (p.materials || []).find((m) => m.id === txnId);
+      if (mat && mat.invoiceData) openInvoiceLightbox({ data: mat.invoiceData, type: mat.invoiceType, name: mat.invoiceName });
+    });
+  });
+  window.lucide?.createIcons();
 }
 
 /* ---------- Money ---------- */
@@ -286,7 +672,8 @@ function renderMoney(p) {
   const txns = sortNewestFirst(
     all("moneyTransactions").filter((t) => t.projectId === p.id)
   );
-  const incoming = moneyIn(txns);
+  // الدفعة الاولية تُحتسب ضمن الوارد
+  const incoming = moneyIn(txns) + num(p.advancePayment);
   const outgoing = moneyOut(txns);
   document.getElementById("moneyIn").textContent = formatMoney(incoming);
   document.getElementById("moneyOut").textContent = formatMoney(outgoing);
@@ -310,6 +697,7 @@ function renderMoney(p) {
             <div class="row-item-sub">${esc(typeLabel)}${t.note ? " · " + esc(t.note) : ""}</div>
           </div>
           <div class="row-item-stats">
+            ${invoiceThumbnailHTML(t, "money")}
             <div class="row-stat">
               <span class="row-stat-label">${esc(t.date || "")}</span>
               <span class="row-stat-value ${isIn ? "is-paid" : "is-remaining"}">${amount}</span>
@@ -318,6 +706,16 @@ function renderMoney(p) {
         </div>`;
     })
     .join("");
+
+  // Wire lightbox clicks
+  list.querySelectorAll(".invoice-row-thumb").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const txnId  = btn.dataset.invoiceId;
+      const txn    = all("moneyTransactions").find((t) => t.id === txnId);
+      if (txn && txn.invoiceData) openInvoiceLightbox({ data: txn.invoiceData, type: txn.invoiceType, name: txn.invoiceName });
+    });
+  });
+  window.lucide?.createIcons();
 }
 
 /* ---------- Full render ---------- */
@@ -338,6 +736,8 @@ function renderAll() {
   renderContractors(p);
   renderMaterials(p);
   renderMoney(p);
+  renderPhasesList(p);
+  renderPhaseLog(p);
 }
 
 /* ---------- Contractor modal ---------- */
@@ -497,6 +897,21 @@ function submitMaterial(event) {
     unitPrice: form.unitPrice.value,
     date: form.date.value,
   });
+
+  // Task 08: Link material cost to active phases
+  const activePhases = getActivePhases(current.id);
+  const totalAmount = Number(form.quantity.value) * Number(form.unitPrice.value);
+  for (const ph of activePhases) {
+    addFinanceToPhaseLog(current.id, {
+      transactionId: "mat_" + Date.now(),
+      phaseId: ph.id,
+      subPhaseId: ph.activeSubPhaseId || null,
+      direction: "out",
+      amount: totalAmount,
+      note: `${name} (${form.quantity.value} ${form.unit.value})`,
+    });
+  }
+
   closeMaterialModal();
   renderAll();
   toast(translate("common.saved"));
@@ -548,6 +963,19 @@ function submitClientPayment(event) {
   if (lastTxn) {
     lastTxn.date = date;
     save("moneyTransactions", lastTxn);
+  }
+
+  // Task 08: Link client payment to active phases
+  const activePhases = getActivePhases(current.id);
+  for (const ph of activePhases) {
+    addFinanceToPhaseLog(current.id, {
+      transactionId: lastTxn ? lastTxn.id : "txn_" + Date.now(),
+      phaseId: ph.id,
+      subPhaseId: ph.activeSubPhaseId || null,
+      direction: "in",
+      amount,
+      note: note || `Payment received on ${date}`,
+    });
   }
 
   closeClientPaymentModal();
@@ -606,6 +1034,32 @@ document.addEventListener("DOMContentLoaded", async () => {
   });
   document.getElementById("materialForm").addEventListener("submit", submitMaterial);
 
+  document.getElementById("matSupplier").addEventListener("change", (e) => {
+    applySupplierSupplies(e.target.value);
+  });
+
+  document.getElementById("addClientPaymentBtn").addEventListener("click", openClientPaymentModal);
+  document.getElementById("clientPaymentModalClose").addEventListener("click", closeClientPaymentModal);
+  document.getElementById("clientPaymentFormCancel").addEventListener("click", closeClientPaymentModal);
+  document.getElementById("clientPaymentModal").addEventListener("click", (e) => {
+    if (e.target === e.currentTarget) closeClientPaymentModal();
+  });
+  document.getElementById("clientPaymentForm").addEventListener("submit", submitClientPayment);
+
+  // Phase modals
+  document.getElementById("addPhaseBtn").addEventListener("click", openAddPhaseModal);
+  document.getElementById("addPhaseModalClose").addEventListener("click", closeAddPhaseModal);
+  document.getElementById("addPhaseCancel").addEventListener("click", closeAddPhaseModal);
+  document.getElementById("addPhaseModal").addEventListener("click", (e) => {
+    if (e.target === e.currentTarget) closeAddPhaseModal();
+  });
+  document.getElementById("addCustomSubBtn").addEventListener("click", addCustomSubRow);
+  document.getElementById("addPhaseForm").addEventListener("submit", submitAddPhase);
+
+  document.getElementById("phaseCompleteClose").addEventListener("click", closeCompletePhaseModal);
+  document.getElementById("phaseCompleteCancel").addEventListener("click", closeCompletePhaseModal);
+  document.getElementById("phaseCompleteConfirm").addEventListener("click", confirmCompletePhase);
+
   document.getElementById("matAddSupplierBtn").addEventListener("click", () => {
     openQuickAddSupplier({
       onCreated: (person) => {
@@ -620,18 +1074,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
     });
   });
-
-document.getElementById("matSupplier").addEventListener("change", (e) => {
-    applySupplierSupplies(e.target.value);
-  });
-
-  document.getElementById("addClientPaymentBtn").addEventListener("click", openClientPaymentModal);
-  document.getElementById("clientPaymentModalClose").addEventListener("click", closeClientPaymentModal);
-  document.getElementById("clientPaymentFormCancel").addEventListener("click", closeClientPaymentModal);
-  document.getElementById("clientPaymentModal").addEventListener("click", (e) => {
-    if (e.target === e.currentTarget) closeClientPaymentModal();
-  });
-  document.getElementById("clientPaymentForm").addEventListener("submit", submitClientPayment);
 
   window.addEventListener("spark:data-changed", renderAll);
 });

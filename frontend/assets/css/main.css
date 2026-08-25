@@ -24,6 +24,7 @@
 @import url("./components/empty-state.css");
 @import url("./components/quick-add.css");
 @import url("./components/quick-add-modal.css");
+@import url("./components/invoice.css");
 
 @import url("./layout/layout.css");
 @import url("./layout/auth.css");

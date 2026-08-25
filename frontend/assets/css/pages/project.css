@@ -95,6 +95,15 @@
   color: var(--danger);
 }
 
+.project-summary-card.is-actual .project-summary-icon {
+  background: rgba(34, 197, 94, 0.18);
+  color: #059669;
+}
+
+.project-summary-card.is-actual .project-summary-value {
+  color: #059669;
+}
+
 .project-summary-icon .icon {
   width: 20px;
   height: 20px;
@@ -518,3 +527,392 @@
     gap: var(--space-4);
   }
 }
+
+/* ============================================
+   Project Phases & History Log
+   ============================================ */
+
+.phases-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.phase-row {
+  --phase-color: #6366f1;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  transition: all var(--transition-fast) var(--ease);
+}
+
+.phase-row--active {
+  border-color: var(--phase-color);
+  border-inline-start: 4px solid var(--phase-color);
+  background: color-mix(in srgb, var(--phase-color) 4%, var(--surface));
+  box-shadow: var(--shadow-sm);
+}
+
+.phase-row--pending {
+  border-style: dashed;
+  opacity: 0.88;
+}
+
+.phase-row--done {
+  background: var(--surface-2);
+  border-color: var(--border);
+  opacity: 0.72;
+}
+
+.phase-row-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-4) var(--space-5);
+  flex-wrap: wrap;
+}
+
+.phase-row-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: var(--radius-full);
+  background-color: var(--phase-color);
+  flex-shrink: 0;
+}
+
+.phase-row--active .phase-row-dot {
+  animation: phase-pulse 2s infinite ease-in-out;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--phase-color) 25%, transparent);
+}
+
+.phase-row--done .phase-row-dot {
+  background-color: var(--text-muted);
+}
+
+.phase-row-title-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 140px;
+}
+
+.phase-row-label {
+  font-weight: 700;
+  font-size: var(--font-size-md);
+  color: var(--text);
+}
+
+.phase-row--active .phase-row-label {
+  color: var(--phase-color);
+}
+
+.phase-row-order {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+}
+
+.phase-row-cost {
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+  color: var(--text);
+  background: var(--surface-2);
+  padding: 3px 10px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+}
+
+.phase-row-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.phase-row-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: var(--radius-full);
+  flex-shrink: 0;
+}
+
+.status-badge--active {
+  background: color-mix(in srgb, var(--phase-color) 15%, transparent);
+  color: var(--phase-color);
+  border: 1px solid color-mix(in srgb, var(--phase-color) 30%, transparent);
+}
+
+.status-badge--pending {
+  background: var(--surface-2);
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+}
+
+.status-badge--done {
+  background: var(--success-soft);
+  color: var(--success);
+}
+
+/* ---------- Sub-phases List ---------- */
+
+.phase-sub-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: 0 var(--space-5) var(--space-4) calc(var(--space-5) + 18px);
+  border-top: 1px dashed var(--border);
+  margin-top: 2px;
+  padding-top: var(--space-3);
+  background: color-mix(in srgb, var(--phase-color) 2%, transparent);
+}
+
+[dir="rtl"] .phase-sub-list {
+  padding: 0 calc(var(--space-5) + 18px) var(--space-4) var(--space-5);
+}
+
+.phase-sub-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  transition: all var(--transition-fast) var(--ease);
+}
+
+.phase-sub-row--active {
+  border-color: var(--phase-color);
+  background: color-mix(in srgb, var(--phase-color) 8%, var(--surface));
+}
+
+.phase-sub-row--done {
+  opacity: 0.65;
+  background: var(--surface-2);
+}
+
+.phase-sub-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: var(--radius-full);
+  background-color: var(--phase-color);
+  opacity: 0.7;
+}
+
+.phase-sub-row--active .phase-sub-dot {
+  opacity: 1;
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--phase-color) 30%, transparent);
+}
+
+.phase-sub-label {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  flex: 1;
+}
+
+.phase-sub-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+/* ---------- Phase History Log Timeline ---------- */
+
+.phase-log-list {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  gap: 0;
+  padding-inline-start: var(--space-6);
+  border-inline-start: 2px solid var(--border);
+  margin-inline-start: var(--space-4);
+  margin-top: var(--space-2);
+}
+
+.phase-log-item {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding-bottom: var(--space-5);
+  position: relative;
+}
+
+.phase-log-item:last-child {
+  padding-bottom: 0;
+}
+
+.phase-log-dot {
+  position: absolute;
+  inset-inline-start: calc(-1 * var(--space-6) - 5px);
+  top: 4px;
+  width: 10px;
+  height: 10px;
+  border-radius: var(--radius-full);
+  background: var(--primary);
+  border: 2px solid var(--surface);
+  box-shadow: 0 0 0 2px var(--border-strong);
+}
+
+.phase-log-dot.is-finance {
+  background: var(--accent);
+}
+
+.phase-log-dot.is-done {
+  background: var(--success);
+}
+
+.phase-log-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  background: var(--surface-2);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+}
+
+.phase-log-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.phase-log-title {
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+  color: var(--text);
+}
+
+.phase-log-time {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+}
+
+.phase-log-desc {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+}
+
+.phase-log-amount {
+  font-weight: 700;
+  font-size: var(--font-size-sm);
+}
+
+.phase-log-amount.is-out {
+  color: var(--danger);
+}
+
+.phase-log-amount.is-in {
+  color: var(--success);
+}
+
+/* ---------- Custom Phase Color Picker ---------- */
+
+.phase-color-picker {
+  display: flex;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+  padding: var(--space-2) 0;
+}
+
+.color-swatch-label {
+  cursor: pointer;
+  display: inline-flex;
+}
+
+.color-swatch-label input[type="radio"] {
+  display: none;
+}
+
+.color-swatch {
+  display: block;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-full);
+  border: 2px solid transparent;
+  transition: transform var(--transition-fast) var(--ease);
+}
+
+.color-swatch-label input[type="radio"]:checked + .color-swatch {
+  transform: scale(1.2);
+  border-color: var(--text);
+  box-shadow: var(--shadow-sm);
+}
+
+.custom-subs-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.custom-sub-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.phase-active-others {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+}
+
+.phase-active-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+}
+
+/* Mobile & iPhone Responsive Optimization */
+@media (max-width: 640px) {
+  .project-summary {
+    padding: var(--space-4) var(--space-3);
+    margin-bottom: var(--space-4);
+  }
+
+  .project-summary-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-2);
+  }
+
+  .project-summary-card.is-actual {
+    grid-column: span 2;
+  }
+
+  .project-summary-card {
+    padding: var(--space-3) var(--space-2);
+  }
+
+  .project-summary-value {
+    font-size: var(--font-size-md);
+  }
+
+  .project-summary-input {
+    width: 100%;
+    font-size: 14px;
+  }
+
+  .detail-grid {
+    grid-template-columns: 1fr;
+    gap: var(--space-4);
+  }
+
+  .detail-section {
+    padding: var(--space-4) var(--space-3);
+  }
+}
+
