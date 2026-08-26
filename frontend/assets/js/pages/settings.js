@@ -50,18 +50,15 @@ document.addEventListener("DOMContentLoaded", async () => {
     const box = document.getElementById("backupPathBox");
     const pathText = document.getElementById("backupPathText");
 
-    const defaultDir = "C:\\Users\\ghost\\Downloads";
-    const defaultPath = "C:\\Users\\ghost\\Downloads\\latest.json";
+    const dynamicDir = info.directory || "C:\\Users\\<username>\\Downloads";
+    const dynamicPath = info.path || "C:\\Users\\<username>\\Downloads\\latest.json";
 
     if (dirText) {
-      dirText.textContent = (info.directory && !info.directory.includes("webDevelopmet"))
-        ? info.directory
-        : defaultDir;
+      dirText.textContent = dynamicDir;
     }
 
     if (box && pathText) {
-      const validPath = (info.path && !info.path.includes("webDevelopmet")) ? info.path : defaultPath;
-      pathText.textContent = validPath;
+      pathText.textContent = dynamicPath;
       box.hidden = false;
     }
   };
