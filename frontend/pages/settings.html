@@ -44,22 +44,44 @@
           <section class="card detail-section">
             <div class="detail-section-head">
               <div>
-                <h2 class="detail-section-title" data-i18n="settings.backupTitle">Data Backup</h2>
-                <p class="text-muted" data-i18n="settings.backupDesc">A full local backup of your data is taken automatically twice a day. You can also download or restore a backup at any time.</p>
+                <h2 class="detail-section-title" data-i18n="settings.backupTitle">النسخ الاحتياطي التلقائي للبيانات / Automatic Data Backup</h2>
+                <p class="text-muted" data-i18n="settings.backupDesc">يتم حفظ النسخة الاحتياطية تلقائياً وبشكل فوري على جهازك عند أي تعديل أو إضافة بيانات.</p>
               </div>
             </div>
-            <div class="settings-status">
-              <span class="settings-status-label" data-i18n="settings.lastBackup">Last backup</span>
-              <span class="settings-status-value" id="lastBackupTime">—</span>
+            
+            <div class="settings-status" style="flex-direction:column; align-items:flex-start; gap:12px;">
+              <div style="display:flex; justify-content:space-between; width:100%; align-items:center;">
+                <span class="settings-status-label" data-i18n="settings.lastBackup">تاريخ وتوقيت آخر حفظ تلقائي:</span>
+                <span class="settings-status-value" id="lastBackupTime" style="font-weight:700; color:var(--primary);">—</span>
+              </div>
+
+              <!-- Folder Directory Box -->
+              <div style="width:100%; padding:12px 14px; background:var(--surface-2); border:1px solid var(--border); border-radius:var(--radius-md);">
+                <div style="display:flex; align-items:center; gap:8px; color:var(--primary); font-weight:700; font-size:0.9rem; margin-bottom:6px;">
+                  <i data-lucide="folder-check" class="icon" style="width:20px;height:20px;"></i>
+                  <span>مجلد الحفظ التلقائي للنسخ الاحتياطية على جهازك (Auto-Save Folder):</span>
+                </div>
+                <code id="backupDirText" style="display:block; background:var(--surface-1); padding:8px 12px; border-radius:var(--radius-sm); font-family:monospace; font-size:0.85rem; word-break:break-all; border:1px solid var(--border); color:var(--text); font-weight:600;">—</code>
+              </div>
+
+              <!-- Latest Backup File Box -->
+              <div id="backupPathBox" style="width:100%; padding:12px 14px; background:rgba(34,197,94,0.08); border:1px solid rgba(34,197,94,0.3); border-radius:var(--radius-md);">
+                <div style="display:flex; align-items:center; gap:8px; color:var(--success); font-weight:700; font-size:0.9rem; margin-bottom:6px;">
+                  <i data-lucide="check-circle-2" class="icon" style="width:20px;height:20px;"></i>
+                  <span>آخر ملف نسخة احتياطية تم حفظه تلقائياً:</span>
+                </div>
+                <code id="backupPathText" style="display:block; background:var(--surface-1); padding:8px 12px; border-radius:var(--radius-sm); font-family:monospace; font-size:0.85rem; word-break:break-all; border:1px solid var(--border); color:var(--text); font-weight:600;">—</code>
+              </div>
             </div>
+
             <div class="settings-actions">
               <button class="btn btn-primary" id="backupNowBtn" type="button">
                 <i data-lucide="download" class="icon"></i>
-                <span data-i18n="settings.backupNow">Download backup</span>
+                <span data-i18n="settings.backupNow">حفظ وتنزيل نسخة احتياطية فورية</span>
               </button>
               <label class="btn btn-outline" for="restoreFile">
                 <i data-lucide="upload" class="icon"></i>
-                <span data-i18n="settings.restore">Restore backup</span>
+                <span data-i18n="settings.restore">استعادة نسخة احتياطية من ملف</span>
               </label>
               <input class="settings-file-input" id="restoreFile" type="file" accept="application/json,.json" hidden />
             </div>

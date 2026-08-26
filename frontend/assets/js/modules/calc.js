@@ -451,6 +451,9 @@ export function personAccountStatement({ personId, personType, fromDate = "", to
           due: amount,
           paid: 0,
           deduction: 0,
+          invoiceData: mt.invoiceData,
+          invoiceType: mt.invoiceType,
+          invoiceName: mt.invoiceName,
         });
       }
     }
@@ -475,6 +478,9 @@ export function personAccountStatement({ personId, personType, fromDate = "", to
             due: totalVal,
             paid: 0,
             deduction: 0,
+            invoiceData: c.invoiceData,
+            invoiceType: c.invoiceType,
+            invoiceName: c.invoiceName,
           });
         }
       }
@@ -501,6 +507,9 @@ export function personAccountStatement({ personId, personType, fromDate = "", to
         due: t.direction === "in" ? amount : 0,
         paid: t.direction === "out" ? amount : 0,
         deduction: 0,
+        invoiceData: t.invoiceData,
+        invoiceType: t.invoiceType,
+        invoiceName: t.invoiceName,
       });
     }
   }

@@ -434,6 +434,7 @@ function renderProjectSummary(p) {
   const diff = incoming - outgoing;
   const expectedProfit = num(p.expectedProfit || 0);
   const actualProfit = expectedProfit + diff;
+  const actualProfitClass = actualProfit > 0 ? "is-positive" : actualProfit < 0 ? "is-negative" : "is-zero";
 
   document.getElementById("projectSummary").innerHTML = `
     <div class="project-summary-grid">
@@ -447,17 +448,17 @@ function renderProjectSummary(p) {
         <span class="project-summary-label">إجمالي الصادر</span>
         <span class="project-summary-value">${formatMoney(outgoing)}</span>
       </div>
-      <div class="project-summary-card is-net ${diff >= 0 ? "is-positive" : "is-negative"}">
+      <div class="project-summary-card is-net ${diff > 0 ? "is-positive" : diff < 0 ? "is-negative" : "is-zero"}">
         <span class="project-summary-icon" aria-hidden="true"><i data-lucide="scale" class="icon"></i></span>
         <span class="project-summary-label">الفرق</span>
-        <span class="project-summary-value">${(diff >= 0 ? "+" : "") + formatMoney(diff)}</span>
+        <span class="project-summary-value">${(diff > 0 ? "+" : "") + formatMoney(diff)}</span>
       </div>
       <div class="project-summary-card is-profit">
         <span class="project-summary-icon" aria-hidden="true"><i data-lucide="target" class="icon"></i></span>
         <span class="project-summary-label">الربح المتوقع</span>
         <input type="number" class="project-summary-input" id="expectedProfitInput" value="${expectedProfit}" step="0.01" min="0" placeholder="0" />
       </div>
-      <div class="project-summary-card is-actual ${actualProfit >= 0 ? "is-positive" : "is-negative"}" title="الربح الفعلي = الربح المتوقع + (الوارد - الصادر)">
+      <div class="project-summary-card is-actual ${actualProfitClass}" title="الربح الفعلي = الربح المتوقع + (الوارد - الصادر)">
         <span class="project-summary-icon" aria-hidden="true"><i data-lucide="trending-up" class="icon"></i></span>
         <span class="project-summary-label">الربح الفعلي</span>
         <span class="project-summary-value">${formatMoney(actualProfit)}</span>

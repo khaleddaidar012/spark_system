@@ -125,13 +125,34 @@ export function renderStatement() {
   const tfoot = document.getElementById("statementTableFoot");
   if (tbody) {
     if (!statement.rows.length) {
-      tbody.innerHTML = `<tr><td colspan="8" class="row-empty">لا توجد معاملات في هذه الفترة الزمنية</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="9" class="row-empty">لا توجد معاملات في هذه الفترة الزمنية</td></tr>`;
     } else {
       tbody.innerHTML = statement.rows
-        .map((r, idx) => {
+        .map((r) => {
           const isDeduction = r.type === "deduction";
           const isPayment = r.type === "payment";
-          const isDeliveryOrWork = r.type === "delivery" || r.type === "work";
+          const invData = r.invoiceData || r.invoiceFile || r.attachment || r.receiptUrl || "";
+          const invType = r.invoiceType || "image/png";
+          const invName = r.invoiceName || "invoice";
+          const hasInvoice = !!(invData && invData !== "undefined" && invData !== "null" && String(invData).trim() !== "");
+
+          let invoiceCell = "";
+          if (hasInvoice) {
+            invoiceCell = `
+              <button class="btn btn-soft btn-xs statement-inv-btn is-has-invoice no-print" type="button" data-inv-data="${esc(invData)}" data-inv-type="${esc(invType)}" data-inv-name="${esc(invName)}" style="background:rgba(59,130,246,0.18);color:var(--primary);font-weight:700;">
+                <i data-lucide="eye" class="icon"></i>
+                <span>عرض الفاتورة</span>
+              </button>
+            `;
+          } else {
+            invoiceCell = `
+              <button class="btn btn-soft btn-xs statement-inv-btn is-upload-btn no-print" type="button" data-txn-id="${esc(r.id)}" data-txn-type="${esc(r.type)}" style="background:rgba(234,179,8,0.15);color:#b45309;font-weight:600;" title="انقر لإرفاق صورة أو ملف فاتورة لهذه العملية">
+                <i data-lucide="paperclip" class="icon"></i>
+                <span>إرفاق فاتورة</span>
+              </button>
+            `;
+          }
+
           return `
             <tr class="${isDeduction ? "is-deduction-row" : isPayment ? "is-payment-row" : ""}">
               <td>${esc(r.date || "—")}</td>
@@ -141,6 +162,7 @@ export function renderStatement() {
               <td class="num-cell ${r.due > 0 ? "is-due" : ""}">${r.due > 0 ? formatMoney(r.due) : "—"}</td>
               <td class="num-cell ${r.paid > 0 ? "is-paid" : ""}">${r.paid > 0 ? formatMoney(r.paid) : "—"}</td>
               <td class="num-cell ${r.deduction > 0 ? "is-deduction" : ""}">${r.deduction > 0 ? formatMoney(r.deduction) : "—"}</td>
+              <td class="no-print" style="text-align:center;">${invoiceCell}</td>
               <td class="num-cell statement-balance-cell"><strong>${formatMoney(r.balance)}</strong></td>
             </tr>
           `;
@@ -156,12 +178,78 @@ export function renderStatement() {
         <td class="num-cell"><strong>${formatMoney(statement.periodDues)}</strong></td>
         <td class="num-cell"><strong>${formatMoney(statement.periodPaid)}</strong></td>
         <td class="num-cell"><strong>${formatMoney(statement.periodDeductions)}</strong></td>
+        <td class="no-print"></td>
         <td class="num-cell statement-final-cell"><strong>${formatMoney(statement.finalBalance)} ج.م</strong></td>
       </tr>
     `;
   }
 
   window.lucide?.createIcons();
+}
+
+function promptAttachInvoice(txnId, onDone) {
+  const input = document.createElement("input");
+  input.type = "file";
+  input.accept = "image/*,application/pdf";
+  input.onchange = () => {
+    const file = input.files && input.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      const data = reader.result;
+      const invType = file.type;
+      const invName = file.name;
+      let updated = false;
+
+      // 1. moneyTransactions
+      const moneyTxns = all("moneyTransactions");
+      const mTxn = moneyTxns.find((t) => String(t.id) === String(txnId));
+      if (mTxn) {
+        mTxn.invoiceData = data;
+        mTxn.invoiceType = invType;
+        mTxn.invoiceName = invName;
+        save("moneyTransactions", mTxn);
+        updated = true;
+      }
+
+      // 2. materialTransactions
+      if (!updated) {
+        const matTxns = all("materialTransactions");
+        const matTxn = matTxns.find((t) => String(t.id) === String(txnId));
+        if (matTxn) {
+          matTxn.invoiceData = data;
+          matTxn.invoiceType = invType;
+          matTxn.invoiceName = invName;
+          save("materialTransactions", matTxn);
+          updated = true;
+        }
+      }
+
+      // 3. projects.materials
+      if (!updated) {
+        const projects = all("projects");
+        for (const p of projects) {
+          if (p.materials) {
+            const item = p.materials.find((m) => String(m.id) === String(txnId));
+            if (item) {
+              item.invoiceData = data;
+              item.invoiceType = invType;
+              item.invoiceName = invName;
+              save("projects", p);
+              updated = true;
+              break;
+            }
+          }
+        }
+      }
+
+      toast("تم رفع وإرفاق الفاتورة بالمعاملة بنجاح!", "success");
+      window.dispatchEvent(new CustomEvent("spark:data-changed"));
+      onDone?.();
+    };
+    reader.readAsDataURL(file);
+  };
+  input.click();
 }
 
 export function initStatementModal() {
@@ -174,6 +262,35 @@ export function initStatementModal() {
   modal.addEventListener("click", (e) => {
     if (e.target === modal) hideModal(modal);
   });
+
+  // Table click delegation for View / Attach Invoice button
+  const tbody = document.getElementById("statementTableBody");
+  if (tbody) {
+    tbody.addEventListener("click", (e) => {
+      const btn = e.target.closest(".statement-inv-btn");
+      if (!btn) return;
+
+      if (btn.classList.contains("is-upload-btn")) {
+        const txnId = btn.dataset.txnId;
+        promptAttachInvoice(txnId, () => renderStatement());
+        return;
+      }
+
+      const invData = btn.dataset.invData;
+      if (invData && invData !== "undefined" && invData !== "null" && invData.trim() !== "") {
+        if (typeof window.openInvoiceLightbox === "function") {
+          window.openInvoiceLightbox({
+            data: invData,
+            type: btn.dataset.invType || "image/png",
+            name: btn.dataset.invName || "invoice"
+          });
+        }
+      } else {
+        const txnId = btn.dataset.txnId;
+        promptAttachInvoice(txnId, () => renderStatement());
+      }
+    });
+  }
 
   // Filter Buttons
   const applyBtn = document.getElementById("statementApplyFilterBtn");

@@ -117,8 +117,23 @@ export function needsAutoBackup() {
   return Date.now() - t >= BACKUP_INTERVAL_MS;
 }
 
+export function saveBackupInfo({ path, directory, fileName, time }) {
+  safeSet("spark_last_backup_path", path || "");
+  safeSet("spark_last_backup_dir", directory || "");
+  safeSet("spark_last_backup_file", fileName || "");
+  if (time) setLastBackupTime(time);
+}
+
+export function getLastBackupInfo() {
+  const time = getLastBackupTime();
+  const path = safeGet("spark_last_backup_path") || "";
+  const directory = safeGet("spark_last_backup_dir") || "";
+  const fileName = safeGet("spark_last_backup_file") || "";
+  return { time, path, directory, fileName };
+}
+
 /* Push a snapshot to the server so it survives browser data loss.
-   Returns true when the server accepted the backup. */
+   Returns server json response when accepted, or null. */
 export async function pushBackupToServer(data) {
   try {
     const headers = { "Content-Type": "application/json" };
@@ -129,25 +144,30 @@ export async function pushBackupToServer(data) {
       headers,
       body: JSON.stringify(data),
     });
-    if (!res.ok) return false;
-    await res.json();
-    return true;
+    if (!res.ok) return null;
+    const result = await res.json();
+    if (result && result.status === "ok") {
+      saveBackupInfo({
+        path: result.path,
+        directory: result.directory,
+        fileName: result.fileName,
+        time: Date.now(),
+      });
+    }
+    return result;
   } catch {
-    return false;
+    return null;
   }
 }
 
-export async function autoBackup() {
-  if (!needsAutoBackup()) return false;
+export async function autoBackup(force = true) {
+  if (!force && !needsAutoBackup()) return false;
   const data = buildBackupData();
-  const pushed = await pushBackupToServer(data);
-  if (pushed) {
-    setLastBackupTime(Date.now());
+  const result = await pushBackupToServer(data);
+  if (result) {
     return true;
   }
-  /* Server unreachable (e.g. app opened without backend) → local file. */
-  downloadBackup();
-  return true;
+  return false;
 }
 
 let backupTimer = null;
@@ -156,11 +176,11 @@ function scheduleAutoBackup() {
   if (backupTimer) clearTimeout(backupTimer);
   backupTimer = setTimeout(() => {
     backupTimer = null;
-    autoBackup();
-  }, 3000);
+    autoBackup(true);
+  }, 1000);
 }
 
 export function initAutoBackup() {
-  autoBackup();
+  autoBackup(true);
   window.addEventListener("spark:data-changed", scheduleAutoBackup);
 }

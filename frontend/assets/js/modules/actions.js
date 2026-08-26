@@ -15,7 +15,18 @@ export function notifyDataChanged() {
 
 /* ---------- Money ---------- */
 
-export function recordMoney({ direction, personType, personId, personName, amount, projectId = null, note = "" }) {
+export function recordMoney({
+  direction,
+  personType,
+  personId,
+  personName,
+  amount,
+  projectId = null,
+  note = "",
+  invoiceData = null,
+  invoiceType = null,
+  invoiceName = null,
+}) {
   const value = num(amount);
   const txn = {
     id: uid(),
@@ -28,6 +39,9 @@ export function recordMoney({ direction, personType, personId, personName, amoun
     date: today(),
     createdAt: Date.now(),
     note: note || "",
+    invoiceData: invoiceData || null,
+    invoiceType: invoiceType || null,
+    invoiceName: invoiceName || null,
   };
   save("moneyTransactions", txn);
 
@@ -93,7 +107,7 @@ function stockIn(name, quantity, unit) {
   }
 }
 
-export function addMaterialToProject(projectId, { name, supplierId, contractorId, quantity, unit, unitPrice, date }) {
+export function addMaterialToProject(projectId, { name, supplierId, contractorId, quantity, unit, unitPrice, date, invoiceData = null, invoiceType = null, invoiceName = null }) {
   const project = get("projects", projectId);
   if (!project) return null;
   const supplierRef = supplierId ? findPersonById(supplierId) : null;
@@ -116,6 +130,9 @@ export function addMaterialToProject(projectId, { name, supplierId, contractorId
     unitPrice: price,
     total,
     date: date || today(),
+    invoiceData: invoiceData || null,
+    invoiceType: invoiceType || null,
+    invoiceName: invoiceName || null,
   };
 
   project.materials = project.materials || [];
@@ -144,6 +161,9 @@ export function addMaterialToProject(projectId, { name, supplierId, contractorId
     total,
     date: item.date,
     createdAt: Date.now(),
+    invoiceData: invoiceData || null,
+    invoiceType: invoiceType || null,
+    invoiceName: invoiceName || null,
   });
 
   notifyDataChanged();

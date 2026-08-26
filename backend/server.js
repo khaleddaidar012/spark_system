@@ -30,7 +30,18 @@ app.get('/api/health', (req, res) => {
    The browser pushes a full snapshot twice a day.
    Each snapshot is stored with a timestamp and the
    newest is also kept as latest.json. */
-const BACKUP_DIR = path.join(__dirname, 'backups');
+const os = require('os');
+
+function getDownloadsBackupDir() {
+  try {
+    const homeDownloads = path.join(os.homedir(), 'Downloads');
+    return homeDownloads;
+  } catch {
+    return 'C:\\Downloads';
+  }
+}
+
+const BACKUP_DIR = getDownloadsBackupDir();
 
 function ensureBackupDir() {
   if (!fs.existsSync(BACKUP_DIR)) {
@@ -46,10 +57,18 @@ app.post('/api/backup', (req, res) => {
     }
     ensureBackupDir();
     const stamp = new Date().toISOString().replace(/[:.]/g, '-');
+    const fileName = `spark-backup-${stamp}.json`;
+    const fullPath = path.join(BACKUP_DIR, fileName);
     const payload = JSON.stringify(data, null, 2);
-    fs.writeFileSync(path.join(BACKUP_DIR, `spark-backup-${stamp}.json`), payload);
+    fs.writeFileSync(fullPath, payload);
     fs.writeFileSync(path.join(BACKUP_DIR, 'latest.json'), payload);
-    res.status(200).json({ status: 'ok', message: 'Backup stored' });
+    res.status(200).json({
+      status: 'ok',
+      message: 'Backup stored',
+      path: fullPath,
+      directory: BACKUP_DIR,
+      fileName
+    });
   } catch (err) {
     res.status(500).json({ status: 'error', message: err.message });
   }

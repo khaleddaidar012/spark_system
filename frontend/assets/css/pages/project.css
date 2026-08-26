@@ -95,13 +95,29 @@
   color: var(--danger);
 }
 
-.project-summary-card.is-actual .project-summary-icon {
+/* Actual Profit Colors: Positive = Green, Negative = Red, Zero = Light Grey */
+.project-summary-card.is-actual.is-positive .project-summary-icon {
   background: rgba(34, 197, 94, 0.18);
   color: #059669;
 }
-
-.project-summary-card.is-actual .project-summary-value {
+.project-summary-card.is-actual.is-positive .project-summary-value {
   color: #059669;
+}
+
+.project-summary-card.is-actual.is-negative .project-summary-icon {
+  background: rgba(239, 68, 68, 0.18);
+  color: var(--danger);
+}
+.project-summary-card.is-actual.is-negative .project-summary-value {
+  color: var(--danger);
+}
+
+.project-summary-card.is-actual.is-zero .project-summary-icon {
+  background: rgba(156, 163, 175, 0.18);
+  color: #9ca3af;
+}
+.project-summary-card.is-actual.is-zero .project-summary-value {
+  color: #9ca3af;
 }
 
 .project-summary-icon .icon {

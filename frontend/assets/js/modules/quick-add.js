@@ -221,7 +221,7 @@ export function openInvoiceLightbox({ data, type, name }) {
   dl.href     = data;
   dl.download = name || "invoice";
 
-  if (type.startsWith("image/")) {
+  if (type && type.startsWith("image/")) {
     body.innerHTML = `<img src="${data}" alt="invoice" class="invoice-lightbox-img" />`;
   } else {
     // PDF — try embed, fallback to download prompt
@@ -236,6 +236,10 @@ export function openInvoiceLightbox({ data, type, name }) {
 
   lb.hidden = false;
   window.lucide?.createIcons();
+}
+
+if (typeof window !== "undefined") {
+  window.openInvoiceLightbox = openInvoiceLightbox;
 }
 
 function initInvoiceLightbox() {

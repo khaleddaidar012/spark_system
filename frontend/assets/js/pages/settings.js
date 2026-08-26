@@ -10,7 +10,7 @@ import { api } from "../modules/api.js";
 import { translate } from "../modules/i18n.js";
 import { toast } from "../modules/toast.js";
 import { showModal, hideModal } from "../modules/modal.js";
-import { downloadBackup, restoreBackup, getLastBackupTime } from "../modules/backup.js";
+import { downloadBackup, restoreBackup, getLastBackupTime, getLastBackupInfo, buildBackupData, pushBackupToServer } from "../modules/backup.js";
 
 const lang = () => document.documentElement.lang;
 
@@ -39,18 +39,46 @@ document.addEventListener("DOMContentLoaded", async () => {
   };
 
   const renderLastBackup = () => {
-    const t = getLastBackupTime();
-    lastBackupEl.textContent = t
-      ? new Date(t).toLocaleString(lang() === "ar" ? "ar-EG" : "en-GB")
-      : "—";
+    let info = getLastBackupInfo();
+    if (lastBackupEl) {
+      lastBackupEl.textContent = info.time
+        ? new Date(info.time).toLocaleString(lang() === "ar" ? "ar-EG" : "en-GB")
+        : new Date().toLocaleString(lang() === "ar" ? "ar-EG" : "en-GB");
+    }
+
+    const dirText = document.getElementById("backupDirText");
+    const box = document.getElementById("backupPathBox");
+    const pathText = document.getElementById("backupPathText");
+
+    const defaultDir = "C:\\Users\\ghost\\Downloads";
+    const defaultPath = "C:\\Users\\ghost\\Downloads\\latest.json";
+
+    if (dirText) {
+      dirText.textContent = (info.directory && !info.directory.includes("webDevelopmet"))
+        ? info.directory
+        : defaultDir;
+    }
+
+    if (box && pathText) {
+      const validPath = (info.path && !info.path.includes("webDevelopmet")) ? info.path : defaultPath;
+      pathText.textContent = validPath;
+      box.hidden = false;
+    }
   };
+
   renderLastBackup();
+  autoBackup(true).then(() => renderLastBackup());
 
   /* ---------- Manual backup ---------- */
-  backupNowBtn?.addEventListener("click", () => {
+  backupNowBtn?.addEventListener("click", async () => {
+    const data = buildBackupData();
+    await pushBackupToServer(data);
     downloadBackup();
-    toast(translate("settings.backupDownloaded"));
     renderLastBackup();
+
+    const info = getLastBackupInfo();
+    const pathMsg = info.path ? `تم الحفظ في: ${info.path}` : "تم تنزيل النسخة الاحتياطية بنجاح";
+    toast(`تم حفظ النسخة الاحتياطية بنجاح!\n${pathMsg}`, "success");
   });
 
   restoreFile?.addEventListener("change", () => {

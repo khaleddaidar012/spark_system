@@ -589,6 +589,54 @@
   color: var(--text);
 }
 
+/* Statement Table Invoice Button Styling */
+.statement-inv-btn {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 5px !important;
+  padding: 4px 10px !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  border-radius: var(--radius-sm) !important;
+  white-space: nowrap !important;
+  cursor: pointer !important;
+  line-height: 1.2 !important;
+  transition: all var(--transition-fast) var(--ease) !important;
+  border: 1px solid transparent !important;
+  height: 28px !important;
+}
+
+.statement-inv-btn .icon {
+  width: 14px !important;
+  height: 14px !important;
+}
+
+.statement-inv-btn.is-has-invoice {
+  background: rgba(37, 99, 235, 0.15) !important;
+  color: #2563eb !important;
+  border-color: rgba(37, 99, 235, 0.3) !important;
+}
+
+.statement-inv-btn.is-has-invoice:hover {
+  background: #2563eb !important;
+  color: #ffffff !important;
+  border-color: #2563eb !important;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.35) !important;
+}
+
+.statement-inv-btn.is-no-invoice {
+  background: var(--surface-2) !important;
+  color: var(--text-muted) !important;
+  border-color: var(--border) !important;
+  opacity: 0.75 !important;
+}
+
+.statement-inv-btn.is-no-invoice:hover {
+  opacity: 1 !important;
+  background: var(--hover) !important;
+}
+
 .statement-deductions-section {
   margin-top: var(--space-4);
   padding: var(--space-3) var(--space-4);
