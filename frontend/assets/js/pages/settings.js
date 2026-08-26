@@ -10,7 +10,7 @@ import { api } from "../modules/api.js";
 import { translate } from "../modules/i18n.js";
 import { toast } from "../modules/toast.js";
 import { showModal, hideModal } from "../modules/modal.js";
-import { downloadBackup, restoreBackup, getLastBackupTime, getLastBackupInfo, buildBackupData, pushBackupToServer } from "../modules/backup.js";
+import { autoBackup, downloadBackup, restoreBackup, getLastBackupTime, getLastBackupInfo, buildBackupData, pushBackupToServer } from "../modules/backup.js";
 
 const lang = () => document.documentElement.lang;
 
@@ -61,21 +61,48 @@ document.addEventListener("DOMContentLoaded", async () => {
       pathText.textContent = dynamicPath;
       box.hidden = false;
     }
+    window.lucide?.createIcons();
   };
 
   renderLastBackup();
   autoBackup(true).then(() => renderLastBackup());
 
-  /* ---------- Manual backup ---------- */
-  backupNowBtn?.addEventListener("click", async () => {
-    const data = buildBackupData();
-    await pushBackupToServer(data);
-    downloadBackup();
-    renderLastBackup();
+  const notifBox = document.getElementById("backupStatusNotification");
 
-    const info = getLastBackupInfo();
-    const pathMsg = info.path ? `تم الحفظ في: ${info.path}` : "تم تنزيل النسخة الاحتياطية بنجاح";
-    toast(`تم حفظ النسخة الاحتياطية بنجاح!\n${pathMsg}`, "success");
+  const showNotification = (msg, isSuccess = true) => {
+    if (!notifBox) return;
+    notifBox.style.background = isSuccess ? "rgba(34,197,94,0.12)" : "rgba(239,68,68,0.12)";
+    notifBox.style.color = isSuccess ? "#15803d" : "#b91c1c";
+    notifBox.style.border = isSuccess ? "1px solid rgba(34,197,94,0.3)" : "1px solid rgba(239,68,68,0.3)";
+    notifBox.innerHTML = `
+      <i data-lucide="${isSuccess ? "check-circle-2" : "alert-triangle"}" class="icon"></i>
+      <span>${msg}</span>
+    `;
+    notifBox.hidden = false;
+    window.lucide?.createIcons();
+  };
+
+  backupNowBtn?.addEventListener("click", async () => {
+    const originalText = backupNowBtn.innerHTML;
+    try {
+      backupNowBtn.disabled = true;
+      backupNowBtn.innerHTML = `<span>⏳ جاري الحفظ والتنزيل...</span>`;
+
+      const data = buildBackupData();
+      await pushBackupToServer(data);
+      downloadBackup();
+      renderLastBackup();
+
+      showNotification("✅ تم حفظ وتنزيل النسخة الاحتياطية بنجاح على جهازك (في مجلد التنزيلات)! 💾", true);
+      toast("✅ <strong>تم حفظ وتنزيل النسخة الاحتياطية بنجاح على جهازك!</strong>", "success");
+    } catch {
+      showNotification("❌ حدث خطأ أثناء حفظ النسخة الاحتياطية، يرجى المحاولة مرة أخرى.", false);
+      toast("❌ <strong>تعذر حفظ النسخة الاحتياطية — يرجى المحاولة مرة أخرى</strong>", "danger");
+    } finally {
+      backupNowBtn.disabled = false;
+      backupNowBtn.innerHTML = originalText;
+      window.lucide?.createIcons();
+    }
   });
 
   restoreFile?.addEventListener("change", () => {
@@ -84,11 +111,13 @@ document.addEventListener("DOMContentLoaded", async () => {
     restoreBackup(
       file,
       () => {
-        toast(translate("settings.restoreSuccess"));
-        setTimeout(() => window.location.reload(), 800);
+        showNotification("🎉 تم استعادة النسخة الاحتياطية بنجاح بنسبة 100%! جاري تحديث البيانات...", true);
+        toast("🎉 تم استعادة النسخة الاحتياطية بنجاح بنسبة 100%! جاري تحديث البيانات...", "success");
+        setTimeout(() => window.location.reload(), 1400);
       },
       () => {
-        toast(translate("settings.restoreError"), "danger");
+        showNotification("❌ فشل استعادة النسخة الاحتياطية — يرجى اختيار ملف JSON صحيح", false);
+        toast("❌ فشل استعادة النسخة الاحتياطية — يرجى اختيار ملف JSON صحيح", "danger");
       }
     );
     restoreFile.value = "";

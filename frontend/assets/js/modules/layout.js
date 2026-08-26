@@ -42,9 +42,10 @@ function initThemeToggle() {
 
 function initLangToggle() {
   const btn = document.getElementById("navLangToggle");
+  const textEl = document.getElementById("navLangText") || btn;
   if (!btn) return;
   const applyLabel = () => {
-    btn.textContent = document.documentElement.lang === "ar" ? "EN" : "ع";
+    if (textEl) textEl.textContent = document.documentElement.lang === "ar" ? "EN" : "ع";
   };
   applyLabel();
   btn.addEventListener("click", async () => {
@@ -150,6 +151,7 @@ export async function initLayout() {
   renderBreadcrumb();
   initModalManager();
   await initI18n();
+  window.lucide?.createIcons();
   initAutoBackup();
 }
 

@@ -23,9 +23,13 @@ function getPreferredTheme() {
 
 function applyTheme(theme) {
   document.documentElement.setAttribute("data-theme", theme);
-  document.querySelectorAll("[data-theme-icon]").forEach((icon) => {
-    icon.style.display = icon.dataset.themeIcon === theme ? "" : "none";
-  });
+  const wrap = document.getElementById("navThemeIconWrap");
+  if (wrap) {
+    wrap.innerHTML = theme === DARK 
+      ? '<i data-lucide="sun" class="icon"></i>' 
+      : '<i data-lucide="moon" class="icon"></i>';
+    window.lucide?.createIcons();
+  }
 }
 
 export function initTheme() {

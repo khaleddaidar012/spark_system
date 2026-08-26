@@ -4,10 +4,22 @@
    and keeps consistent sizing/alignment.
    ============================================ */
 
-[data-lucide] {
-  display: inline-block;
+svg[data-lucide],
+i[data-lucide],
+.icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   flex-shrink: 0;
   vertical-align: middle;
+  width: 1.15em;
+  height: 1.15em;
+  stroke-width: 2;
+}
+
+.icon {
+  width: 18px;
+  height: 18px;
 }
 
 [data-lucide] svg {

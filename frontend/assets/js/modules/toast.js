@@ -18,11 +18,15 @@ export function toast(message, type = "success") {
   const el = document.createElement("div");
   el.className = `toast toast-${type}`;
   el.setAttribute("role", "status");
-  el.textContent = message;
+  el.innerHTML = message;
   host.appendChild(el);
-  requestAnimationFrame(() => el.classList.add("is-visible"));
+
+  setTimeout(() => {
+    el.classList.add("is-visible");
+  }, 20);
+
   setTimeout(() => {
     el.classList.remove("is-visible");
-    setTimeout(() => el.remove(), 300);
-  }, 2600);
+    setTimeout(() => el.remove(), 400);
+  }, 4000);
 }

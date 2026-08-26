@@ -3,46 +3,55 @@
    ============================================ */
 
 .toast-container {
-  position: fixed;
-  bottom: var(--space-6);
-  inset-inline-end: var(--space-6);
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-  z-index: 300;
-  max-width: min(360px, calc(100vw - var(--space-6)));
+  position: fixed !important;
+  bottom: 24px !important;
+  left: 24px !important;
+  right: auto !important;
+  display: flex !important;
+  flex-direction: column-reverse !important;
+  align-items: flex-start !important;
+  gap: 10px !important;
+  z-index: 999999 !important;
+  max-width: min(380px, calc(100vw - 32px)) !important;
+  pointer-events: none !important;
 }
 
 .toast {
-  padding: 12px 16px;
-  font-size: var(--font-size-md);
+  pointer-events: auto;
+  padding: 12px 18px;
+  font-size: 0.9rem;
   font-weight: 600;
-  color: var(--surface);
-  background: var(--text);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-lg);
+  line-height: 1.4;
+  border-radius: 12px;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.22);
   opacity: 0;
-  transform: translateY(10px);
-  transition: opacity var(--transition-fast) var(--ease),
-    transform var(--transition-fast) var(--ease);
+  transform: translateY(20px) scale(0.95);
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  backdrop-filter: blur(12px);
 }
 
 .toast.is-visible {
   opacity: 1;
-  transform: translateY(0);
+  transform: translateY(0) scale(1);
 }
 
 .toast-success {
-  background: var(--success);
+  background: #059669;
   color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.25);
 }
 
 .toast-danger {
-  background: var(--danger);
+  background: #dc2626;
   color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.25);
 }
 
 .toast-info {
-  background: var(--info);
+  background: #2563eb;
   color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.25);
 }

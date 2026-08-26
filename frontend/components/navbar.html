@@ -14,11 +14,14 @@
   </div>
 
   <div class="navbar-end">
-    <button class="btn btn-icon" id="navLangToggle" type="button" aria-label="Switch language" title="العربية">ع</button>
+    <button class="btn btn-icon" id="navLangToggle" type="button" aria-label="Switch language" title="العربية">
+      <span id="navLangText">ع</span>
+    </button>
 
     <button class="btn btn-icon" id="navThemeToggle" type="button" aria-label="Toggle theme" title="Toggle theme">
-      <i data-lucide="moon" class="icon" data-theme-icon="dark"></i>
-      <i data-lucide="sun" class="icon" data-theme-icon="light" style="display:none;"></i>
+      <span id="navThemeIconWrap">
+        <i data-lucide="moon" class="icon"></i>
+      </span>
     </button>
 
     <button class="btn btn-icon" id="navLogout" type="button" aria-label="Logout" title="Logout">
