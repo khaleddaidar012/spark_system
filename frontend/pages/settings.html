@@ -113,27 +113,109 @@
   </div>
 
   <div class="modal-overlay" id="deleteModal" hidden>
-    <div class="modal modal-sm" role="dialog" aria-modal="true" aria-labelledby="deleteModalTitle">
+    <div class="modal modal-md" role="dialog" aria-modal="true" aria-labelledby="deleteModalTitle">
       <div class="modal-header">
-        <h2 class="modal-title" id="deleteModalTitle" data-i18n="settings.deleteTitle">Delete All Data</h2>
+        <div style="display:flex; align-items:center; gap:10px;">
+          <div style="width:36px; height:36px; border-radius:50%; background:var(--danger-soft); display:flex; align-items:center; justify-content:center; color:var(--danger); flex-shrink:0;">
+            <i data-lucide="alert-triangle" class="icon" style="width:20px; height:20px;"></i>
+          </div>
+          <div>
+            <h2 class="modal-title" id="deleteModalTitle" data-i18n="settings.deleteTitle">حذف البيانات</h2>
+            <p class="text-muted" style="font-size:0.8rem; margin:0;" data-i18n="settings.chooseDataToDelete">اختر البيانات المراد حذفها:</p>
+          </div>
+        </div>
         <button class="btn btn-icon modal-close" id="deleteModalClose" type="button" aria-label="Close">
           <i data-lucide="x" class="icon"></i>
         </button>
       </div>
+
       <form id="deleteForm" class="modal-body form-stack" novalidate>
-        <p class="settings-delete-warning" data-i18n="settings.deleteWarning">This will permanently delete all data. A backup will be downloaded first. Enter your password twice to confirm.</p>
-        <div class="form-field">
-          <label class="form-label" for="delPassword1" data-i18n="settings.password">Password</label>
-          <input class="form-input" id="delPassword1" name="password1" type="password" required autocomplete="off" data-i18n-ph="settings.passwordPh" placeholder="Enter your password" />
+        <p class="settings-delete-warning" data-i18n="settings.deleteWarning">
+          يرجى تحديد البيانات المراد حذفها بدقة. سيتم أخذ نسخة احتياطية وتنزيلها تلقائياً قبل الحذف. أدخل كلمة المرور مرتين للتأكيد.
+        </p>
+
+        <!-- Categories Selector -->
+        <div class="delete-categories-wrapper">
+          <div class="delete-categories-header">
+            <span style="font-weight:700; font-size:0.85rem; color:var(--text);" data-i18n="settings.chooseDataToDelete">اختر البيانات المراد حذفها:</span>
+            <button type="button" class="btn btn-ghost btn-xs" id="selectAllCategoriesBtn" style="font-size:0.8rem; gap:4px;">
+              <i data-lucide="check-square" class="icon" style="width:14px; height:14px;"></i>
+              <span id="selectAllBtnText" data-i18n="settings.selectAll">تحديد الكل</span>
+            </button>
+          </div>
+
+          <div class="delete-categories-grid">
+            <!-- 1. Finance -->
+            <label class="delete-category-card" for="delCatFinance" id="cardCatFinance">
+              <input type="checkbox" id="delCatFinance" name="deleteCategory" value="finance" />
+              <div class="delete-category-content">
+                <div class="delete-category-head">
+                  <i data-lucide="wallet" class="delete-category-icon icon"></i>
+                  <span data-i18n="settings.catFinance">الحسابات المالية</span>
+                </div>
+                <span class="delete-category-desc" data-i18n="settings.catFinanceDesc">حركات الأموال والمصروفات والخصومات وسجلات الدفع</span>
+              </div>
+            </label>
+
+            <!-- 2. Projects -->
+            <label class="delete-category-card" for="delCatProjects" id="cardCatProjects">
+              <input type="checkbox" id="delCatProjects" name="deleteCategory" value="projects" />
+              <div class="delete-category-content">
+                <div class="delete-category-head">
+                  <i data-lucide="building-2" class="delete-category-icon icon"></i>
+                  <span data-i18n="settings.catProjects">المشاريع</span>
+                </div>
+                <span class="delete-category-desc" data-i18n="settings.catProjectsDesc">جميع المشاريع وتفاصيلها وبنودها ومصروفاتها</span>
+              </div>
+            </label>
+
+            <!-- 3. Suppliers -->
+            <label class="delete-category-card" for="delCatSuppliers" id="cardCatSuppliers">
+              <input type="checkbox" id="delCatSuppliers" name="deleteCategory" value="suppliers" />
+              <div class="delete-category-content">
+                <div class="delete-category-head">
+                  <i data-lucide="truck" class="delete-category-icon icon"></i>
+                  <span data-i18n="settings.catSuppliers">الموردين</span>
+                </div>
+                <span class="delete-category-desc" data-i18n="settings.catSuppliersDesc">بيانات وسجلات الموردين وفواتيرهم</span>
+              </div>
+            </label>
+
+            <!-- 4. Contractors -->
+            <label class="delete-category-card" for="delCatContractors" id="cardCatContractors">
+              <input type="checkbox" id="delCatContractors" name="deleteCategory" value="contractors" />
+              <div class="delete-category-content">
+                <div class="delete-category-head">
+                  <i data-lucide="hard-hat" class="delete-category-icon icon"></i>
+                  <span data-i18n="settings.catContractors">المقاولين</span>
+                </div>
+                <span class="delete-category-desc" data-i18n="settings.catContractorsDesc">بيانات وسجلات المقاولين ومستحقاتهم</span>
+              </div>
+            </label>
+          </div>
         </div>
+
+        <div class="divider" style="margin: 4px 0 12px;"></div>
+
+        <!-- Double Password Confirmation -->
         <div class="form-field">
-          <label class="form-label" for="delPassword2" data-i18n="settings.confirmPassword">Confirm password</label>
-          <input class="form-input" id="delPassword2" name="password2" type="password" required autocomplete="off" data-i18n-ph="settings.confirmPasswordPh" placeholder="Re-enter your password" />
+          <label class="form-label" for="delPassword1" data-i18n="settings.password">كلمة المرور</label>
+          <input class="form-input" id="delPassword1" name="password1" type="password" required autocomplete="off" data-i18n-ph="settings.passwordPh" placeholder="أدخل كلمة المرور" />
         </div>
+
+        <div class="form-field">
+          <label class="form-label" for="delPassword2" data-i18n="settings.confirmPassword">تأكيد كلمة المرور</label>
+          <input class="form-input" id="delPassword2" name="password2" type="password" required autocomplete="off" data-i18n-ph="settings.confirmPasswordPh" placeholder="أعد إدخال كلمة المرور" />
+        </div>
+
         <p class="form-error" id="deleteError" hidden></p>
+
         <div class="modal-actions">
-          <button class="btn btn-ghost" id="deleteCancel" type="button" data-i18n="settings.cancel">Cancel</button>
-          <button class="btn btn-danger" id="deleteConfirm" type="submit" data-i18n="settings.confirmDelete">Delete everything</button>
+          <button class="btn btn-ghost" id="deleteCancel" type="button" data-i18n="settings.cancel">إلغاء</button>
+          <button class="btn btn-danger" id="deleteConfirm" type="submit">
+            <i data-lucide="trash-2" class="icon"></i>
+            <span id="deleteConfirmText" data-i18n="settings.confirmDelete">حذف البيانات المحددة</span>
+          </button>
         </div>
       </form>
     </div>

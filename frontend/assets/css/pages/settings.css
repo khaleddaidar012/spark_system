@@ -45,10 +45,133 @@
   border-radius: var(--radius-sm);
   padding: var(--space-3) var(--space-4);
   margin: 0 0 var(--space-4);
+  line-height: 1.5;
+  border-right: 3px solid var(--danger);
+}
+
+[dir="ltr"] .settings-delete-warning {
+  border-right: none;
+  border-left: 3px solid var(--danger);
+}
+
+/* Category Multi-Select Styles */
+.delete-categories-wrapper {
+  margin-bottom: var(--space-4);
+}
+
+.delete-categories-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-2);
+}
+
+.delete-categories-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-3);
+}
+
+.delete-category-card {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  border: 1.5px solid var(--border);
+  background: var(--surface-2);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.delete-category-card:hover {
+  background: var(--surface-1);
+  border-color: var(--border-strong);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+.delete-category-card.is-selected {
+  background: rgba(239, 68, 68, 0.06);
+  border-color: var(--danger);
+  box-shadow: 0 0 0 1px var(--danger);
+}
+
+.delete-category-card input[type="checkbox"] {
+  margin-top: 3px;
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  accent-color: var(--danger);
+  flex-shrink: 0;
+}
+
+.delete-category-content {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  flex: 1;
+}
+
+.delete-category-head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 700;
+  font-size: 0.88rem;
+  color: var(--text);
+}
+
+.delete-category-card.is-selected .delete-category-head {
+  color: var(--danger);
+}
+
+.delete-category-icon {
+  width: 17px;
+  height: 17px;
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.delete-category-card.is-selected .delete-category-icon {
+  color: var(--danger);
+}
+
+.delete-category-desc {
+  font-size: 0.77rem;
+  line-height: 1.35;
+  color: var(--text-muted);
+}
+
+.delete-category-badge {
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: var(--radius-full);
+  background: var(--surface-3);
+  color: var(--text-muted);
+  margin-inline-start: auto;
+}
+
+.delete-category-card.is-selected .delete-category-badge {
+  background: rgba(239, 68, 68, 0.15);
+  color: var(--danger);
 }
 
 @media (max-width: 640px) {
   .settings-actions .btn {
     width: 100%;
   }
+
+  .delete-categories-grid {
+    grid-template-columns: 1fr;
+    gap: var(--space-2);
+  }
+
+  .delete-category-card {
+    padding: 10px 12px;
+  }
 }
+

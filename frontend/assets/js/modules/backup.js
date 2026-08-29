@@ -94,6 +94,10 @@ export async function restoreBackup(file, onOk, onError) {
           }
         }
       }
+      try {
+        localStorage.removeItem("spark_contractors_deleted");
+        localStorage.removeItem("spark_suppliers_deleted");
+      } catch {}
       onOk();
     } catch {
       onError();

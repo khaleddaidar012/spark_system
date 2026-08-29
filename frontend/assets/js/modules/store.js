@@ -144,6 +144,97 @@ export function remove(name, id) {
 export async function wipeAll() {
   await api.reset();
   for (const key of Object.keys(cache)) cache[key] = [];
+  try {
+    localStorage.setItem("spark_contractors_deleted", "true");
+    localStorage.setItem("spark_suppliers_deleted", "true");
+  } catch {}
+}
+
+/* Selectively delete categories of data. */
+export async function deleteCategories({ projects = false, finance = false, suppliers = false, contractors = false } = {}) {
+  if (finance) {
+    cache.moneyTransactions = [];
+    cache.materialTransactions = [];
+    cache.deductions = [];
+    // Reset financial balances on remaining entities
+    if (Array.isArray(cache.contractors)) {
+      for (const c of cache.contractors) {
+        c.paid = 0;
+      }
+    }
+    if (Array.isArray(cache.suppliers)) {
+      for (const s of cache.suppliers) {
+        s.purchases = 0;
+        s.paid = 0;
+      }
+    }
+    if (Array.isArray(cache.clients)) {
+      for (const cl of cache.clients) {
+        cl.paid = 0;
+      }
+    }
+    if (Array.isArray(cache.projects)) {
+      for (const p of cache.projects) {
+        p.otherExpenses = [];
+        p.advancePayment = 0;
+        if (Array.isArray(p.materials)) {
+          for (const m of p.materials) {
+            m.cost = 0;
+            m.unitPrice = 0;
+            m.total = 0;
+          }
+        }
+        if (Array.isArray(p.contractors)) {
+          for (const c of p.contractors) {
+            c.paid = 0;
+          }
+        }
+      }
+    }
+  }
+
+  if (projects) {
+    cache.projects = [];
+    cache.moneyTransactions = (cache.moneyTransactions || []).filter((t) => !t.projectId);
+    cache.materialTransactions = (cache.materialTransactions || []).filter((t) => !t.projectId);
+    cache.deductions = (cache.deductions || []).filter((d) => !d.projectId);
+  }
+
+  if (suppliers) {
+    cache.suppliers = [];
+    try {
+      localStorage.setItem("spark_suppliers_deleted", "true");
+    } catch {}
+    cache.moneyTransactions = (cache.moneyTransactions || []).filter((t) => t.personType !== "supplier");
+    cache.materialTransactions = (cache.materialTransactions || []).filter((t) => !t.supplierId);
+    if (Array.isArray(cache.projects)) {
+      for (const p of cache.projects) {
+        if (Array.isArray(p.materials)) {
+          p.materials = p.materials.filter((m) => !m.supplierId && !m.supplierName);
+        }
+      }
+    }
+  }
+
+  if (contractors) {
+    cache.contractors = [];
+    try {
+      localStorage.setItem("spark_contractors_deleted", "true");
+    } catch {}
+    cache.moneyTransactions = (cache.moneyTransactions || []).filter((t) => t.personType !== "contractor");
+    cache.deductions = (cache.deductions || []).filter((d) => d.personType !== "contractor");
+    if (Array.isArray(cache.projects)) {
+      for (const p of cache.projects) {
+        if (Array.isArray(p.contractors)) {
+          p.contractors = [];
+        }
+      }
+    }
+  }
+
+  // Synchronize the full snapshot to Cloudflare D1 / Local backend
+  await api.restore(dbSnapshot());
+  return true;
 }
 
 /* Empty the database and re-create the demo seed. */
@@ -227,32 +318,36 @@ const DEFAULT_SUPPLIERS = [
 ];
 
 export function seedDefaultData() {
-  const existingContractorNames = new Set(all("contractors").map((c) => c.name));
-  for (const c of DEFAULT_CONTRACTORS) {
-    if (!existingContractorNames.has(c.name)) {
-      save("contractors", {
-        id: uid(),
-        name: c.name,
-        role: c.role,
-        phone: "",
-        total: 0,
-        paid: 0,
-      });
+  if (!localStorage.getItem("spark_contractors_deleted")) {
+    const existingContractorNames = new Set(all("contractors").map((c) => c.name));
+    for (const c of DEFAULT_CONTRACTORS) {
+      if (!existingContractorNames.has(c.name)) {
+        save("contractors", {
+          id: uid(),
+          name: c.name,
+          role: c.role,
+          phone: "",
+          total: 0,
+          paid: 0,
+        });
+      }
     }
   }
 
-  const existingSupplierNames = new Set(all("suppliers").map((s) => s.name));
-  for (const s of DEFAULT_SUPPLIERS) {
-    if (!existingSupplierNames.has(s.name)) {
-      save("suppliers", {
-        id: uid(),
-        name: s.name,
-        phone: "",
-        notes: s.notes || "",
-        supplies: s.supplies || [],
-        purchases: 0,
-        paid: 0,
-      });
+  if (!localStorage.getItem("spark_suppliers_deleted")) {
+    const existingSupplierNames = new Set(all("suppliers").map((s) => s.name));
+    for (const s of DEFAULT_SUPPLIERS) {
+      if (!existingSupplierNames.has(s.name)) {
+        save("suppliers", {
+          id: uid(),
+          name: s.name,
+          phone: "",
+          notes: s.notes || "",
+          supplies: s.supplies || [],
+          purchases: 0,
+          paid: 0,
+        });
+      }
     }
   }
 }

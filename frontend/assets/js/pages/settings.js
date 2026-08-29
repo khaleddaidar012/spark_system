@@ -5,7 +5,7 @@
    ============================================ */
 
 import { initLayout } from "../modules/layout.js";
-import { initStore, wipeAll } from "../modules/store.js";
+import { initStore, wipeAll, deleteCategories } from "../modules/store.js";
 import { api } from "../modules/api.js";
 import { translate } from "../modules/i18n.js";
 import { toast } from "../modules/toast.js";
@@ -28,14 +28,60 @@ document.addEventListener("DOMContentLoaded", async () => {
   const password1 = document.getElementById("delPassword1");
   const password2 = document.getElementById("delPassword2");
   const deleteConfirm = document.getElementById("deleteConfirm");
+  const deleteConfirmText = document.getElementById("deleteConfirmText");
   const deleteCancel = document.getElementById("deleteCancel");
   const deleteClose = document.getElementById("deleteModalClose");
 
+  // Category Multi-Select elements
+  const catCheckboxes = [
+    { el: document.getElementById("delCatFinance"), card: document.getElementById("cardCatFinance"), key: "finance" },
+    { el: document.getElementById("delCatProjects"), card: document.getElementById("cardCatProjects"), key: "projects" },
+    { el: document.getElementById("delCatSuppliers"), card: document.getElementById("cardCatSuppliers"), key: "suppliers" },
+    { el: document.getElementById("delCatContractors"), card: document.getElementById("cardCatContractors"), key: "contractors" },
+  ];
+  const selectAllBtn = document.getElementById("selectAllCategoriesBtn");
+  const selectAllText = document.getElementById("selectAllBtnText");
+
+  const updateSelectAllBtnText = () => {
+    const allChecked = catCheckboxes.every((c) => c.el && c.el.checked);
+    if (selectAllText) {
+      selectAllText.textContent = allChecked
+        ? (translate("settings.deselectAll") || "إلغاء تحديد الكل")
+        : (translate("settings.selectAll") || "تحديد الكل");
+    }
+  };
+
+  catCheckboxes.forEach(({ el, card }) => {
+    if (!el) return;
+    el.addEventListener("change", () => {
+      if (card) card.classList.toggle("is-selected", el.checked);
+      updateSelectAllBtnText();
+      if (deleteError && !deleteError.hidden) {
+        deleteError.hidden = true;
+      }
+    });
+  });
+
+  selectAllBtn?.addEventListener("click", () => {
+    const allChecked = catCheckboxes.every((c) => c.el && c.el.checked);
+    const targetState = !allChecked;
+    catCheckboxes.forEach(({ el, card }) => {
+      if (el) el.checked = targetState;
+      if (card) card.classList.toggle("is-selected", targetState);
+    });
+    updateSelectAllBtnText();
+    if (deleteError && !deleteError.hidden) {
+      deleteError.hidden = true;
+    }
+  });
+
   const showError = (key) => {
-    deleteError.textContent = translate(key);
+    deleteError.textContent = translate(key) || key;
     deleteError.hidden = false;
-    password1.classList.add("is-invalid");
-    password2.classList.add("is-invalid");
+    if (key.toLowerCase().includes("password")) {
+      password1.classList.add("is-invalid");
+      password2.classList.add("is-invalid");
+    }
   };
 
   const renderLastBackup = () => {
@@ -123,14 +169,26 @@ document.addEventListener("DOMContentLoaded", async () => {
     restoreFile.value = "";
   });
 
-  /* ---------- Delete all data ---------- */
+  /* ---------- Delete custom data ---------- */
   deleteAllBtn?.addEventListener("click", () => {
     deleteError.hidden = true;
     password1.classList.remove("is-invalid");
     password2.classList.remove("is-invalid");
     password1.value = "";
     password2.value = "";
+
+    // Reset category checkboxes to unselected
+    catCheckboxes.forEach(({ el, card }) => {
+      if (el) el.checked = false;
+      if (card) card.classList.remove("is-selected");
+    });
+    updateSelectAllBtnText();
+
+    if (deleteConfirm) deleteConfirm.disabled = false;
+    if (deleteConfirmText) deleteConfirmText.textContent = translate("settings.confirmDelete") || "حذف البيانات المحددة";
+
     showModal(deleteModal);
+    window.lucide?.createIcons();
   });
 
   const closeDelete = () => {
@@ -138,6 +196,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     deleteError.hidden = true;
     password1.classList.remove("is-invalid");
     password2.classList.remove("is-invalid");
+    if (deleteConfirm) deleteConfirm.disabled = false;
   };
 
   deleteCancel?.addEventListener("click", closeDelete);
@@ -149,11 +208,25 @@ document.addEventListener("DOMContentLoaded", async () => {
     password1.classList.remove("is-invalid");
     password2.classList.remove("is-invalid");
 
+    // Gather selected categories
+    const selected = {};
+    catCheckboxes.forEach(({ el, key }) => {
+      selected[key] = !!(el && el.checked);
+    });
+
+    const hasAnySelected = Object.values(selected).some(Boolean);
+    if (!hasAnySelected) {
+      showError("settings.noCategorySelected");
+      return;
+    }
+
     const p1 = password1.value;
     const p2 = password2.value;
 
     if (!p1 || !p2) {
       showError("settings.enterBothPasswords");
+      if (!p1) password1.focus();
+      else password2.focus();
       return;
     }
     if (p1 !== p2) {
@@ -161,18 +234,47 @@ document.addEventListener("DOMContentLoaded", async () => {
       password2.focus();
       return;
     }
-    if (!(await api.verifyPassword(p1)).ok) {
+
+    try {
+      const verifyRes = await api.verifyPassword(p1);
+      if (!verifyRes || !verifyRes.ok) {
+        showError("settings.wrongPassword");
+        password1.focus();
+        return;
+      }
+    } catch {
       showError("settings.wrongPassword");
       password1.focus();
       return;
     }
 
-    deleteConfirm.disabled = true;
-    downloadBackup();
-    await wipeAll();
-    toast(translate("settings.deleted"));
-    setTimeout(() => {
-      window.location.href = "./login.html";
-    }, 1200);
+    try {
+      if (deleteConfirm) deleteConfirm.disabled = true;
+      if (deleteConfirmText) deleteConfirmText.textContent = translate("settings.deleting") || "جاري الحذف...";
+
+      // Automatic safety backup before deletion
+      const backupData = buildBackupData();
+      await pushBackupToServer(backupData).catch(() => null);
+      downloadBackup();
+
+      // Delete the selected categories
+      await deleteCategories(selected);
+
+      renderLastBackup();
+      closeDelete();
+
+      const successMsg = translate("settings.deleted") || "تم حذف البيانات المحددة بنجاح.";
+      toast(successMsg, "success");
+      showNotification(`✅ ${successMsg} تم حفظ وتنزيل نسخة احتياطية مسبقاً لحماية بياناتك.`, true);
+
+      // Reload page to refresh all data stores and views cleanly
+      setTimeout(() => {
+        window.location.reload();
+      }, 1300);
+    } catch (err) {
+      showError(err.message || "settings.wrongPassword");
+      if (deleteConfirm) deleteConfirm.disabled = false;
+      if (deleteConfirmText) deleteConfirmText.textContent = translate("settings.confirmDelete") || "حذف البيانات المحددة";
+    }
   });
 });
