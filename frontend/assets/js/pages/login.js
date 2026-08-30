@@ -11,7 +11,12 @@ const REMEMBER_KEY = "spark_remembered_user";
 
 document.addEventListener("DOMContentLoaded", async () => {
   if ("serviceWorker" in navigator) {
-    navigator.serviceWorker.register("/sw.js", { scope: "/" }).catch(() => {});
+    navigator.serviceWorker.register("/sw.js", { scope: "/" }).then((reg) => {
+      if (reg.active) reg.active.postMessage({ type: "PRECACHE_ALL" });
+      if (navigator.serviceWorker.controller) {
+        navigator.serviceWorker.controller.postMessage({ type: "PRECACHE_ALL" });
+      }
+    }).catch(() => {});
   }
   initTheme();
 

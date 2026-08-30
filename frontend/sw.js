@@ -3,7 +3,7 @@
    CacheFirst for Static Assets, Network/Fallback for API
    ============================================ */
 
-const CACHE_NAME = "spark-erp-cache-v6";
+const CACHE_NAME = "spark-erp-cache-v7";
 
 const STATIC_ASSETS = [
   "/",
@@ -123,6 +123,39 @@ const STATIC_ASSETS = [
   "/assets/js/sync/SyncEngine.js"
 ];
 
+async function preCacheAllAssets() {
+  try {
+    const cache = await caches.open(CACHE_NAME);
+    console.log("[SW] Pre-caching all 80+ application assets...");
+
+    const batchSize = 5;
+    for (let i = 0; i < STATIC_ASSETS.length; i += batchSize) {
+      const batch = STATIC_ASSETS.slice(i, i + batchSize);
+      await Promise.allSettled(
+        batch.map(async (asset) => {
+          try {
+            const res = await fetch(asset, { redirect: "follow", cache: "no-cache" });
+            if (res && (res.status === 200 || res.ok)) {
+              const blob = await res.blob();
+              const cleanRes = new Response(blob, {
+                status: 200,
+                statusText: "OK",
+                headers: res.headers,
+              });
+              await cache.put(asset, cleanRes);
+            }
+          } catch (err) {
+            console.warn(`[SW] Pre-cache failed for ${asset}:`, err);
+          }
+        })
+      );
+    }
+    console.log("[SW] Complete pre-cache finished successfully!");
+  } catch (e) {
+    console.error("[SW] Pre-cache error:", e);
+  }
+}
+
 async function getCachedAsset(request, url) {
   // 1. Try exact request match
   let res = await caches.match(request, { ignoreSearch: true });
@@ -156,43 +189,27 @@ async function getCachedAsset(request, url) {
 }
 
 self.addEventListener("install", (event) => {
-  event.waitUntil(
-    (async () => {
-      const cache = await caches.open(CACHE_NAME);
-      console.log("[SW] Pre-caching all application assets in batches...");
-
-      // Process pre-cache in controlled batches of 5 to avoid connection limits
-      const batchSize = 5;
-      for (let i = 0; i < STATIC_ASSETS.length; i += batchSize) {
-        const batch = STATIC_ASSETS.slice(i, i + batchSize);
-        await Promise.allSettled(
-          batch.map(async (asset) => {
-            try {
-              const res = await fetch(asset, { cache: "no-cache" });
-              if (res && (res.status === 200 || res.status === 0 || res.type === "opaque")) {
-                await cache.put(asset, res);
-              }
-            } catch (err) {
-              console.warn(`[SW] Pre-cache failed for ${asset}:`, err);
-            }
-          })
-        );
-      }
-      console.log("[SW] System offline pre-cache complete!");
-    })()
-  );
+  event.waitUntil(preCacheAllAssets());
   self.skipWaiting();
 });
 
 self.addEventListener("activate", (event) => {
   event.waitUntil(
-    caches.keys().then((keys) => {
-      return Promise.all(
+    (async () => {
+      const keys = await caches.keys();
+      await Promise.all(
         keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key))
       );
-    })
+      await self.clients.claim();
+      preCacheAllAssets();
+    })()
   );
-  self.clients.claim();
+});
+
+self.addEventListener("message", (event) => {
+  if (event.data && event.data.type === "PRECACHE_ALL") {
+    preCacheAllAssets();
+  }
 });
 
 self.addEventListener("fetch", (event) => {
@@ -210,6 +227,8 @@ self.addEventListener("fetch", (event) => {
 
   event.respondWith(
     (async () => {
+      const cache = await caches.open(CACHE_NAME);
+
       // 1. CACHE FIRST: Try finding in cache immediately (0ms latency, works offline)
       const cachedResponse = await getCachedAsset(event.request, url);
       if (cachedResponse) {
@@ -219,23 +238,25 @@ self.addEventListener("fetch", (event) => {
       // 2. NETWORK FALLBACK if not in cache
       try {
         const networkResponse = await fetch(event.request);
-        if (networkResponse && networkResponse.status === 200 && networkResponse.type === "basic") {
-          const responseToCache = networkResponse.clone();
-          caches.open(CACHE_NAME).then((cache) => {
-            cache.put(event.request, responseToCache);
-          });
+        if (networkResponse && (networkResponse.status === 200 || networkResponse.ok)) {
+          const clone = networkResponse.clone();
+          cache.put(event.request, clone);
         }
         return networkResponse;
       } catch (err) {
         // 3. OFFLINE NAVIGATION FALLBACK: Return any cached HTML shell
         if (event.request.mode === "navigate" || (event.request.headers.get("accept") || "").includes("text/html")) {
           const fallback =
-            (await caches.match("/pages/dashboard.html")) ||
-            (await caches.match("/pages/dashboard")) ||
-            (await caches.match("/pages/login.html")) ||
-            (await caches.match("/pages/login")) ||
-            (await caches.match("/index.html")) ||
-            (await caches.match("/"));
+            (await cache.match(url.pathname, { ignoreSearch: true })) ||
+            (await cache.match(url.pathname + ".html", { ignoreSearch: true })) ||
+            (await cache.match("/pages/dashboard.html")) ||
+            (await cache.match("/pages/dashboard")) ||
+            (await cache.match("/pages/login.html")) ||
+            (await cache.match("/pages/login")) ||
+            (await cache.match("/pages/projects.html")) ||
+            (await cache.match("/pages/projects")) ||
+            (await cache.match("/index.html")) ||
+            (await cache.match("/"));
           if (fallback) return fallback;
         }
         throw err;
