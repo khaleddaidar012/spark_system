@@ -428,12 +428,17 @@ export async function onRequest(context) {
         return json({ error: "username and password are required" }, 400);
       }
       const c = config(env);
-      const hash = await sha256Hex(password);
-      if (!constantTimeEqual(username, c.adminUser) || !constantTimeEqual(hash, c.adminHash)) {
+      const cleanUser = username.trim().toLowerCase();
+      const cleanPass = password.trim();
+      const hash1 = await sha256Hex(cleanPass);
+      const hash2 = await sha256Hex(password);
+      const validUser = cleanUser === c.adminUser.toLowerCase();
+      const validHash = hash1 === c.adminHash || hash2 === c.adminHash;
+      if (!validUser || !validHash) {
         return json({ error: "Invalid username or password" }, 401);
       }
-      const token = await signToken(username, c.authSecret);
-      return json({ token, username });
+      const token = await signToken(c.adminUser, c.authSecret);
+      return json({ token, username: c.adminUser });
     }
 
     if (segments[0] === "auth" && segments[1] === "verify" && method === "POST") {

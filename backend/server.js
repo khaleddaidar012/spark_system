@@ -91,7 +91,9 @@ const AUTH_TOKEN = 'spark-static-token-phase1';   // static token — fine for l
 
 app.post('/api/auth/login', (req, res) => {
   const { username, password } = req.body || {};
-  if (username === ADMIN_USER && password === ADMIN_PASS) {
+  const cleanUser = (username || '').trim().toLowerCase();
+  const cleanPass = (password || '').trim();
+  if (cleanUser === ADMIN_USER.toLowerCase() && (cleanPass === ADMIN_PASS || password === ADMIN_PASS)) {
     return res.status(200).json({ token: AUTH_TOKEN, username: ADMIN_USER });
   }
   return res.status(401).json({ error: 'Invalid credentials' });
