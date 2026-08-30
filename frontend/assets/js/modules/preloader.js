@@ -20,7 +20,7 @@ export function injectPreloader() {
       <div class="preloader-card">
         <div class="preloader-logo-ring">
           <div class="preloader-spinner"></div>
-          <svg class="preloader-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg class="preloader-icon-svg" width="32" height="32" style="width:32px;height:32px;max-width:32px;max-height:32px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
           </svg>
         </div>
