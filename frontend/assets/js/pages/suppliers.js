@@ -140,9 +140,11 @@ function submitSupplier(event) {
   supplier.phone = form.phone.value.trim();
   supplier.notes = form.notes.value.trim();
   supplier.supplies = splitSupplies(form.supplies.value);
+  supplier.kind = "suppliers";
+  supplier.roles = Array.isArray(supplier.roles) && supplier.roles.length ? supplier.roles : ["supplier"];
   if (!editingId) {
-    supplier.purchases = 0;
-    supplier.paid = 0;
+    supplier.purchases = supplier.purchases || 0;
+    supplier.paid = supplier.paid || 0;
   }
   save("suppliers", supplier);
   closeModal();

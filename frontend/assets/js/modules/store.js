@@ -91,10 +91,10 @@ async function loadCacheFromIndexedDB() {
     cache.deductions = await db.deductions.filter((x) => !x.deletedAt).toArray();
 
     const people = await db.people.filter((x) => !x.deletedAt).toArray();
-    cache.suppliers = people.filter((p) => p.kind === "suppliers");
-    cache.contractors = people.filter((p) => p.kind === "contractors");
-    cache.clients = people.filter((p) => p.kind === "clients");
-    cache.others = people.filter((p) => p.kind === "others");
+    cache.suppliers = people.filter((p) => p.kind === "suppliers" || p.kind === "supplier" || (Array.isArray(p.roles) && (p.roles.includes("supplier") || p.roles.includes("suppliers"))));
+    cache.contractors = people.filter((p) => p.kind === "contractors" || p.kind === "contractor" || (Array.isArray(p.roles) && (p.roles.includes("contractor") || p.roles.includes("contractors"))));
+    cache.clients = people.filter((p) => p.kind === "clients" || p.kind === "client" || (Array.isArray(p.roles) && (p.roles.includes("client") || p.roles.includes("clients"))));
+    cache.others = people.filter((p) => p.kind === "others" || p.kind === "other" || (Array.isArray(p.roles) && (p.roles.includes("other") || p.roles.includes("others"))));
   } catch (err) {
     console.error("[Store] Error reading IndexedDB cache:", err);
   }
@@ -169,6 +169,13 @@ function reportSyncError() {
 
 /* Apply locally to memory & IndexedDB instantly, enqueue sync operation */
 export function save(name, item) {
+  if (PEOPLE_COLLECTIONS.includes(name)) {
+    item.kind = item.kind || name;
+    if (!item.roles || !Array.isArray(item.roles) || !item.roles.length) {
+      item.roles = [COLLECTION_ROLE[name] || "supplier"];
+    }
+  }
+
   const list = cache[name] || (cache[name] = []);
   const idx = list.findIndex((x) => x.id === item.id);
   if (idx === -1) list.push(item);
@@ -208,6 +215,12 @@ export function save(name, item) {
       console.error("[Store] Dexie write error:", err);
     }
   })();
+
+  try {
+    window.dispatchEvent(new CustomEvent("spark:data-changed"));
+  } catch {
+    /* ignore */
+  }
 
   return item;
 }

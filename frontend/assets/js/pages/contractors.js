@@ -328,6 +328,8 @@ function initModal() {
     save("contractors", {
       id: uid(),
       name,
+      kind: "contractors",
+      roles: ["contractor"],
       role: form.role.value,
       phone: form.phone.value.trim(),
       total: Number(form.total.value || 0),
