@@ -3,7 +3,7 @@
    CacheFirst for Static Assets, Network/Fallback for API
    ============================================ */
 
-const CACHE_NAME = "spark-erp-cache-v5";
+const CACHE_NAME = "spark-erp-cache-v6";
 
 const STATIC_ASSETS = [
   "/",
@@ -11,16 +11,26 @@ const STATIC_ASSETS = [
   "/manifest.json",
   "/sw.js",
 
-  // Pages
+  // Pages (Both Clean URLs & .html)
+  "/pages/login",
   "/pages/login.html",
+  "/pages/dashboard",
   "/pages/dashboard.html",
+  "/pages/projects",
   "/pages/projects.html",
+  "/pages/project",
   "/pages/project.html",
+  "/pages/finance",
   "/pages/finance.html",
+  "/pages/suppliers",
   "/pages/suppliers.html",
+  "/pages/contractors",
   "/pages/contractors.html",
+  "/pages/reports",
   "/pages/reports.html",
+  "/pages/settings",
   "/pages/settings.html",
+  "/pages/statement",
   "/pages/statement.html",
 
   // Components
@@ -113,6 +123,38 @@ const STATIC_ASSETS = [
   "/assets/js/sync/SyncEngine.js"
 ];
 
+async function getCachedAsset(request, url) {
+  // 1. Try exact request match
+  let res = await caches.match(request, { ignoreSearch: true });
+  if (res) return res;
+
+  // 2. Try pathname match
+  res = await caches.match(url.pathname, { ignoreSearch: true });
+  if (res) return res;
+
+  // 3. Try pathname + .html match (e.g. /pages/dashboard -> /pages/dashboard.html)
+  if (!url.pathname.endsWith(".html") && !url.pathname.endsWith(".js") && !url.pathname.endsWith(".css") && !url.pathname.endsWith(".json") && !url.pathname.endsWith(".svg")) {
+    res = await caches.match(url.pathname + ".html", { ignoreSearch: true });
+    if (res) return res;
+  }
+
+  // 4. Try pathname without .html match (e.g. /pages/dashboard.html -> /pages/dashboard)
+  if (url.pathname.endsWith(".html")) {
+    const cleanPath = url.pathname.slice(0, -5);
+    res = await caches.match(cleanPath, { ignoreSearch: true });
+    if (res) return res;
+  }
+
+  // 5. Try trailing slash / index.html
+  if (url.pathname.endsWith("/")) {
+    res = (await caches.match(url.pathname + "index.html", { ignoreSearch: true })) ||
+          (await caches.match(url.pathname + "pages/dashboard.html", { ignoreSearch: true }));
+    if (res) return res;
+  }
+
+  return null;
+}
+
 self.addEventListener("install", (event) => {
   event.waitUntil(
     (async () => {
@@ -168,16 +210,13 @@ self.addEventListener("fetch", (event) => {
 
   event.respondWith(
     (async () => {
-      // 1. Check exact match or path match from Cache Storage
-      try {
-        const cached = await caches.match(event.request, { ignoreSearch: true });
-        if (cached) return cached;
+      // 1. CACHE FIRST: Try finding in cache immediately (0ms latency, works offline)
+      const cachedResponse = await getCachedAsset(event.request, url);
+      if (cachedResponse) {
+        return cachedResponse;
+      }
 
-        const pathCached = await caches.match(url.pathname, { ignoreSearch: true });
-        if (pathCached) return pathCached;
-      } catch (e) {}
-
-      // 2. Try network fetch if online
+      // 2. NETWORK FALLBACK if not in cache
       try {
         const networkResponse = await fetch(event.request);
         if (networkResponse && networkResponse.status === 200 && networkResponse.type === "basic") {
@@ -188,25 +227,19 @@ self.addEventListener("fetch", (event) => {
         }
         return networkResponse;
       } catch (err) {
-        // 3. Network failed (OFFLINE): Guarantee HTML page response for navigation
+        // 3. OFFLINE NAVIGATION FALLBACK: Return any cached HTML shell
         if (event.request.mode === "navigate" || (event.request.headers.get("accept") || "").includes("text/html")) {
-          const cache = await caches.open(CACHE_NAME);
-          const pageFallback =
-            (await cache.match(url.pathname, { ignoreSearch: true })) ||
-            (await cache.match(url.pathname + ".html", { ignoreSearch: true })) ||
-            (await cache.match("/pages/dashboard.html")) ||
-            (await cache.match("/pages/login.html")) ||
-            (await cache.match("/pages/projects.html")) ||
-            (await cache.match("/index.html")) ||
-            (await cache.match("/"));
-          if (pageFallback) return pageFallback;
+          const fallback =
+            (await caches.match("/pages/dashboard.html")) ||
+            (await caches.match("/pages/dashboard")) ||
+            (await caches.match("/pages/login.html")) ||
+            (await caches.match("/pages/login")) ||
+            (await caches.match("/index.html")) ||
+            (await caches.match("/"));
+          if (fallback) return fallback;
         }
         throw err;
       }
     })()
   );
 });
-
-
-
-
