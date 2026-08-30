@@ -236,16 +236,20 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     try {
-      const verifyRes = await api.verifyPassword(p1);
-      if (!verifyRes || !verifyRes.ok) {
+      if (navigator.onLine) {
+        const verifyRes = await api.verifyPassword(p1);
+        if (!verifyRes || !verifyRes.ok) {
+          showError("settings.wrongPassword");
+          password1.focus();
+          return;
+        }
+      }
+    } catch {
+      if (navigator.onLine) {
         showError("settings.wrongPassword");
         password1.focus();
         return;
       }
-    } catch {
-      showError("settings.wrongPassword");
-      password1.focus();
-      return;
     }
 
     try {
