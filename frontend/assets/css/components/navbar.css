@@ -16,6 +16,28 @@
   border-bottom: 1px solid var(--border);
 }
 
+.navbar-sync-progress {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #3b82f6, #6366f1, #8b5cf6, #3b82f6);
+  background-size: 200% 100%;
+  animation: navbarSyncLoading 1.2s infinite linear;
+  display: none;
+  z-index: 100;
+}
+
+.navbar-sync-progress.is-active {
+  display: block;
+}
+
+@keyframes navbarSyncLoading {
+  0% { background-position: 100% 0; }
+  100% { background-position: -100% 0; }
+}
+
 .navbar-start,
 .navbar-end {
   display: flex;

@@ -75,6 +75,7 @@ async function request(path, { method = "GET", body, auth = true } = {}) {
 }
 
 export const api = {
+  request,
   /* auth */
   login: (username, password) => request("/auth/login", { method: "POST", auth: false, body: { username, password } }),
   verifyPassword: (password) => request("/auth/verify", { method: "POST", body: { password } }),
@@ -87,6 +88,10 @@ export const api = {
   reset: () => request("/data/reset", { method: "POST" }),
   seed: () => request("/data/seed", { method: "POST" }),
   restore: (db) => request("/data/restore", { method: "POST", body: { db } }),
+
+  /* sync */
+  pushSync: (payload) => request("/sync/push", { method: "POST", body: payload }),
+  pullSync: () => request("/sync/pull"),
 
   /* backup */
   backup: (payload) => request("/backup", { method: "POST", body: payload }),

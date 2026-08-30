@@ -11,6 +11,10 @@ import { initQuickAdd } from "./quick-add.js";
 import { initModalManager } from "./modal.js";
 import { initAutoBackup } from "./backup.js";
 import { requireAuth, logout } from "./auth.js";
+import { syncEngine } from "../sync/SyncEngine.js";
+import { connectivityMonitor } from "../sync/ConnectivityMonitor.js";
+import { requestStoragePersistence } from "../db/storage-health.js";
+import { initSyncStatusBadge } from "../components/sync-status-badge.js";
 
 const SIDEBAR_KEY = "spark_sidebar_collapsed";
 
@@ -153,6 +157,15 @@ export async function initLayout() {
   await initI18n();
   window.lucide?.createIcons();
   initAutoBackup();
+
+  // PWA & Connectivity Engine Initialization
+  connectivityMonitor.init();
+  syncEngine.init();
+  initSyncStatusBadge();
+  requestStoragePersistence();
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("../sw.js").catch(() => {});
+  }
 }
 
 export { getLang };

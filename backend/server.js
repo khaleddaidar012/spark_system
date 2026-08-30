@@ -112,7 +112,8 @@ app.post('/api/auth/logout', (_req, res) => {
 /* ---------- Data routes (in-memory / localStorage-first) ----------
    The frontend manages its own state. These endpoints are thin stubs
    that let the API calls resolve without 404 errors.                 */
-const DB_FILE = path.join(__dirname, 'backups', 'db.json');
+const DB_DIR = path.join(__dirname, 'backups');
+const DB_FILE = path.join(DB_DIR, 'db.json');
 
 function readDB() {
   try {
@@ -122,7 +123,9 @@ function readDB() {
 }
 
 function writeDB(data) {
-  ensureBackupDir();
+  if (!fs.existsSync(DB_DIR)) {
+    fs.mkdirSync(DB_DIR, { recursive: true });
+  }
   fs.writeFileSync(DB_FILE, JSON.stringify(data, null, 2));
 }
 
@@ -171,6 +174,36 @@ app.post('/api/data/restore', authGuard, (req, res) => {
   if (!db) return res.status(400).json({ error: 'Missing db payload' });
   writeDB(db);
   res.status(200).json({ ok: true });
+});
+
+/* Sync routes */
+app.post('/api/sync/push', authGuard, (req, res) => {
+  const ops = Array.isArray(req.body && req.body.operations) ? req.body.operations : [];
+  const processed = [];
+  const db = readDB();
+
+  for (const op of ops) {
+    if (!op || !op.entity || !op.payload) continue;
+    const coll = op.entity;
+    if (!db[coll]) db[coll] = [];
+
+    if (op.operation === 'delete') {
+      const targetId = op.entityId || op.payload.id;
+      db[coll] = db[coll].filter(r => r.id !== targetId);
+    } else {
+      const idx = db[coll].findIndex(r => r.id === op.payload.id);
+      if (idx >= 0) db[coll][idx] = op.payload;
+      else db[coll].push(op.payload);
+    }
+    if (op.id) processed.push(op.id);
+  }
+
+  writeDB(db);
+  res.status(200).json({ ok: true, processed, serverTime: Date.now() });
+});
+
+app.get('/api/sync/pull', authGuard, (_req, res) => {
+  res.status(200).json({ ok: true, serverTime: Date.now(), data: readDB() });
 });
 
 // Not found handler

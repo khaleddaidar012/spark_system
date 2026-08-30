@@ -5,7 +5,7 @@
    accounts via the actions module.
    ============================================ */
 
-import { all, get, peopleWithRole, findPersonById } from "./store.js";
+import { all, get, save, peopleWithRole, findPersonById } from "./store.js";
 import { recordMoney, addMaterialToProject, consumeMaterial } from "./actions.js";
 import { contractorWorksOnProject } from "./calc.js";
 import { translate } from "./i18n.js";
@@ -503,8 +503,25 @@ function initQuickMoney() {
     }
 
     const projectId = document.getElementById("moneyProject").value || null;
-    if (type === "contractor" && projectId && personId && !contractorWorksOnProject(personId, projectId)) {
-      toast(translate("quick.contractorNotOnProject").replace("{name}", personName), "info");
+    if (type === "contractor" && projectId && personId) {
+      const project = get("projects", projectId);
+      if (project) {
+        project.contractors = project.contractors || [];
+        let pCont = project.contractors.find((c) => c.id === personId);
+        if (!pCont) {
+          const person = get("contractors", personId);
+          pCont = {
+            id: personId,
+            name: personName,
+            role: person ? (person.role || "contractor") : "contractor",
+            total: 0,
+            paid: 0,
+          };
+          project.contractors.push(pCont);
+          save("projects", project);
+          toast(`تمت إضافة المقاول ${personName} تلقائياً إلى المشروع`, "success");
+        }
+      }
     }
 
     const phaseId = document.getElementById("moneyPhase")?.value || null;

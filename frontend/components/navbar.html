@@ -1,4 +1,5 @@
 <header class="navbar">
+  <div id="navbarSyncProgress" class="navbar-sync-progress"></div>
   <div class="navbar-start">
     <button class="btn btn-icon navbar-burger" id="sidebarToggle" type="button" aria-label="Toggle menu" title="Toggle menu">
       <i data-lucide="menu" class="icon"></i>
@@ -14,6 +15,10 @@
   </div>
 
   <div class="navbar-end">
+    <button class="btn btn-icon" id="navSyncBadge" type="button" aria-label="Sync Status" title="Sync Status">
+      <span id="syncBadgeIcon">🟢</span>
+    </button>
+
     <button class="btn btn-icon" id="navLangToggle" type="button" aria-label="Switch language" title="العربية">
       <span id="navLangText">ع</span>
     </button>

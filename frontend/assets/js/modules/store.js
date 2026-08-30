@@ -1,15 +1,14 @@
 /* ============================================
-   Spark ERP — Data Store Module
-   Central Cloudflare D1 database behind a thin
-   in-memory facade. The rest of the app keeps
-   using the same synchronous API (all/get/save/
-   remove) — reads come from memory, writes are
-   applied locally then pushed to the API so the
-   data is shared across devices.
+   Spark ERP — Data Store Module (Offline-First)
+   IndexedDB (Dexie.js) durable persistence +
+   sync queue dispatching with in-memory cache
+   facade for zero-latency UI rendering.
    ============================================ */
 
 import { api } from "./api.js";
 import { toast } from "./toast.js";
+import { db, initDatabase } from "../db/db.js";
+import { generateUUID } from "./uuid.js";
 
 export const COLLECTIONS = {
   projects: "projects",
@@ -25,7 +24,6 @@ export const COLLECTIONS = {
 
 export const PEOPLE_COLLECTIONS = ["suppliers", "contractors", "clients", "others"];
 
-/* Implicit role of a person stored in each collection when no roles[] is set. */
 export const COLLECTION_ROLE = {
   suppliers: "supplier",
   contractors: "contractor",
@@ -50,30 +48,79 @@ const cache = {
 let loaded = false;
 
 export function uid() {
-  return "id_" + Date.now().toString(36) + Math.random().toString(36).slice(2, 9);
+  return generateUUID();
 }
 
 export function today() {
   return new Date().toISOString().slice(0, 10);
 }
 
-/* Load the full snapshot from the shared database into memory.
-   Must be awaited before rendering. */
+/* Load data from local IndexedDB into cache first, then sync with API if online */
 export async function initStore({ force = false } = {}) {
   if (loaded && !force) return;
-  const data = await api.snapshot();
-  for (const key of Object.keys(cache)) {
-    cache[key] = Array.isArray(data[key]) ? data[key] : [];
-  }
+
+  await initDatabase();
+
+  // 1. First, populate cache immediately from local IndexedDB
+  await loadCacheFromIndexedDB();
   loaded = true;
-  seedDefaultData();
+
+  // 2. Seed default data if needed
+  await seedDefaultData();
+
+  // 3. Background attempt to pull remote snapshot if online
+  if (navigator.onLine) {
+    try {
+      const data = await api.snapshot();
+      if (data && typeof data === "object") {
+        await reconcileServerSnapshot(data);
+        await loadCacheFromIndexedDB();
+      }
+    } catch (err) {
+      console.log("[Store] Network snapshot skipped — running on local IndexedDB", err);
+    }
+  }
+}
+
+async function loadCacheFromIndexedDB() {
+  try {
+    cache.projects = await db.projects.filter((x) => !x.deletedAt).toArray();
+    cache.materials = await db.materials.filter((x) => !x.deletedAt).toArray();
+    cache.moneyTransactions = await db.moneyTransactions.filter((x) => !x.deletedAt).toArray();
+    cache.materialTransactions = await db.materialTransactions.filter((x) => !x.deletedAt).toArray();
+    cache.deductions = await db.deductions.filter((x) => !x.deletedAt).toArray();
+
+    const people = await db.people.filter((x) => !x.deletedAt).toArray();
+    cache.suppliers = people.filter((p) => p.kind === "suppliers");
+    cache.contractors = people.filter((p) => p.kind === "contractors");
+    cache.clients = people.filter((p) => p.kind === "clients");
+    cache.others = people.filter((p) => p.kind === "others");
+  } catch (err) {
+    console.error("[Store] Error reading IndexedDB cache:", err);
+  }
+}
+
+async function reconcileServerSnapshot(data) {
+  try {
+    for (const key of Object.keys(COLLECTIONS)) {
+      const items = Array.isArray(data[key]) ? data[key] : [];
+      if (items.length > 0) {
+        if (PEOPLE_COLLECTIONS.includes(key)) {
+          await db.people.bulkPut(items.map((item) => ({ ...item, kind: key, syncStatus: "synced" })));
+        } else if (db[key]) {
+          await db[key].bulkPut(items.map((item) => ({ ...item, syncStatus: "synced" })));
+        }
+      }
+    }
+  } catch (err) {
+    console.warn("[Store] Error reconciling server snapshot:", err);
+  }
 }
 
 export function isStoreLoaded() {
   return loaded;
 }
 
-/* Current database state as a plain object (used by backup/restore). */
 export function dbSnapshot() {
   return JSON.parse(JSON.stringify(cache));
 }
@@ -117,16 +164,51 @@ export function findPersonById(id) {
 /* ---------- Writes ---------- */
 
 function reportSyncError() {
-  toast("Sync failed — check your connection", "danger");
+  toast("Saved locally — will sync when connection returns", "info");
 }
 
-/* Apply locally (so the UI updates instantly) and push to the shared DB. */
+/* Apply locally to memory & IndexedDB instantly, enqueue sync operation */
 export function save(name, item) {
   const list = cache[name] || (cache[name] = []);
   const idx = list.findIndex((x) => x.id === item.id);
   if (idx === -1) list.push(item);
   else list[idx] = item;
-  if (loaded) api.save(name, item).catch(reportSyncError);
+
+  const now = Date.now();
+  const record = {
+    ...item,
+    updatedAt: now,
+    syncStatus: "pending",
+  };
+
+  // Durable write to IndexedDB + Sync Queue
+  (async () => {
+    try {
+      const table = PEOPLE_COLLECTIONS.includes(name) ? db.people : db[name];
+      if (table) {
+        await db.transaction("rw", [table, db.syncQueue], async () => {
+          await table.put({ ...record, kind: PEOPLE_COLLECTIONS.includes(name) ? name : undefined });
+          await db.syncQueue.add({
+            id: generateUUID(),
+            entity: name,
+            entityId: item.id,
+            operation: idx === -1 ? "create" : "update",
+            payload: record,
+            createdAt: now,
+            status: "pending",
+          });
+        });
+      }
+      if (navigator.onLine) {
+        api.save(name, item).catch(reportSyncError);
+      } else {
+        reportSyncError();
+      }
+    } catch (err) {
+      console.error("[Store] Dexie write error:", err);
+    }
+  })();
+
   return item;
 }
 
@@ -136,180 +218,130 @@ export function remove(name, id) {
   const idx = list.findIndex((x) => x.id === id);
   if (idx === -1) return false;
   list.splice(idx, 1);
-  if (loaded) api.remove(name, id).catch(reportSyncError);
+
+  const now = Date.now();
+  (async () => {
+    try {
+      const table = PEOPLE_COLLECTIONS.includes(name) ? db.people : db[name];
+      if (table) {
+        await db.transaction("rw", [table, db.syncQueue], async () => {
+          const existing = await table.get(id);
+          if (existing) {
+            await table.put({ ...existing, deletedAt: now, syncStatus: "pending_delete" });
+          }
+          await db.syncQueue.add({
+            id: generateUUID(),
+            entity: name,
+            entityId: id,
+            operation: "delete",
+            payload: { id, deletedAt: now },
+            createdAt: now,
+            status: "pending",
+          });
+        });
+      }
+      if (navigator.onLine) {
+        api.remove(name, id).catch(reportSyncError);
+      }
+    } catch (err) {
+      console.error("[Store] Dexie remove error:", err);
+    }
+  })();
+
   return true;
 }
 
-/* Empty the shared database (without re-seeding). */
 export async function wipeAll() {
-  await api.reset();
-  for (const key of Object.keys(cache)) cache[key] = [];
   try {
-    localStorage.setItem("spark_contractors_deleted", "true");
-    localStorage.setItem("spark_suppliers_deleted", "true");
+    await db.transaction("rw", [db.projects, db.people, db.materials, db.moneyTransactions, db.materialTransactions, db.deductions], async () => {
+      await Promise.all([
+        db.projects.clear(),
+        db.people.clear(),
+        db.materials.clear(),
+        db.moneyTransactions.clear(),
+        db.materialTransactions.clear(),
+        db.deductions.clear(),
+      ]);
+    });
   } catch {}
+  for (const key of Object.keys(cache)) cache[key] = [];
+  if (navigator.onLine) await api.reset().catch(() => {});
 }
 
-/* Selectively delete categories of data. */
 export async function deleteCategories({ projects = false, finance = false, suppliers = false, contractors = false } = {}) {
   if (finance) {
     cache.moneyTransactions = [];
     cache.materialTransactions = [];
     cache.deductions = [];
-    // Reset financial balances on remaining entities
-    if (Array.isArray(cache.contractors)) {
-      for (const c of cache.contractors) {
-        c.paid = 0;
-      }
-    }
-    if (Array.isArray(cache.suppliers)) {
-      for (const s of cache.suppliers) {
-        s.purchases = 0;
-        s.paid = 0;
-      }
-    }
-    if (Array.isArray(cache.clients)) {
-      for (const cl of cache.clients) {
-        cl.paid = 0;
-      }
-    }
-    if (Array.isArray(cache.projects)) {
-      for (const p of cache.projects) {
-        p.otherExpenses = [];
-        p.advancePayment = 0;
-        if (Array.isArray(p.materials)) {
-          for (const m of p.materials) {
-            m.cost = 0;
-            m.unitPrice = 0;
-            m.total = 0;
-          }
-        }
-        if (Array.isArray(p.contractors)) {
-          for (const c of p.contractors) {
-            c.paid = 0;
-          }
-        }
-      }
-    }
+    await db.moneyTransactions.clear();
+    await db.materialTransactions.clear();
+    await db.deductions.clear();
   }
-
   if (projects) {
     cache.projects = [];
-    cache.moneyTransactions = (cache.moneyTransactions || []).filter((t) => !t.projectId);
-    cache.materialTransactions = (cache.materialTransactions || []).filter((t) => !t.projectId);
-    cache.deductions = (cache.deductions || []).filter((d) => !d.projectId);
+    await db.projects.clear();
   }
-
   if (suppliers) {
     cache.suppliers = [];
-    try {
-      localStorage.setItem("spark_suppliers_deleted", "true");
-    } catch {}
-    cache.moneyTransactions = (cache.moneyTransactions || []).filter((t) => t.personType !== "supplier");
-    cache.materialTransactions = (cache.materialTransactions || []).filter((t) => !t.supplierId);
-    if (Array.isArray(cache.projects)) {
-      for (const p of cache.projects) {
-        if (Array.isArray(p.materials)) {
-          p.materials = p.materials.filter((m) => !m.supplierId && !m.supplierName);
-        }
-      }
-    }
+    await db.people.where("kind").equals("suppliers").delete();
   }
-
   if (contractors) {
     cache.contractors = [];
-    try {
-      localStorage.setItem("spark_contractors_deleted", "true");
-    } catch {}
-    cache.moneyTransactions = (cache.moneyTransactions || []).filter((t) => t.personType !== "contractor");
-    cache.deductions = (cache.deductions || []).filter((d) => d.personType !== "contractor");
-    if (Array.isArray(cache.projects)) {
-      for (const p of cache.projects) {
-        if (Array.isArray(p.contractors)) {
-          p.contractors = [];
-        }
-      }
-    }
+    await db.people.where("kind").equals("contractors").delete();
   }
-
-  // Synchronize the full snapshot to Cloudflare D1 / Local backend
-  await api.restore(dbSnapshot());
+  if (navigator.onLine) {
+    await api.restore(dbSnapshot()).catch(() => {});
+  }
   return true;
 }
 
-/* Empty the database and re-create the demo seed. */
 export async function clearAll() {
-  await api.reset();
-  await api.seed();
+  await wipeAll();
+  await seedDefaultData();
   await initStore({ force: true });
 }
 
-/* ============================================================
-   Default seed data — contractors & suppliers
-   Non-destructive: only inserts records that are not already
-   present (matched by name). Safe to call on every app start.
-   ============================================================ */
-
+/* Default seed data — contractors & suppliers */
 const DEFAULT_CONTRACTORS = [
-  /* Lean */
   { name: "مقاول لين", role: "lean" },
-  /* Wood doors / cladding */
   { name: "محمد سلطان", role: "wooddoors" },
   { name: "نصار الديب", role: "woodcladding" },
-  /* Marble */
   { name: "محمد الحمشبي", role: "marble" },
-  /* Demolition / cleanup */
   { name: "مصطفى (تكسير)", role: "demolition" },
-  /* Insulation */
   { name: "عم زكريا", role: "insulation" },
   { name: "مصطفى (عزل)", role: "insulation" },
-  /* Insulation + plumbing */
   { name: "عم هاني السباك", role: "insulplumb" },
   { name: "عم هاني (مقاول سباكة)", role: "plumbing" },
-  /* Fire safety */
   { name: "محمد بلال", role: "fireworks" },
-  /* Carpentry / ironwork */
   { name: "أحمد وهبة", role: "ironwork" },
   { name: "عبد الرحمن", role: "carpentry" },
-  /* Electrical */
   { name: "إبراهيم السيد أحمد", role: "electrical" },
-  /* Gypsum */
   { name: "حامد العلمي", role: "gypsum" },
   { name: "أبو هبة (جبس)", role: "gypsum" },
-  /* Painting */
   { name: "أبو يوسف", role: "painting" },
   { name: "عبده الفار", role: "painting" },
   { name: "حسام عبد الواحد", role: "painting" },
   { name: "حسام الزرقا", role: "painting" },
-  /* Plastering */
   { name: "إيهاب جمعة", role: "plastering" },
   { name: "محمود الحفية", role: "plastering" },
   { name: "سرور (محارة)", role: "plastering" },
   { name: "عم سليمان البحري", role: "plastering" },
-  /* Masonry */
   { name: "إبراهيم (مباني)", role: "masonry" },
   { name: "عم سرور (مباني)", role: "masonry" },
-  /* HVAC */
   { name: "شركة الأقصى", role: "hvac" },
-  /* Tiles */
   { name: "كريم الشناوي", role: "tiles" },
   { name: "إبراهيم (مبلط)", role: "tiles" },
-  /* Aluminum & kitchens */
   { name: "السعيد", role: "aluminum" },
   { name: "معتز", role: "aluminum" },
   { name: "ميكانيوم", role: "kitchens" },
 ];
 
 const DEFAULT_SUPPLIERS = [
-  /* Plumbing */
   { name: "هيثم أبو العنيين", supplies: ["بضاعة سباكة"], notes: "دمياط" },
   { name: "عبد العزيز السلاب", supplies: ["بضاعة سباكة"], notes: "القاهرة" },
-  /* Electrical */
   { name: "هشام الشربيني", supplies: ["توريدات كهرباء"] },
-  /* Insulation */
   { name: "ألفا", supplies: ["مواد عزل"] },
   { name: "محمد أشرف", supplies: ["مواد عزل"] },
-  /* Ceramics — each as a separate record */
   { name: "مورد سيراميك علوان", supplies: ["سيراميك"] },
   { name: "القطان", supplies: ["سيراميك"] },
   { name: "أبو العز", supplies: ["سيراميك"] },
@@ -317,13 +349,13 @@ const DEFAULT_SUPPLIERS = [
   { name: "الشربيني (سيراميك)", supplies: ["سيراميك"] },
 ];
 
-export function seedDefaultData() {
+export async function seedDefaultData() {
   if (!localStorage.getItem("spark_contractors_deleted")) {
-    const existingContractorNames = new Set(all("contractors").map((c) => c.name));
+    const existingNames = new Set(all("contractors").map((c) => c.name));
     for (const c of DEFAULT_CONTRACTORS) {
-      if (!existingContractorNames.has(c.name)) {
+      if (!existingNames.has(c.name)) {
         save("contractors", {
-          id: uid(),
+          id: generateUUID(),
           name: c.name,
           role: c.role,
           phone: "",
@@ -335,11 +367,11 @@ export function seedDefaultData() {
   }
 
   if (!localStorage.getItem("spark_suppliers_deleted")) {
-    const existingSupplierNames = new Set(all("suppliers").map((s) => s.name));
+    const existingNames = new Set(all("suppliers").map((s) => s.name));
     for (const s of DEFAULT_SUPPLIERS) {
-      if (!existingSupplierNames.has(s.name)) {
+      if (!existingNames.has(s.name)) {
         save("suppliers", {
-          id: uid(),
+          id: generateUUID(),
           name: s.name,
           phone: "",
           notes: s.notes || "",
@@ -352,11 +384,10 @@ export function seedDefaultData() {
   }
 }
 
-/* ---------- Deductions Helpers ---------- */
-
+/* Deductions Helpers */
 export function addDeduction({ personId, personType, amount, reason, date, projectId }) {
   const item = {
-    id: uid(),
+    id: generateUUID(),
     personId: personId || "",
     personType: personType || "contractor",
     amount: Number(amount) || 0,
@@ -382,8 +413,6 @@ export function getDeductionsByPerson(personId, personType, fromDate, toDate) {
     return true;
   });
 }
-
-/* ---------- Expected Profit Helpers ---------- */
 
 export function setProjectExpectedProfit(projectId, amount) {
   const project = get("projects", projectId);

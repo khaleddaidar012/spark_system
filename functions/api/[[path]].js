@@ -482,6 +482,35 @@ export async function onRequest(context) {
       return json({ error: "not found" }, 404);
     }
 
+    /* Sync Engine Push & Pull API */
+    if (segments[0] === "sync") {
+      const user = await requireAuth(request, env);
+      if (!user) return unauthorized();
+
+      if (segments[1] === "push" && method === "POST") {
+        const body = await readJson(request);
+        const ops = Array.isArray(body && body.operations) ? body.operations : [];
+        const processed = [];
+        for (const op of ops) {
+          if (!op || !op.entity || !op.payload) continue;
+          if (op.operation === "delete") {
+            await removeItem(env.DB, op.entity, op.entityId || op.payload.id);
+          } else {
+            await upsertItem(env.DB, op.entity, op.payload);
+          }
+          if (op.id) processed.push(op.id);
+        }
+        return json({ ok: true, processed, serverTime: Date.now() });
+      }
+
+      if (segments[1] === "pull" && method === "GET") {
+        const data = await snapshot(env.DB);
+        return json({ ok: true, serverTime: Date.now(), data });
+      }
+
+      return json({ error: "not found" }, 404);
+    }
+
     /* Backup snapshots (stored in KV when a binding is configured) */
     if (segments[0] === "backup") {
       const user = await requireAuth(request, env);

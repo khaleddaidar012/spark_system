@@ -1,0 +1,23 @@
+{
+  "name": "Spark Engineering ERP System",
+  "short_name": "Spark ERP",
+  "description": "Offline-First ERP and Management System for Engineering and Construction",
+  "start_url": "./pages/dashboard.html",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#1e293b",
+  "dir": "rtl",
+  "lang": "ar",
+  "icons": [
+    {
+      "src": "./assets/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "./assets/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
