@@ -97,8 +97,12 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     try {
       await login(username, password, rememberMe.checked);
-    } catch {
-      showError("login.errorInvalid");
+    } catch (err) {
+      if (err && err.message === "offline_no_match") {
+        showError("login.errorOfflineNoMatch");
+      } else {
+        showError("login.errorInvalid");
+      }
       usernameInput.classList.add("is-invalid");
       passwordInput.classList.add("is-invalid");
       passwordInput.focus();

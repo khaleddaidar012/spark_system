@@ -1,18 +1,90 @@
 /* ============================================
    Spark ERP — Auth Module
-   Server-verified login. The browser sends the
-   username/password to /api/auth/login and keeps
-   the returned bearer token. No password or hash
-   is ever stored in the frontend code.
+   Server-verified login with offline fallback.
+   Stores bearer token and cached hash for offline access.
    ============================================ */
 
 import { api, getToken, setToken, clearToken } from "./api.js";
+import { syncEngine } from "../sync/SyncEngine.js";
+
+const OFFLINE_AUTH_KEY = "spark_offline_auth";
+
+async function hashString(str) {
+  if (window.crypto && window.crypto.subtle) {
+    try {
+      const msgUint8 = new TextEncoder().encode(str);
+      const hashBuffer = await window.crypto.subtle.digest("SHA-256", msgUint8);
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+      return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
+    } catch {
+      /* fallback */
+    }
+  }
+  return btoa(str);
+}
 
 /* Returns the logged-in username after a successful login. */
 export async function login(username, password, remember) {
-  const res = await api.login(username, password);
-  setToken(res.token, remember);
-  return res.username;
+  const normUsername = username.trim().toLowerCase();
+  const inputHash = await hashString(normUsername + ":" + password);
+
+  try {
+    const res = await api.login(username, password);
+    setToken(res.token, remember);
+
+    // Save offline authentication record for subsequent offline logins
+    try {
+      localStorage.setItem(
+        OFFLINE_AUTH_KEY,
+        JSON.stringify({
+          username: res.username || username,
+          hash: inputHash,
+          token: res.token,
+          savedAt: Date.now(),
+        })
+      );
+    } catch {
+      /* storage unavailable */
+    }
+
+    // Trigger sync cycle to pull remote DB into IndexedDB
+    try {
+      if (syncEngine && typeof syncEngine.triggerSync === "function") {
+        syncEngine.triggerSync().catch(() => {});
+      }
+    } catch {
+      /* sync engine optional */
+    }
+
+    return res.username || username;
+  } catch (err) {
+    const isOfflineErr =
+      !navigator.onLine ||
+      err.message === "network-error" ||
+      (err.message && err.message.includes("fetch"));
+
+    if (isOfflineErr) {
+      try {
+        const offlineRecordRaw = localStorage.getItem(OFFLINE_AUTH_KEY);
+        if (offlineRecordRaw) {
+          const offlineRecord = JSON.parse(offlineRecordRaw);
+          if (
+            offlineRecord.username &&
+            offlineRecord.username.toLowerCase() === normUsername &&
+            offlineRecord.hash === inputHash
+          ) {
+            const tokenToUse = offlineRecord.token || "offline_session_" + Date.now();
+            setToken(tokenToUse, remember);
+            return offlineRecord.username;
+          }
+        }
+      } catch {
+        /* storage read error */
+      }
+      throw new Error("offline_no_match");
+    }
+    throw err;
+  }
 }
 
 export function isLoggedIn() {

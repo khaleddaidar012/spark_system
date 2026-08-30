@@ -23,6 +23,7 @@
     "signingIn": "Signing in…",
     "errorRequired": "Please enter your username and password.",
     "errorInvalid": "Invalid username or password.",
+    "errorOfflineNoMatch": "No saved credentials found for offline login. Please connect to internet for initial login.",
     "footer": "© Spark Engineering Company"
   },
   "nav": {
