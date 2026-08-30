@@ -3,7 +3,7 @@
    CacheFirst for Static Assets, Network/Fallback for API
    ============================================ */
 
-const CACHE_NAME = "spark-erp-cache-v3";
+const CACHE_NAME = "spark-erp-cache-v4";
 
 const STATIC_ASSETS = [
   "/",
@@ -115,16 +115,29 @@ const STATIC_ASSETS = [
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      console.log("[SW] Pre-caching static application shell assets");
-      return Promise.allSettled(
-        STATIC_ASSETS.map((asset) =>
-          cache.add(asset).catch((err) => {
-            console.warn(`[SW] Failed to pre-cache ${asset}:`, err);
+    (async () => {
+      const cache = await caches.open(CACHE_NAME);
+      console.log("[SW] Pre-caching all application assets in batches...");
+
+      // Process pre-cache in controlled batches of 5 to avoid connection limits
+      const batchSize = 5;
+      for (let i = 0; i < STATIC_ASSETS.length; i += batchSize) {
+        const batch = STATIC_ASSETS.slice(i, i + batchSize);
+        await Promise.allSettled(
+          batch.map(async (asset) => {
+            try {
+              const res = await fetch(asset, { cache: "no-cache" });
+              if (res && res.status === 200) {
+                await cache.put(asset, res);
+              }
+            } catch (err) {
+              console.warn(`[SW] Pre-cache failed for ${asset}:`, err);
+            }
           })
-        )
-      );
-    })
+        );
+      }
+      console.log("[SW] System offline pre-cache complete!");
+    })()
   );
   self.skipWaiting();
 });
@@ -150,32 +163,40 @@ self.addEventListener("fetch", (event) => {
 
   // CacheFirst strategy for static HTML/CSS/JS assets
   event.respondWith(
-    caches.match(event.request, { ignoreSearch: true }).then((cachedResponse) => {
-      if (cachedResponse) {
-        return cachedResponse;
-      }
-      return fetch(event.request)
-        .then((networkResponse) => {
-          if (!networkResponse || networkResponse.status !== 200 || networkResponse.type !== "basic") {
-            return networkResponse;
-          }
+    (async () => {
+      // 1. Try exact or search-ignored match from Cache Storage
+      const cached = await caches.match(event.request, { ignoreSearch: true });
+      if (cached) return cached;
+
+      const pathCached = await caches.match(url.pathname, { ignoreSearch: true });
+      if (pathCached) return pathCached;
+
+      // 2. Attempt network fetch if online
+      try {
+        const networkResponse = await fetch(event.request);
+        if (networkResponse && networkResponse.status === 200 && networkResponse.type === "basic") {
           const responseToCache = networkResponse.clone();
           caches.open(CACHE_NAME).then((cache) => {
             cache.put(event.request, responseToCache);
           });
-          return networkResponse;
-        })
-        .catch(() => {
-          // Fallback for HTML navigation requests offline
-          if (event.request.mode === "navigate") {
-            return caches.match(url.pathname, { ignoreSearch: true }) ||
-                   caches.match("/pages/dashboard.html") ||
-                   caches.match("/pages/login.html") ||
-                   caches.match("/");
-          }
-        });
-    })
+        }
+        return networkResponse;
+      } catch (err) {
+        // 3. Fallback for HTML navigation requests offline
+        if (event.request.mode === "navigate") {
+          const fallback =
+            (await caches.match(url.pathname, { ignoreSearch: true })) ||
+            (await caches.match("/pages/dashboard.html")) ||
+            (await caches.match("/pages/login.html")) ||
+            (await caches.match("/pages/projects.html")) ||
+            (await caches.match("/"));
+          if (fallback) return fallback;
+        }
+        throw err;
+      }
+    })()
   );
 });
+
 
 

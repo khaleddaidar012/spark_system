@@ -10,6 +10,9 @@ import { login, isLoggedIn } from "../modules/auth.js";
 const REMEMBER_KEY = "spark_remembered_user";
 
 document.addEventListener("DOMContentLoaded", async () => {
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("../sw.js").catch(() => {});
+  }
   initTheme();
 
   /* ---------- Language ---------- */
