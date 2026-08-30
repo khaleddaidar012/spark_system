@@ -3,7 +3,7 @@
    CacheFirst for Static Assets, Network/Fallback for API
    ============================================ */
 
-const CACHE_NAME = "spark-erp-cache-v12";
+const CACHE_NAME = "spark-erp-cache-v13";
 
 const STATIC_ASSETS = [
   "/",
@@ -66,6 +66,7 @@ const STATIC_ASSETS = [
   "/assets/css/components/modal.css",
   "/assets/css/components/navbar.css",
   "/assets/css/components/placeholder.css",
+  "/assets/css/components/preloader.css",
   "/assets/css/components/quick-add-modal.css",
   "/assets/css/components/quick-add.css",
   "/assets/css/components/sidebar.css",
@@ -96,6 +97,7 @@ const STATIC_ASSETS = [
   "/assets/js/modules/person-roles.js",
   "/assets/js/modules/person-statement.js",
   "/assets/js/modules/phases-catalog.js",
+  "/assets/js/modules/preloader.js",
   "/assets/js/modules/project-phases.js",
   "/assets/js/modules/quick-add-person.js",
   "/assets/js/modules/quick-add.js",
