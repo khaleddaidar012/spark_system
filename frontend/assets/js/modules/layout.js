@@ -141,7 +141,10 @@ async function loadQuickAdd() {
   initQuickAdd();
 }
 
+import { initAppPreloader } from "./preloader.js";
+
 export async function initLayout() {
+  initAppPreloader();
   if (!requireAuth()) return;
   await loadComponent("sidebar-root", "../components/sidebar.html");
   await loadComponent("navbar-root", "../components/navbar.html");

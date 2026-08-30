@@ -1,0 +1,137 @@
+/* ============================================
+   Spark ERP — Sleek Professional Preloader
+   ============================================ */
+
+#app-preloader {
+  position: fixed;
+  inset: 0;
+  z-index: 999999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--surface-1, #0f172a);
+  color: var(--text, #f8fafc);
+  transition: opacity 300ms cubic-bezier(0.4, 0, 0.2, 1), visibility 300ms cubic-bezier(0.4, 0, 0.2, 1);
+  font-family: 'Cairo', system-ui, -apple-system, sans-serif;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+#app-preloader.is-hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.preloader-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 32px 24px;
+  max-width: 380px;
+  width: 90%;
+  background: rgba(30, 41, 59, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 24px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.35);
+  animation: preloaderCardPop 400ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes preloaderCardPop {
+  from {
+    opacity: 0;
+    transform: scale(0.92) translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.preloader-logo-ring {
+  position: relative;
+  width: 72px;
+  height: 72px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.preloader-spinner {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 3px solid transparent;
+  border-top-color: var(--primary, #6366f1);
+  border-right-color: var(--accent, #3b82f6);
+  animation: preloaderSpin 1s linear infinite;
+}
+
+@keyframes preloaderSpin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.preloader-icon-svg {
+  width: 32px;
+  height: 32px;
+  color: var(--primary, #6366f1);
+  filter: drop-shadow(0 0 8px rgba(99, 102, 241, 0.6));
+  animation: preloaderPulse 1.5s ease-in-out infinite alternate;
+}
+
+@keyframes preloaderPulse {
+  0% { transform: scale(0.95); opacity: 0.85; }
+  100% { transform: scale(1.08); opacity: 1; }
+}
+
+.preloader-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin: 0 0 6px;
+  letter-spacing: -0.01em;
+  background: linear-gradient(135deg, #ffffff 0%, #cbd5e1 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.preloader-subtitle {
+  font-size: 0.85rem;
+  color: #94a3b8;
+  margin: 0 0 20px;
+  line-height: 1.5;
+  min-height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.preloader-progress-track {
+  width: 100%;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 999px;
+  overflow: hidden;
+  margin-bottom: 10px;
+}
+
+.preloader-progress-bar {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #6366f1, #3b82f6, #10b981);
+  border-radius: 999px;
+  transition: width 200ms ease-out;
+}
+
+.preloader-status {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #64748b;
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+}

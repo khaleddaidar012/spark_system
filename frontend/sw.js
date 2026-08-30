@@ -3,7 +3,7 @@
    CacheFirst for Static Assets, Network/Fallback for API
    ============================================ */
 
-const CACHE_NAME = "spark-erp-cache-v10";
+const CACHE_NAME = "spark-erp-cache-v11";
 
 const STATIC_ASSETS = [
   "/",
@@ -123,12 +123,24 @@ const STATIC_ASSETS = [
   "/assets/js/sync/SyncEngine.js"
 ];
 
+async function broadcastToClients(msg) {
+  try {
+    const clients = await self.clients.matchAll({ includeUncontrolled: true, type: "window" });
+    clients.forEach((client) => client.postMessage(msg));
+  } catch {
+    /* ignore */
+  }
+}
+
 async function preCacheAllAssets() {
   try {
     const cache = await caches.open(CACHE_NAME);
     console.log("[SW] Pre-caching all 80+ application assets...");
 
+    let loaded = 0;
+    const total = STATIC_ASSETS.length;
     const batchSize = 5;
+
     for (let i = 0; i < STATIC_ASSETS.length; i += batchSize) {
       const batch = STATIC_ASSETS.slice(i, i + batchSize);
       await Promise.allSettled(
@@ -146,11 +158,15 @@ async function preCacheAllAssets() {
             }
           } catch (err) {
             console.warn(`[SW] Pre-cache failed for ${asset}:`, err);
+          } finally {
+            loaded++;
+            broadcastToClients({ type: "PRECACHE_PROGRESS", loaded, total });
           }
         })
       );
     }
     console.log("[SW] Complete pre-cache finished successfully!");
+    broadcastToClients({ type: "PRECACHE_COMPLETE" });
   } catch (e) {
     console.error("[SW] Pre-cache error:", e);
   }

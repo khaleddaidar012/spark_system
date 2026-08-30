@@ -6,10 +6,12 @@
 import { initTheme, toggleTheme } from "../modules/theme.js";
 import { initI18n, setLanguage, translate } from "../modules/i18n.js";
 import { login, isLoggedIn } from "../modules/auth.js";
+import { initAppPreloader } from "../modules/preloader.js";
 
 const REMEMBER_KEY = "spark_remembered_user";
 
 document.addEventListener("DOMContentLoaded", async () => {
+  initAppPreloader();
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("/sw.js", { scope: "/" }).then((reg) => {
       if (reg.active) reg.active.postMessage({ type: "PRECACHE_ALL" });
