@@ -226,16 +226,25 @@ class SyncEngine {
       const res = await api.pullSync();
       if (res && res.ok && res.data) {
         const data = res.data;
+        let hadUpdates = false;
+
         for (const [key, items] of Object.entries(data)) {
           if (!Array.isArray(items) || items.length === 0) continue;
           if (PEOPLE_KEYS.includes(key)) {
             const records = items.map((item) => ({ ...item, kind: key, syncStatus: "synced" }));
             await db.people.bulkPut(records);
+            hadUpdates = true;
           } else if (db[key]) {
             await db[key].bulkPut(items.map((item) => ({ ...item, syncStatus: "synced" })));
+            hadUpdates = true;
           }
         }
+
         await db.syncMetadata.put({ key: "lastSyncAt", value: res.serverTime || Date.now() });
+
+        /* Always notify store.js to refresh cache after a server pull,
+           so data added on other devices (phone/tablet) appears immediately */
+        window.dispatchEvent(new CustomEvent("spark:remote-data-updated"));
       }
     } catch (err) {
       console.warn("[SyncEngine] Pull failed:", err);

@@ -66,6 +66,13 @@ function emitDataChanged() {
   }, 80);
 }
 
+/* Exported: reload in-memory cache from IndexedDB and trigger UI refresh.
+   Called by SyncEngine after a successful pull from the server. */
+export async function refreshFromIndexedDB() {
+  await loadCacheFromIndexedDB();
+  emitDataChanged();
+}
+
 /* Load data from local IndexedDB into cache FIRST (instant), then hydrate from API in background */
 export async function initStore({ force = false } = {}) {
   if (loaded && !force) return;
@@ -76,10 +83,16 @@ export async function initStore({ force = false } = {}) {
   await loadCacheFromIndexedDB();
   loaded = true;
 
-  // 2. Seed default data only if needed (sync, skip if already seeded)
+  // 2. Seed default data only if needed
   await seedDefaultData();
 
-  // 3. Fire-and-forget background API hydration — NEVER blocks page render
+  // 3. Auto-refresh cache whenever SyncEngine pulls remote changes
+  window.addEventListener("spark:remote-data-updated", async () => {
+    await loadCacheFromIndexedDB();
+    emitDataChanged();
+  });
+
+  // 4. Fire-and-forget background API hydration — NEVER blocks page render
   if (navigator.onLine) {
     Promise.resolve().then(async () => {
       try {
