@@ -55,30 +55,44 @@ export function today() {
   return new Date().toISOString().slice(0, 10);
 }
 
-/* Load data from local IndexedDB into cache first, then sync with API if online */
+/* Debounced spark:data-changed — prevents UI thrashing on bulk writes */
+let _dataChangedTimer = null;
+function emitDataChanged() {
+  if (_dataChangedTimer) clearTimeout(_dataChangedTimer);
+  _dataChangedTimer = setTimeout(() => {
+    try {
+      window.dispatchEvent(new CustomEvent("spark:data-changed"));
+    } catch { /* ignore */ }
+  }, 80);
+}
+
+/* Load data from local IndexedDB into cache FIRST (instant), then hydrate from API in background */
 export async function initStore({ force = false } = {}) {
   if (loaded && !force) return;
 
   await initDatabase();
 
-  // 1. First, populate cache immediately from local IndexedDB
+  // 1. Immediately populate cache from IndexedDB — zero-latency, works offline
   await loadCacheFromIndexedDB();
   loaded = true;
 
-  // 2. Seed default data if needed
+  // 2. Seed default data only if needed (sync, skip if already seeded)
   await seedDefaultData();
 
-  // 3. Background attempt to pull remote snapshot if online
+  // 3. Fire-and-forget background API hydration — NEVER blocks page render
   if (navigator.onLine) {
-    try {
-      const data = await api.snapshot();
-      if (data && typeof data === "object") {
-        await reconcileServerSnapshot(data);
-        await loadCacheFromIndexedDB();
+    Promise.resolve().then(async () => {
+      try {
+        const data = await api.snapshot();
+        if (data && typeof data === "object") {
+          await reconcileServerSnapshot(data);
+          await loadCacheFromIndexedDB();
+          emitDataChanged();
+        }
+      } catch {
+        /* Running on local IndexedDB — this is normal when offline */
       }
-    } catch (err) {
-      console.log("[Store] Network snapshot skipped — running on local IndexedDB", err);
-    }
+    });
   }
 }
 
@@ -163,10 +177,6 @@ export function findPersonById(id) {
 
 /* ---------- Writes ---------- */
 
-function reportSyncError() {
-  toast("Saved locally — will sync when connection returns", "info");
-}
-
 /* Apply locally to memory & IndexedDB instantly, enqueue sync operation */
 export function save(name, item) {
   if (PEOPLE_COLLECTIONS.includes(name)) {
@@ -188,7 +198,7 @@ export function save(name, item) {
     syncStatus: "pending",
   };
 
-  // Durable write to IndexedDB + Sync Queue
+  // Durable write to IndexedDB + enqueue in SyncQueue (batched sync via SyncEngine — no N+1 requests)
   (async () => {
     try {
       const table = PEOPLE_COLLECTIONS.includes(name) ? db.people : db[name];
@@ -206,21 +216,15 @@ export function save(name, item) {
           });
         });
       }
-      if (navigator.onLine) {
-        api.save(name, item).catch(reportSyncError);
-      } else {
-        reportSyncError();
-      }
+      // SyncEngine handles batched push — no individual api.save() calls
+      window.dispatchEvent(new CustomEvent("spark:queue-updated"));
     } catch (err) {
       console.error("[Store] Dexie write error:", err);
     }
   })();
 
-  try {
-    window.dispatchEvent(new CustomEvent("spark:data-changed"));
-  } catch {
-    /* ignore */
-  }
+  // Debounced UI update — prevents thrashing on bulk saves
+  emitDataChanged();
 
   return item;
 }
@@ -253,14 +257,14 @@ export function remove(name, id) {
           });
         });
       }
-      if (navigator.onLine) {
-        api.remove(name, id).catch(reportSyncError);
-      }
+      /* SyncEngine handles batched push */
+      window.dispatchEvent(new CustomEvent("spark:queue-updated"));
     } catch (err) {
       console.error("[Store] Dexie remove error:", err);
     }
   })();
 
+  emitDataChanged();
   return true;
 }
 
