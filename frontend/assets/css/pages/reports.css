@@ -83,7 +83,8 @@
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-sm);
-  overflow: hidden;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .report-panel-title {
@@ -98,6 +99,7 @@
   width: 100%;
   border-collapse: collapse;
   font-size: var(--font-size-sm);
+  min-width: 480px;
 }
 
 .report-table th,
@@ -153,12 +155,20 @@
 
 @media (max-width: 640px) {
   .reports-stats {
-    grid-template-columns: 1fr;
-    gap: var(--space-4);
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-3);
+  }
+
+  .report-stat-card {
+    padding: var(--space-3) var(--space-3);
+  }
+
+  .report-stat-value {
+    font-size: var(--font-size-md);
   }
 
   .report-table th,
   .report-table td {
-    padding: var(--space-3);
+    padding: var(--space-3) var(--space-3);
   }
 }

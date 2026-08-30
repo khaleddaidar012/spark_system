@@ -456,3 +456,40 @@
   color: #059669;
 }
 
+@media (max-width: 640px) {
+  .projects-financial-summary {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-2);
+    margin-bottom: var(--space-4);
+  }
+
+  .proj-fin-card {
+    padding: var(--space-2) var(--space-3);
+    gap: var(--space-2);
+  }
+
+  .proj-fin-card.is-actual {
+    grid-column: span 2;
+  }
+
+  .proj-fin-value {
+    font-size: var(--font-size-sm);
+  }
+
+  .proj-fin-icon {
+    width: 32px;
+    height: 32px;
+  }
+
+  .project-card-actions {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--space-2);
+  }
+
+  .project-card-actions .btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+

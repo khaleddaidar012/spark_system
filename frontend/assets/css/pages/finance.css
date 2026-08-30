@@ -70,8 +70,24 @@
 
 @media (max-width: 640px) {
   .finance-summary {
-    grid-template-columns: 1fr;
-    gap: var(--space-4);
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-3);
+  }
+
+  .finance-card.is-net {
+    grid-column: span 2;
+  }
+
+  .expense-summary-grid {
+    gap: var(--space-2);
+  }
+
+  .expense-card {
+    padding: var(--space-3) var(--space-2);
+  }
+
+  .expense-card-value {
+    font-size: var(--font-size-md);
   }
 }
 

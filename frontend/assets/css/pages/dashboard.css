@@ -164,4 +164,10 @@
     width: 26px;
     height: 26px;
   }
+
+  .module-card-arrow {
+    opacity: 1;
+    transform: none;
+    background: var(--surface-2);
+  }
 }
