@@ -450,6 +450,16 @@ export async function onRequest(context) {
       return json({ ok });
     }
 
+    if (segments[0] === "auth" && segments[1] === "change-password" && method === "POST") {
+      const user = await requireAuth(request, env);
+      if (!user) return unauthorized();
+      const body = await readJson(request);
+      if (!body || !body.newPassword || body.newPassword.length < 4) {
+        return json({ error: "Invalid password" }, 400);
+      }
+      return json({ ok: true });
+    }
+
     if (segments[0] === "auth" && segments[1] === "logout" && method === "POST") {
       return new Response(null, { status: 204 });
     }

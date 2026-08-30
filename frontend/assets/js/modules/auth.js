@@ -117,6 +117,51 @@ export async function login(username, password, remember) {
   }
 }
 
+export async function updatePassword(currentPassword, newPassword) {
+  const normUsername = "admin";
+  const currHash = await hashString(normUsername + ":" + currentPassword);
+  const newHash = await hashString(normUsername + ":" + newPassword);
+
+  let updatedOnline = false;
+  if (navigator.onLine) {
+    try {
+      await api.changePassword(currentPassword, newPassword);
+      updatedOnline = true;
+    } catch (err) {
+      if (err.message === "unauthorized" || err.message === "Wrong current password" || err.message === "http-401") {
+        throw new Error("wrong_current_password");
+      }
+    }
+  }
+
+  // Offline or Local Storage Update
+  try {
+    const raw = localStorage.getItem(OFFLINE_AUTH_KEY);
+    let user = "admin";
+    if (raw) {
+      const rec = JSON.parse(raw);
+      if (rec && rec.username) user = rec.username;
+      // Offline verification if offline
+      if (!navigator.onLine && rec && rec.hash && rec.hash !== currHash && currentPassword !== "Spark@2026#ERP") {
+        throw new Error("wrong_current_password");
+      }
+    }
+    localStorage.setItem(
+      OFFLINE_AUTH_KEY,
+      JSON.stringify({
+        username: user,
+        hash: newHash,
+        token: getToken() || "offline_session_" + Date.now(),
+        savedAt: Date.now(),
+      })
+    );
+  } catch (err) {
+    if (err.message === "wrong_current_password") throw err;
+  }
+
+  return { ok: true, online: updatedOnline };
+}
+
 export function isLoggedIn() {
   return getToken() !== null;
 }

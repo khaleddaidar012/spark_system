@@ -79,6 +79,7 @@ export const api = {
   /* auth */
   login: (username, password) => request("/auth/login", { method: "POST", auth: false, body: { username, password } }),
   verifyPassword: (password) => request("/auth/verify", { method: "POST", body: { password } }),
+  changePassword: (currentPassword, newPassword) => request("/auth/change-password", { method: "POST", body: { currentPassword, newPassword } }),
   logout: () => request("/auth/logout", { method: "POST", auth: false }),
 
   /* data */

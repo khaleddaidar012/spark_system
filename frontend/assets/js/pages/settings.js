@@ -14,9 +14,76 @@ import { autoBackup, downloadBackup, restoreBackup, getLastBackupTime, getLastBa
 
 const lang = () => document.documentElement.lang;
 
+import { updatePassword } from "../modules/auth.js";
+
 document.addEventListener("DOMContentLoaded", async () => {
   await initStore();
   await initLayout();
+
+  const changePassForm = document.getElementById("changePasswordForm");
+  const changeCurrPass = document.getElementById("changeCurrPass");
+  const changeNewPass = document.getElementById("changeNewPass");
+  const changeConfirmPass = document.getElementById("changeConfirmPass");
+  const changePassNotif = document.getElementById("changePassNotif");
+  const changePassBtn = document.getElementById("changePassSubmitBtn");
+
+  const showPassNotif = (msg, isSuccess) => {
+    if (!changePassNotif) return;
+    changePassNotif.style.background = isSuccess ? "rgba(34,197,94,0.12)" : "rgba(239,68,68,0.12)";
+    changePassNotif.style.color = isSuccess ? "#15803d" : "#b91c1c";
+    changePassNotif.style.border = isSuccess ? "1px solid rgba(34,197,94,0.3)" : "1px solid rgba(239,68,68,0.3)";
+    changePassNotif.innerHTML = `
+      <i data-lucide="${isSuccess ? "check-circle-2" : "alert-triangle"}" class="icon"></i>
+      <span>${msg}</span>
+    `;
+    changePassNotif.hidden = false;
+    window.lucide?.createIcons();
+  };
+
+  changePassForm?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    if (changePassNotif) changePassNotif.hidden = true;
+
+    const curr = changeCurrPass.value;
+    const next = changeNewPass.value;
+    const confirm = changeConfirmPass.value;
+
+    if (!curr) {
+      showPassNotif("يرجى إدخال كلمة المرور الحالية", false);
+      changeCurrPass.focus();
+      return;
+    }
+    if (!next || next.length < 4) {
+      showPassNotif("يرجى إدخال كلمة مرور جديدة مكونة من 4 خانات على الأقل", false);
+      changeNewPass.focus();
+      return;
+    }
+    if (next !== confirm) {
+      showPassNotif("كلمة المرور الجديدة وتأكيدها غير متطابقين", false);
+      changeConfirmPass.focus();
+      return;
+    }
+
+    try {
+      if (changePassBtn) changePassBtn.disabled = true;
+      showPassNotif("جاري تحديث كلمة المرور...", true);
+
+      await updatePassword(curr, next);
+
+      showPassNotif("✅ تم تغيير كلمة المرور بنجاح! يمكن استخدامها الآن أونلاين وأوفلاين. 🔑", true);
+      toast("🔑 <strong>تم تغيير كلمة المرور بنجاح!</strong>", "success");
+      changePassForm.reset();
+    } catch (err) {
+      if (err.message === "wrong_current_password") {
+        showPassNotif("❌ كلمة المرور الحالية غير صحيحة!", false);
+        changeCurrPass.focus();
+      } else {
+        showPassNotif("❌ تعذر تغيير كلمة المرور: " + (err.message || "خطأ غير متوقع"), false);
+      }
+    } finally {
+      if (changePassBtn) changePassBtn.disabled = false;
+    }
+  });
 
   const lastBackupEl = document.getElementById("lastBackupTime");
   const backupNowBtn = document.getElementById("backupNowBtn");

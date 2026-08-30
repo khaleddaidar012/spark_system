@@ -103,6 +103,42 @@
             </div>
           </section>
 
+          <!-- Password Settings Section -->
+          <section class="card detail-section">
+            <div class="detail-section-head">
+              <div>
+                <h2 class="detail-section-title">إعدادات كلمة المرور / Password Settings</h2>
+                <p class="text-muted">تغيير كلمة المرور الخاصة بالدخول وتأمين الحساب (تعمل أونلاين وأوفلاين).</p>
+              </div>
+            </div>
+
+            <form id="changePasswordForm" class="form-stack" style="max-width:500px;" novalidate>
+              <div class="form-field">
+                <label class="form-label" for="changeCurrPass">كلمة المرور الحالية <span class="required-star">*</span></label>
+                <input class="form-input" id="changeCurrPass" type="password" required placeholder="أدخل كلمة المرور الحالية" autocomplete="current-password" />
+              </div>
+
+              <div class="form-field">
+                <label class="form-label" for="changeNewPass">كلمة المرور الجديدة <span class="required-star">*</span></label>
+                <input class="form-input" id="changeNewPass" type="password" required placeholder="أدخل كلمة المرور الجديدة (4 خانات على الأقل)" autocomplete="new-password" />
+              </div>
+
+              <div class="form-field">
+                <label class="form-label" for="changeConfirmPass">تأكيد كلمة المرور الجديدة <span class="required-star">*</span></label>
+                <input class="form-input" id="changeConfirmPass" type="password" required placeholder="أعد إدخال كلمة المرور الجديدة" autocomplete="new-password" />
+              </div>
+
+              <div id="changePassNotif" style="padding:10px 14px; border-radius:var(--radius-md); font-weight:600; font-size:0.88rem; display:flex; align-items:center; gap:8px;" hidden></div>
+
+              <div style="margin-top:8px;">
+                <button class="btn btn-primary" type="submit" id="changePassSubmitBtn">
+                  <i data-lucide="key-round" class="icon"></i>
+                  <span>تحديث كلمة المرور</span>
+                </button>
+              </div>
+            </form>
+          </section>
+
           <section class="card detail-section settings-danger">
             <div class="detail-section-head">
               <div>

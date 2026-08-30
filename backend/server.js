@@ -107,6 +107,18 @@ app.post('/api/auth/verify', (req, res) => {
   return res.status(401).json({ error: 'Wrong password' });
 });
 
+app.post('/api/auth/change-password', (req, res) => {
+  const { currentPassword, newPassword } = req.body || {};
+  if (!currentPassword || !newPassword || newPassword.length < 4) {
+    return res.status(400).json({ error: 'Invalid password' });
+  }
+  if (currentPassword === ADMIN_PASS || currentPassword.trim() === ADMIN_PASS) {
+    ADMIN_PASS = newPassword;
+    return res.status(200).json({ ok: true });
+  }
+  return res.status(401).json({ error: 'Wrong password' });
+});
+
 app.post('/api/auth/logout', (_req, res) => {
   res.status(204).end();
 });
