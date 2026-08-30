@@ -3,6 +3,9 @@
    Batched push of local syncQueue operations +
    pull of remote server changes on reconnect.
    Emits real progress events for UI feedback.
+
+   Fallback: if syncQueue is empty but IndexedDB
+   has items, uses snapshot push via /api/data.
    ============================================ */
 
 import { SyncQueueManager } from "./sync-queue.js";
@@ -12,6 +15,17 @@ import { db } from "../db/db.js";
 import { generateUUID } from "../modules/uuid.js";
 
 const PEOPLE_KEYS = ["suppliers", "contractors", "clients", "others"];
+const PUSH_COLLECTIONS = [
+  "projects",
+  "suppliers",
+  "contractors",
+  "clients",
+  "others",
+  "materials",
+  "moneyTransactions",
+  "materialTransactions",
+  "deductions",
+];
 
 class SyncEngine {
   constructor() {
@@ -29,21 +43,21 @@ class SyncEngine {
       }
     });
 
-    /* Queue updated (new save) → debounced sync trigger when online */
+    /* New data saved → debounced sync trigger */
     window.addEventListener("spark:queue-updated", () => {
       if (!connectivityMonitor.isServerReachable) return;
       if (this._pendingQueueSync) clearTimeout(this._pendingQueueSync);
       this._pendingQueueSync = setTimeout(() => this.triggerSync(), 1500);
     });
 
-    /* Periodic sync every 60 seconds (reduced from 30s) */
+    /* Periodic sync every 60 seconds */
     this.syncInterval = setInterval(() => {
       if (connectivityMonitor.isServerReachable && !this.isSyncing) {
         this.triggerSync();
       }
     }, 60000);
 
-    /* Initial sync on load if already online */
+    /* Initial sync on load */
     if (navigator.onLine) {
       setTimeout(() => this.triggerSync(), 800);
     }
@@ -53,20 +67,40 @@ class SyncEngine {
     if (this.isSyncing) return;
     this.isSyncing = true;
 
-    /* How many items are pending? */
-    const total = await SyncQueueManager.getPendingCount();
+    /* Check how many queue operations are pending */
+    const queueCount = await SyncQueueManager.getPendingCount();
 
-    this._emitStatus("syncing", { total, pushed: 0, percent: 0 });
+    /* Collect all pending IndexedDB items (pending_delete + pending syncStatus) */
+    const pendingItems = await this._getPendingIndexedDBItems();
+    const total = Math.max(queueCount, pendingItems.length);
+
+    this._emitStatus("syncing", { total, pushed: 0, percent: total > 0 ? 1 : 50 });
 
     try {
-      /* 1. Push pending local operations with real progress */
-      await this.pushPendingOperations(total);
+      let pushed = 0;
 
-      /* 2. Pull remote changes */
+      if (queueCount > 0) {
+        /* Fast path: push via sync queue (delta operations) */
+        pushed = await this.pushPendingOperations(total);
+      } else if (pendingItems.length > 0) {
+        /* Fallback path: no queue ops, but IndexedDB has unsynced items */
+        /* Push each item individually via /api/data */
+        pushed = await this._pushPendingItemsDirect(pendingItems, (done) => {
+          const pct = Math.round((done / pendingItems.length) * 100);
+          this._emitStatus("syncing", { total: pendingItems.length, pushed: done, percent: pct });
+        });
+      }
+
+      /* Pull remote changes to merge server-side updates */
       await this.pullRemoteChanges();
 
       this.lastSyncAt = Date.now();
-      this._emitStatus("synced", { total, pushed: total, percent: 100, lastSyncAt: this.lastSyncAt });
+      this._emitStatus("synced", {
+        total,
+        pushed,
+        percent: 100,
+        lastSyncAt: this.lastSyncAt,
+      });
     } catch (err) {
       console.warn("[SyncEngine] Sync cycle error:", err);
       this._emitStatus("error", { error: err.message });
@@ -75,11 +109,72 @@ class SyncEngine {
     }
   }
 
+  /* Collect all items from IndexedDB that have syncStatus === "pending" */
+  async _getPendingIndexedDBItems() {
+    const pending = [];
+    try {
+      const tables = {
+        projects: db.projects,
+        materials: db.materials,
+        moneyTransactions: db.moneyTransactions,
+        materialTransactions: db.materialTransactions,
+        deductions: db.deductions,
+      };
+
+      for (const [name, table] of Object.entries(tables)) {
+        const items = await table
+          .filter((x) => x.syncStatus === "pending" || x.syncStatus === "pending_delete")
+          .toArray();
+        for (const item of items) {
+          pending.push({ name, item });
+        }
+      }
+
+      /* People collections */
+      const people = await db.people
+        .filter((x) => x.syncStatus === "pending" || x.syncStatus === "pending_delete")
+        .toArray();
+      for (const person of people) {
+        const name = person.kind || "suppliers";
+        pending.push({ name, item: person });
+      }
+    } catch (err) {
+      console.warn("[SyncEngine] Error reading pending IndexedDB items:", err);
+    }
+    return pending;
+  }
+
+  /* Push pending IndexedDB items directly via /api/data (fallback when queue is empty) */
+  async _pushPendingItemsDirect(pendingItems, onProgress) {
+    let pushed = 0;
+    for (const { name, item } of pendingItems) {
+      try {
+        if (item.syncStatus === "pending_delete") {
+          await api.remove(name, item.id);
+        } else {
+          await api.save(name, item);
+        }
+
+        /* Mark as synced in IndexedDB */
+        const table = PEOPLE_KEYS.includes(name) ? db.people : db[name];
+        if (table) {
+          await table.update(item.id, { syncStatus: "synced" });
+        }
+
+        pushed++;
+        onProgress(pushed);
+      } catch (err) {
+        console.warn(`[SyncEngine] Direct push failed for ${name}/${item.id}:`, err);
+      }
+    }
+    return pushed;
+  }
+
   async pushPendingOperations(totalEstimate) {
     const BATCH_SIZE = 50;
     let pushed = 0;
     const total = totalEstimate || (await SyncQueueManager.getPendingCount());
-    if (total === 0) return;
+    if (total === 0) return 0;
 
     let batchNum = 0;
     while (true) {
@@ -100,16 +195,16 @@ class SyncEngine {
         };
 
         const res = await api.pushSync(payload);
-        if (res && res.ok) {
+        if (res && (res.ok === true || res.processed)) {
           const autoIdsToClear = pendingOps.map((op) => op.autoId);
           await SyncQueueManager.markProcessed(autoIdsToClear);
           pushed += pendingOps.length;
           batchNum++;
 
-          /* Emit real progress */
           const percent = total > 0 ? Math.round((pushed / total) * 100) : 100;
           this._emitStatus("syncing", { total, pushed, percent });
         } else {
+          console.warn("[SyncEngine] Push returned non-OK:", res);
           break;
         }
       } catch (err) {
@@ -120,9 +215,10 @@ class SyncEngine {
         break;
       }
 
-      /* Safety: limit iterations */
       if (batchNum > 20) break;
     }
+
+    return pushed;
   }
 
   async pullRemoteChanges() {

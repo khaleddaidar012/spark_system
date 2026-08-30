@@ -120,18 +120,20 @@ function updateSyncPanel(state, detail = {}) {
   const { percent = null, pushed = 0, total = 0 } = detail;
 
   if (state === "syncing") {
+    /* Only show panel if there are actual pending changes */
     if (!_panelVisible && total > 0) showPanel();
 
     panelTitle.textContent = "🔄 جاري المزامنة...";
     if (panelRetry) panelRetry.hidden = true;
 
-    const pct = percent != null ? percent : 0;
-    if (panelBar)  panelBar.style.width  = `${Math.max(2, pct)}%`;
+    const pct = percent != null ? Math.max(1, percent) : 1;
+    if (panelBar)  panelBar.style.width  = `${pct}%`;
     if (panelPct)  panelPct.textContent  = `${pct}%`;
     if (panelDetail) {
       panelDetail.textContent = total > 0
         ? `تم رفع ${pushed} من ${total} تغيير`
-        : "يتم رفع التغييرات المعلقة...";
+        : "يتم التحقق من التحديثات...";
+    }
     }
 
   } else if (state === "synced") {
