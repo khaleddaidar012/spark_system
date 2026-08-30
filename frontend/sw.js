@@ -3,7 +3,7 @@
    CacheFirst for Static Assets, Network/Fallback for API
    ============================================ */
 
-const CACHE_NAME = "spark-erp-cache-v4";
+const CACHE_NAME = "spark-erp-cache-v5";
 
 const STATIC_ASSETS = [
   "/",
@@ -127,7 +127,7 @@ self.addEventListener("install", (event) => {
           batch.map(async (asset) => {
             try {
               const res = await fetch(asset, { cache: "no-cache" });
-              if (res && res.status === 200) {
+              if (res && (res.status === 200 || res.status === 0 || res.type === "opaque")) {
                 await cache.put(asset, res);
               }
             } catch (err) {
@@ -161,17 +161,23 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // CacheFirst strategy for static HTML/CSS/JS assets
+  // Handle GET requests
+  if (event.request.method !== "GET") {
+    return;
+  }
+
   event.respondWith(
     (async () => {
-      // 1. Try exact or search-ignored match from Cache Storage
-      const cached = await caches.match(event.request, { ignoreSearch: true });
-      if (cached) return cached;
+      // 1. Check exact match or path match from Cache Storage
+      try {
+        const cached = await caches.match(event.request, { ignoreSearch: true });
+        if (cached) return cached;
 
-      const pathCached = await caches.match(url.pathname, { ignoreSearch: true });
-      if (pathCached) return pathCached;
+        const pathCached = await caches.match(url.pathname, { ignoreSearch: true });
+        if (pathCached) return pathCached;
+      } catch (e) {}
 
-      // 2. Attempt network fetch if online
+      // 2. Try network fetch if online
       try {
         const networkResponse = await fetch(event.request);
         if (networkResponse && networkResponse.status === 200 && networkResponse.type === "basic") {
@@ -182,21 +188,25 @@ self.addEventListener("fetch", (event) => {
         }
         return networkResponse;
       } catch (err) {
-        // 3. Fallback for HTML navigation requests offline
-        if (event.request.mode === "navigate") {
-          const fallback =
-            (await caches.match(url.pathname, { ignoreSearch: true })) ||
-            (await caches.match("/pages/dashboard.html")) ||
-            (await caches.match("/pages/login.html")) ||
-            (await caches.match("/pages/projects.html")) ||
-            (await caches.match("/"));
-          if (fallback) return fallback;
+        // 3. Network failed (OFFLINE): Guarantee HTML page response for navigation
+        if (event.request.mode === "navigate" || (event.request.headers.get("accept") || "").includes("text/html")) {
+          const cache = await caches.open(CACHE_NAME);
+          const pageFallback =
+            (await cache.match(url.pathname, { ignoreSearch: true })) ||
+            (await cache.match(url.pathname + ".html", { ignoreSearch: true })) ||
+            (await cache.match("/pages/dashboard.html")) ||
+            (await cache.match("/pages/login.html")) ||
+            (await cache.match("/pages/projects.html")) ||
+            (await cache.match("/index.html")) ||
+            (await cache.match("/"));
+          if (pageFallback) return pageFallback;
         }
         throw err;
       }
     })()
   );
 });
+
 
 
 

@@ -164,7 +164,7 @@ export async function initLayout() {
   initSyncStatusBadge();
   requestStoragePersistence();
   if ("serviceWorker" in navigator) {
-    navigator.serviceWorker.register("../sw.js").catch(() => {});
+    navigator.serviceWorker.register("/sw.js", { scope: "/" }).catch(() => {});
   }
 }
 
