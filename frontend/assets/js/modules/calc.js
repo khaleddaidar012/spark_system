@@ -108,6 +108,12 @@ export function supplierTransactions(supplierId) {
   return { money, material };
 }
 
+export function contractorTransactions(contractorId) {
+  return sortNewestFirst(
+    all("moneyTransactions").filter((t) => t.personType === "contractor" && t.personId === contractorId)
+  );
+}
+
 export function supplierProjectName(projectId) {
   if (!projectId) return "";
   const p = all("projects").find((x) => x.id === projectId);
