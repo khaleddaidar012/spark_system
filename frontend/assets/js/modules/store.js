@@ -225,6 +225,20 @@ export function save(name, item) {
   return item;
 }
 
+export function addDeduction({ personId, personType, amount, reason, date }) {
+  const item = {
+    id: uid(),
+    personId,
+    personType,
+    amount: Number(amount) || 0,
+    reason: reason || "",
+    date: date || today(),
+    createdAt: Date.now(),
+  };
+  save("deductions", item);
+  return item;
+}
+
 export function remove(name, id) {
   const list = cache[name];
   if (!list) return false;
