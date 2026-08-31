@@ -127,6 +127,7 @@ export async function reconcileServerSnapshot(data) {
 
           /* Remove local synced items that no longer exist on server */
           for (const p of allLocalPeople) {
+            if (p.kind !== key) continue; /* Only process people of this category */
             if (!serverIdSet.has(p.id) && p.syncStatus === "synced" && !p.deletedAt) {
               await db.people.delete(p.id).catch(() => {});
             }
@@ -137,9 +138,10 @@ export async function reconcileServerSnapshot(data) {
             const mergedItems = items.map((serverItem) => {
               const localItem = allLocalPeople.find((p) => p.id === serverItem.id);
               if (localItem && localItem.syncStatus === "pending" && localItem.updatedAt >= serverItem.updatedAt) {
-                return { ...localItem, kind: key, syncStatus: "synced" };
+                return { ...localItem, kind: key, syncStatus: "synced", deletedAt: null };
               }
-              return { ...serverItem, kind: key, syncStatus: "synced" };
+              const { syncStatus: _s, deletedAt: _d, ...cleanServer } = serverItem;
+              return { ...cleanServer, kind: key, syncStatus: "synced", deletedAt: null };
             });
             await db.people.bulkPut(mergedItems);
           }
@@ -159,9 +161,10 @@ export async function reconcileServerSnapshot(data) {
           const mergedItems = items.map((serverItem) => {
             const localItem = allLocalItems.find((i) => i.id === serverItem.id);
             if (localItem && localItem.syncStatus === "pending" && localItem.updatedAt >= serverItem.updatedAt) {
-              return { ...localItem, syncStatus: "synced" };
+              return { ...localItem, syncStatus: "synced", deletedAt: null };
             }
-            return { ...serverItem, syncStatus: "synced" };
+            const { syncStatus: _s, deletedAt: _d, ...cleanServer } = serverItem;
+            return { ...cleanServer, syncStatus: "synced", deletedAt: null };
           });
           await db[key].bulkPut(mergedItems);
         }

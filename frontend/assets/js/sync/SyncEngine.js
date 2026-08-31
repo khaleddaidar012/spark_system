@@ -337,6 +337,7 @@ class SyncEngine {
 
               /* Remove local synced items that no longer exist on server */
               for (const p of allLocalPeople) {
+                if (p.kind !== key) continue; /* Only process people of this category */
                 if (!serverIdSet.has(p.id) && p.syncStatus === "synced" && !p.deletedAt) {
                   await db.people.delete(p.id).catch(() => {});
                 }
