@@ -134,8 +134,6 @@ function updateSyncPanel(state, detail = {}) {
         ? `تم رفع ${pushed} من ${total} تغيير`
         : "يتم التحقق من التحديثات...";
     }
-    }
-
   } else if (state === "synced") {
     if (panelBar)  panelBar.style.width  = "100%";
     if (panelPct)  panelPct.textContent  = "100%";

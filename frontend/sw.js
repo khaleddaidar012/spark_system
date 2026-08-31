@@ -3,7 +3,7 @@
    CacheFirst for Static Assets, Network/Fallback for API
    ============================================ */
 
-const CACHE_NAME = "spark-erp-cache-v22";
+const CACHE_NAME = "spark-erp-cache-v23";
 
 const STATIC_ASSETS = [
   "/",
