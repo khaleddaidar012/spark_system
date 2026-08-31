@@ -28,6 +28,15 @@ const PUSH_COLLECTIONS = [
   "deductions",
 ];
 
+/** Remove sync metadata before pushing to server */
+function cleanPayloadForServer(payload) {
+  if (!payload || typeof payload !== "object") return payload;
+  const cleaned = { ...payload };
+  delete cleaned.syncStatus;
+  delete cleaned.deletedAt;
+  return cleaned;
+}
+
 class SyncEngine {
   constructor() {
     this.isSyncing = false;
@@ -214,7 +223,7 @@ class SyncEngine {
         if (item.syncStatus === "pending_delete") {
           await api.remove(name, item.id);
         } else {
-          await api.save(name, item);
+          await api.save(name, cleanPayloadForServer(item));
         }
 
         /* Mark as synced in IndexedDB */
@@ -251,7 +260,7 @@ class SyncEngine {
             entity: op.entity,
             entityId: op.entityId,
             operation: op.operation,
-            payload: op.payload,
+            payload: cleanPayloadForServer(op.payload),
             createdAt: op.createdAt,
           })),
         };
@@ -338,9 +347,10 @@ class SyncEngine {
                 const mergedItems = serverItems.map((serverItem) => {
                   const localItem = allLocalPeople.find((p) => p.id === serverItem.id);
                   if (localItem && localItem.syncStatus === "pending" && localItem.updatedAt >= serverItem.updatedAt) {
-                    return { ...localItem, kind: key, syncStatus: "synced" };
+                    return { ...localItem, kind: key, syncStatus: "synced", deletedAt: null };
                   }
-                  return { ...serverItem, kind: key, syncStatus: "synced" };
+                  const { syncStatus: _s, deletedAt: _d, ...cleanServer } = serverItem;
+                  return { ...cleanServer, kind: key, syncStatus: "synced", deletedAt: null };
                 });
                 await db.people.bulkPut(mergedItems);
               }
@@ -360,9 +370,10 @@ class SyncEngine {
               const mergedItems = serverItems.map((serverItem) => {
                 const localItem = allLocalItems.find((i) => i.id === serverItem.id);
                 if (localItem && localItem.syncStatus === "pending" && localItem.updatedAt >= serverItem.updatedAt) {
-                  return { ...localItem, syncStatus: "synced" };
+                  return { ...localItem, syncStatus: "synced", deletedAt: null };
                 }
-                return { ...serverItem, syncStatus: "synced" };
+                const { syncStatus: _s, deletedAt: _d, ...cleanServer } = serverItem;
+                return { ...cleanServer, syncStatus: "synced", deletedAt: null };
               });
               await db[key].bulkPut(mergedItems);
             }
