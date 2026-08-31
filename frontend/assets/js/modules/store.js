@@ -46,6 +46,7 @@ const cache = {
 };
 
 let loaded = false;
+let _reconciling = false;
 
 export function uid() {
   return generateUUID();
@@ -94,6 +95,7 @@ export async function initStore({ force = false } = {}) {
 
   // 4. Fire-and-forget background API hydration — NEVER blocks page render
   if (navigator.onLine) {
+    _reconciling = true;
     Promise.resolve().then(async () => {
       try {
         const data = await api.snapshot();
@@ -104,6 +106,8 @@ export async function initStore({ force = false } = {}) {
         }
       } catch {
         /* Running on local IndexedDB — this is normal when offline */
+      } finally {
+        _reconciling = false;
       }
     });
   }
@@ -127,7 +131,7 @@ async function loadCacheFromIndexedDB() {
   }
 }
 
-async function reconcileServerSnapshot(data) {
+export async function reconcileServerSnapshot(data) {
   try {
     for (const key of Object.keys(COLLECTIONS)) {
       const items = Array.isArray(data[key]) ? data[key] : [];
@@ -135,9 +139,10 @@ async function reconcileServerSnapshot(data) {
 
       if (PEOPLE_COLLECTIONS.includes(key)) {
         if (db.people) {
-          // Remove local synced items that no longer exist on server
           const currentPeople = await db.people
-            .filter((p) => (p.kind === key || (Array.isArray(p.roles) && p.roles.includes(COLLECTION_ROLE[key]))) && p.syncStatus === "synced" && !p.deletedAt)
+            .where("kind")
+            .equals(key)
+            .filter((p) => p.syncStatus === "synced" && !p.deletedAt)
             .toArray();
           for (const p of currentPeople) {
             if (!serverIdSet.has(p.id)) {
@@ -166,6 +171,10 @@ async function reconcileServerSnapshot(data) {
   } catch (err) {
     console.warn("[Store] Error reconciling server snapshot:", err);
   }
+}
+
+export function isReconciling() {
+  return _reconciling;
 }
 
 export function isStoreLoaded() {
@@ -214,8 +223,7 @@ export function findPersonById(id) {
 
 /* ---------- Writes ---------- */
 
-/* Apply locally to memory & IndexedDB instantly, enqueue sync operation */
-export function save(name, item) {
+export async function save(name, item) {
   if (PEOPLE_COLLECTIONS.includes(name)) {
     item.kind = item.kind || name;
     if (!item.roles || !Array.isArray(item.roles) || !item.roles.length) {
@@ -233,35 +241,36 @@ export function save(name, item) {
     ...item,
     updatedAt: now,
     syncStatus: "pending",
+    kind: PEOPLE_COLLECTIONS.includes(name) ? name : item.kind,
   };
 
-  // Durable write to IndexedDB + enqueue in SyncQueue (batched sync via SyncEngine — no N+1 requests)
-  (async () => {
-    try {
-      const table = PEOPLE_COLLECTIONS.includes(name) ? db.people : db[name];
-      if (table) {
-        await db.transaction("rw", [table, db.syncQueue], async () => {
-          await table.put({ ...record, kind: PEOPLE_COLLECTIONS.includes(name) ? name : undefined });
-          await db.syncQueue.add({
-            id: generateUUID(),
-            entity: name,
-            entityId: item.id,
-            operation: idx === -1 ? "create" : "update",
-            payload: record,
-            createdAt: now,
-            status: "pending",
-          });
-        });
-      }
-      // SyncEngine handles batched push — no individual api.save() calls
-      window.dispatchEvent(new CustomEvent("spark:queue-updated"));
-    } catch (err) {
-      console.error("[Store] Dexie write error:", err);
-    }
-  })();
-
-  // Debounced UI update — prevents thrashing on bulk saves
   emitDataChanged();
+
+  try {
+    const table = PEOPLE_COLLECTIONS.includes(name) ? db.people : db[name];
+    if (table) {
+      await db.transaction("rw", [table, db.syncQueue], async () => {
+        await table.put({ ...record, kind: PEOPLE_COLLECTIONS.includes(name) ? name : undefined });
+        await db.syncQueue.add({
+          id: generateUUID(),
+          entity: name,
+          entityId: item.id,
+          operation: idx === -1 ? "create" : "update",
+          payload: record,
+          createdAt: now,
+          status: "pending",
+        });
+      });
+    }
+    window.dispatchEvent(new CustomEvent("spark:queue-updated"));
+  } catch (err) {
+    console.error("[Store] Dexie write error:", err);
+    if (idx === -1) {
+      list.pop();
+    } else {
+      list[idx] = item;
+    }
+  }
 
   return item;
 }
@@ -271,6 +280,7 @@ export function remove(name, id) {
   if (!list) return false;
   const idx = list.findIndex((x) => x.id === id);
   if (idx === -1) return false;
+  const removedItem = list[idx];
   list.splice(idx, 1);
 
   const now = Date.now();
@@ -294,10 +304,10 @@ export function remove(name, id) {
           });
         });
       }
-      /* SyncEngine handles batched push */
       window.dispatchEvent(new CustomEvent("spark:queue-updated"));
     } catch (err) {
       console.error("[Store] Dexie remove error:", err);
+      list.splice(idx, 0, removedItem);
     }
   })();
 

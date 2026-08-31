@@ -13,6 +13,7 @@ import { connectivityMonitor } from "./ConnectivityMonitor.js";
 import { api } from "../modules/api.js";
 import { db } from "../db/db.js";
 import { generateUUID } from "../modules/uuid.js";
+import { isReconciling } from "../modules/store.js";
 
 const PEOPLE_KEYS = ["suppliers", "contractors", "clients", "others"];
 const PUSH_COLLECTIONS = [
@@ -276,6 +277,7 @@ class SyncEngine {
   }
 
   async pullRemoteChanges() {
+    if (isReconciling()) return;
     try {
       const res = await api.pullSync();
       if (res && res.ok && res.data) {
@@ -299,7 +301,9 @@ class SyncEngine {
           if (PEOPLE_KEYS.includes(key)) {
             if (db.people) {
               const currentLocalPeople = await db.people
-                .filter((p) => (p.kind === key || (Array.isArray(p.roles) && p.roles.includes(key))) && p.syncStatus === "synced" && !p.deletedAt)
+                .where("kind")
+                .equals(key)
+                .filter((p) => p.syncStatus === "synced" && !p.deletedAt)
                 .toArray();
               for (const p of currentLocalPeople) {
                 if (!serverIdSet.has(p.id)) {
