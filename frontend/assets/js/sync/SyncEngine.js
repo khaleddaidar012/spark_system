@@ -33,6 +33,16 @@ class SyncEngine {
     this.syncInterval = null;
     this._pendingQueueSync = null;
     this.lastSyncAt = null;
+    this._watchdogTimer = null;
+  }
+
+  forceResetSync() {
+    this.isSyncing = false;
+    if (this._watchdogTimer) {
+      clearTimeout(this._watchdogTimer);
+      this._watchdogTimer = null;
+    }
+    this._emitStatus("error", { error: "تمت إعادة تعيين المزامنة" });
   }
 
   init() {
@@ -66,6 +76,15 @@ class SyncEngine {
   async triggerSync() {
     if (this.isSyncing) return;
     this.isSyncing = true;
+
+    if (this._watchdogTimer) clearTimeout(this._watchdogTimer);
+    this._watchdogTimer = setTimeout(() => {
+      if (this.isSyncing) {
+        console.warn("[SyncEngine] Watchdog timeout: auto-resetting stuck sync state");
+        this.isSyncing = false;
+        this._emitStatus("error", { error: "انتهت مهلة المزامنة — انقر للإعادة" });
+      }
+    }, 25000);
 
     /* Check how many queue operations are pending */
     const queueCount = await SyncQueueManager.getPendingCount();
@@ -105,6 +124,10 @@ class SyncEngine {
       console.warn("[SyncEngine] Sync cycle error:", err);
       this._emitStatus("error", { error: err.message });
     } finally {
+      if (this._watchdogTimer) {
+        clearTimeout(this._watchdogTimer);
+        this._watchdogTimer = null;
+      }
       this.isSyncing = false;
     }
   }
@@ -122,6 +145,7 @@ class SyncEngine {
       };
 
       for (const [name, table] of Object.entries(tables)) {
+        if (!table) continue;
         const items = await table
           .filter((x) => x.syncStatus === "pending" || x.syncStatus === "pending_delete")
           .toArray();
@@ -131,12 +155,14 @@ class SyncEngine {
       }
 
       /* People collections */
-      const people = await db.people
-        .filter((x) => x.syncStatus === "pending" || x.syncStatus === "pending_delete")
-        .toArray();
-      for (const person of people) {
-        const name = person.kind || "suppliers";
-        pending.push({ name, item: person });
+      if (db.people) {
+        const people = await db.people
+          .filter((x) => x.syncStatus === "pending" || x.syncStatus === "pending_delete")
+          .toArray();
+        for (const person of people) {
+          const name = person.kind || "suppliers";
+          pending.push({ name, item: person });
+        }
       }
     } catch (err) {
       console.warn("[SyncEngine] Error reading pending IndexedDB items:", err);
@@ -198,6 +224,21 @@ class SyncEngine {
         if (res && (res.ok === true || res.processed)) {
           const autoIdsToClear = pendingOps.map((op) => op.autoId);
           await SyncQueueManager.markProcessed(autoIdsToClear);
+
+          // Update syncStatus of corresponding records in IndexedDB
+          for (const op of pendingOps) {
+            try {
+              const table = PEOPLE_KEYS.includes(op.entity) ? db.people : db[op.entity];
+              if (table && op.entityId) {
+                if (op.operation === "delete") {
+                  await table.delete(op.entityId).catch(() => {});
+                } else {
+                  await table.update(op.entityId, { syncStatus: "synced" }).catch(() => {});
+                }
+              }
+            } catch {}
+          }
+
           pushed += pendingOps.length;
           batchNum++;
 

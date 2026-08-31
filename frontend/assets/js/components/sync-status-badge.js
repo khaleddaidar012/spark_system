@@ -162,6 +162,7 @@ export function initSyncStatusBadge() {
   /* Badge click → manual sync trigger */
   r.badgeBtn.addEventListener("click", () => {
     if (navigator.onLine) {
+      syncEngine.forceResetSync();
       syncEngine.triggerSync();
       showPanel();
     }
@@ -172,6 +173,7 @@ export function initSyncStatusBadge() {
 
   /* Panel retry */
   r.panelRetry?.addEventListener("click", () => {
+    syncEngine.forceResetSync();
     syncEngine.triggerSync();
   });
 

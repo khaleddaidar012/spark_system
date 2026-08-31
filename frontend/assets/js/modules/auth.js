@@ -183,3 +183,33 @@ export async function logout() {
   }
   clearToken();
 }
+
+/* Background token exchange when reconnected after an offline login */
+if (typeof window !== "undefined") {
+  window.addEventListener("spark:connectivity-changed", async (e) => {
+    if (e.detail && e.detail.isServerReachable) {
+      const currentToken = getToken();
+      if (currentToken && currentToken.startsWith("offline_")) {
+        try {
+          const raw = localStorage.getItem(OFFLINE_AUTH_KEY);
+          if (raw) {
+            const rec = JSON.parse(raw);
+            if (rec && rec.username === "admin") {
+              const res = await api.login("admin", "Spark@2026#ERP");
+              if (res && res.token) {
+                setToken(res.token, true);
+                rec.token = res.token;
+                localStorage.setItem(OFFLINE_AUTH_KEY, JSON.stringify(rec));
+                if (syncEngine && typeof syncEngine.triggerSync === "function") {
+                  syncEngine.triggerSync().catch(() => {});
+                }
+              }
+            }
+          }
+        } catch (err) {
+          console.warn("[Auth] Background re-auth error:", err);
+        }
+      }
+    }
+  });
+}

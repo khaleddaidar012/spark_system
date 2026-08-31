@@ -31,6 +31,7 @@ const SNAPSHOT_KEYS = [
   "materials",
   "moneyTransactions",
   "materialTransactions",
+  "deductions",
 ];
 
 const PEOPLE_COLLECTIONS = ["suppliers", "contractors", "clients", "others"];
@@ -44,6 +45,7 @@ const COLLECTION_TABLE = {
   materials: "materials",
   moneyTransactions: "money_transactions",
   materialTransactions: "material_transactions",
+  deductions: "deductions",
 };
 
 const TOKEN_TTL_MS = 30 * 24 * 60 * 60 * 1000; /* 30 days */
@@ -204,6 +206,13 @@ async function upsertItem(db, collection, item) {
          direction = excluded.direction, person_id = excluded.person_id,
          project_id = excluded.project_id, created_at = excluded.created_at, data = excluded.data`
     ).bind(item.id, item.direction || "", item.personId || null, item.projectId || null, item.createdAt || 0, data).run();
+  } else if (table === "deductions") {
+    await db.prepare(
+      `INSERT INTO deductions (id, person_id, person_type, project_id, date, created_at, data) VALUES (?, ?, ?, ?, ?, ?, ?)
+       ON CONFLICT(id) DO UPDATE SET
+         person_id = excluded.person_id, person_type = excluded.person_type,
+         project_id = excluded.project_id, date = excluded.date, created_at = excluded.created_at, data = excluded.data`
+    ).bind(item.id, item.personId || null, item.personType || "contractor", item.projectId || null, item.date || "", item.createdAt || 0, data).run();
   } else {
     await db.prepare(
       `INSERT INTO material_transactions (id, direction, project_id, created_at, data) VALUES (?, ?, ?, ?, ?)
@@ -230,16 +239,18 @@ async function reset(db) {
     db.prepare("DELETE FROM materials"),
     db.prepare("DELETE FROM money_transactions"),
     db.prepare("DELETE FROM material_transactions"),
+    db.prepare("DELETE FROM deductions"),
   ]);
 }
 
 async function snapshot(db) {
-  const [projects, people, materials, money, mat] = await Promise.all([
+  const [projects, people, materials, money, mat, ded] = await Promise.all([
     readRows(db, "SELECT data FROM projects ORDER BY rowid ASC"),
     readRows(db, "SELECT kind, data FROM people ORDER BY rowid ASC"),
     readRows(db, "SELECT data FROM materials ORDER BY rowid ASC"),
     readRows(db, "SELECT data FROM money_transactions ORDER BY rowid ASC"),
     readRows(db, "SELECT data FROM material_transactions ORDER BY rowid ASC"),
+    readRows(db, "SELECT data FROM deductions ORDER BY rowid ASC"),
   ]);
   const result = {
     projects: projects.map((r) => JSON.parse(r.data)),
@@ -250,6 +261,7 @@ async function snapshot(db) {
     materials: materials.map((r) => JSON.parse(r.data)),
     moneyTransactions: money.map((r) => JSON.parse(r.data)),
     materialTransactions: mat.map((r) => JSON.parse(r.data)),
+    deductions: ded.map((r) => JSON.parse(r.data)),
   };
   for (const row of people) {
     const item = JSON.parse(row.data);
@@ -266,6 +278,7 @@ async function restore(db, full) {
     db.prepare("DELETE FROM materials"),
     db.prepare("DELETE FROM money_transactions"),
     db.prepare("DELETE FROM material_transactions"),
+    db.prepare("DELETE FROM deductions"),
   ];
   for (const key of SNAPSHOT_KEYS) {
     const list = Array.isArray(full[key]) ? full[key] : [];
@@ -306,6 +319,15 @@ async function restore(db, full) {
                direction = excluded.direction, person_id = excluded.person_id,
                project_id = excluded.project_id, created_at = excluded.created_at, data = excluded.data`
           ).bind(item.id, item.direction || "", item.personId || null, item.projectId || null, item.createdAt || 0, data)
+        );
+      } else if (table === "deductions") {
+        stmts.push(
+          db.prepare(
+            `INSERT INTO deductions (id, person_id, person_type, project_id, date, created_at, data) VALUES (?, ?, ?, ?, ?, ?, ?)
+             ON CONFLICT(id) DO UPDATE SET
+               person_id = excluded.person_id, person_type = excluded.person_type,
+               project_id = excluded.project_id, date = excluded.date, created_at = excluded.created_at, data = excluded.data`
+          ).bind(item.id, item.personId || null, item.personType || "contractor", item.projectId || null, item.date || "", item.createdAt || 0, data)
         );
       } else {
         stmts.push(

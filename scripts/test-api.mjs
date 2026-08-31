@@ -126,7 +126,7 @@ check("login succeeds with token", r.status === 200 && !!r.data.token, JSON.stri
 const token = r.data.token;
 
 r = await call(env, "GET", "/api/data", undefined, token);
-check("snapshot (empty) returns all 8 collections", r.status === 200 && Object.keys(r.data).length === 8, JSON.stringify(Object.keys(r.data)));
+check("snapshot (empty) returns all 9 collections", r.status === 200 && Object.keys(r.data).length === 9 && Array.isArray(r.data.deductions), JSON.stringify(Object.keys(r.data)));
 
 r = await call(env, "POST", "/api/data/seed", {}, token);
 check("seed inserts demo data", r.status === 200 && r.data.seeded === true, JSON.stringify(r));

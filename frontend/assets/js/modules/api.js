@@ -42,12 +42,15 @@ export function clearToken() {
   }
 }
 
-async function request(path, { method = "GET", body, auth = true } = {}) {
+async function request(path, { method = "GET", body, auth = true, timeoutMs = 20000 } = {}) {
   const headers = { "Content-Type": "application/json" };
   if (auth) {
     const token = getToken();
     if (token) headers.Authorization = "Bearer " + token;
   }
+
+  const controller = typeof AbortController !== "undefined" ? new AbortController() : null;
+  const timeoutId = controller ? setTimeout(() => controller.abort(), timeoutMs) : null;
 
   let res;
   try {
@@ -55,14 +58,25 @@ async function request(path, { method = "GET", body, auth = true } = {}) {
       method,
       headers,
       body: body !== undefined ? JSON.stringify(body) : undefined,
+      signal: controller ? controller.signal : undefined,
     });
-  } catch {
+  } catch (err) {
+    if (err.name === "AbortError") {
+      throw new Error("timeout");
+    }
     throw new Error("network-error");
+  } finally {
+    if (timeoutId) clearTimeout(timeoutId);
   }
 
   if (res.status === 401) {
     clearToken();
-    if (auth) window.location.replace("./login.html");
+    try {
+      window.dispatchEvent(new CustomEvent("spark:auth-unauthorized"));
+    } catch {}
+    if (auth && typeof window !== "undefined" && !window.location.pathname.endsWith("login.html") && !window.location.pathname.endsWith("login")) {
+      window.location.replace("./login.html");
+    }
     throw new Error("unauthorized");
   }
   if (res.status === 204) return null;

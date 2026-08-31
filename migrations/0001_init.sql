@@ -43,9 +43,22 @@ CREATE TABLE IF NOT EXISTS material_transactions (
   data TEXT NOT NULL
 );
 
+CREATE TABLE IF NOT EXISTS deductions (
+  id TEXT PRIMARY KEY,
+  person_id TEXT,
+  person_type TEXT,
+  project_id TEXT,
+  date TEXT,
+  created_at INTEGER DEFAULT 0,
+  data TEXT NOT NULL
+);
+
 -- Useful indexes for the queries the app performs (person/project filtering).
 CREATE INDEX IF NOT EXISTS idx_people_kind ON people(kind);
 CREATE INDEX IF NOT EXISTS idx_money_person ON money_transactions(person_id);
 CREATE INDEX IF NOT EXISTS idx_money_project ON money_transactions(project_id);
 CREATE INDEX IF NOT EXISTS idx_mat_project ON material_transactions(project_id);
 CREATE INDEX IF NOT EXISTS idx_projects_status ON projects(status);
+CREATE INDEX IF NOT EXISTS idx_deductions_person ON deductions(person_id);
+CREATE INDEX IF NOT EXISTS idx_deductions_project ON deductions(project_id);
+

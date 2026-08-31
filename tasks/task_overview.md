@@ -1,92 +1,125 @@
-# Task Overview — Spark ERP Financial & Project Enhancements
+# Task Overview — Spark ERP Bug Fix Sprint
 
-Status: pending
-Priority: high
+## Project Goal
 
-## 1. Executive Summary & Architecture Overview
+Fix three critical reported bugs in the Spark ERP system (Cloudflare Pages + D1 + IndexedDB offline-first PWA):
 
-تحويل متطلبات نظام Spark Engineering ERP الواردة في `tasks.md` إلى خطة تنفيذ معمارية مفصلة وعالية الدقة. ترتكز هذه التحسينات على 4 أركان مالية وتشغيلية رئيسية:
-
-1. **ربط المصروفات بمراحل المشروع وتحديث تكلفة كل مرحلة (Live Phase Cost Accumulation)**:
-   - ربط جميع عمليات الصرف (سواء من الإضافة السريعة Quick Add أو من داخل صفحة المشروع أو صفحة الحسابات) بالمرحلة النشطة أو المختارة للمشروع (`project.phases[i]`).
-   - تحديث وحساب التكلفة الإجمالية لكل مرحلة/حالة تلقائياً وبشكل حي، وإظهارها بوضوح في سجل حالات المشروع (Phase History Log).
-2. **كشف حساب الموردين والمقاولين مع الخصومات وطباعة PDF (Supplier & Contractor Statements)**:
-   - إضافة زر "كشف حساب" في صفحتي المقاولين والموردين يتيح تحديد فترة زمنية (من تاريخ إلى تاريخ).
-   - عرض المعاملات المالية (الوارد، الصادر، المدفوع، الخصم، الرصيد).
-   - إمكانية تطبيق خصومات مباشرة على كشف الحساب وتوثيقها في سجل الخصومات.
-   - تصدير وطباعة كشف حساب رسمي احترافي بصيغة PDF يدعم اللغة العربية واتجاه RTL.
-3. **إحصائيات إجمالي الواردات في الحسابات المالية (Finance Inflow KPI)**:
-   - إضافة مؤشر "إجمالي الواردات" (اليوم، هذا الأسبوع، هذا الشهر، والإجمالي الكلي) بجانب "إجمالي المصروفات" وصافي الرصيد في صفحة `finance.html`.
-4. **شريط المؤشرات المالية العلوية في صفحة المشاريع (Projects Header KPIs)**:
-   - 5 بطاقات إحصائية متجاورة في أعلى صفحة المشاريع:
-     1. إجمالي الوارد (Total Inflow)
-     2. إجمالي الصادر (Total Outflow)
-     3. الفرق (Net Difference = الوارد - الصادر)
-     4. الربح المتوقع (Expected Profit - مدخل يدوي قابل للتعديل والحفظ)
-     5. الربح الفعلي (Actual Profit - معادلة ديناميكية = الربح المتوقع + الفرق بين الوارد والصادر).
+1. The full application does **not render online** on the laptop — only dashboard cards and basic initial info show, not the complete system.
+2. The full application does **not work on mobile** (phone) at all.
+3. The **sync gets permanently stuck** when coming back online after working offline on the phone — shows "syncing" indefinitely and never completes.
+4. **Error diagnosis** — run a comprehensive diagnostic for any errors on both laptop and phone.
 
 ---
 
-## 2. Dependency Graph & Execution Order
+## AI Map
 
-```text
-[ Task 01: ربط المصروفات بالمراحل ] ───┐
-                                       ├──► [ Task 04: إحصائيات المشاريع العلوية ]
-[ Task 03: إحصائيات الواردات المالية ] ──┘                  │
-                                                            │
-[ Task 02: كشف حساب المقاولين والموردين ]                    │
-                                                            ▼
-                                        [ Task 05: اختبارات التكامل والتحقق الشامل ]
-```
+Project knowledge map: This project has no AI_MAP/ directory. Architecture is documented in:
 
-### الترتيب الموصى به للتنفيذ:
-1. **Task 01 — Project Stage Financial Tracking**: بناء وتجهيز ربط المصاريف بالمراحل وحساب التكلفة التراكمية في `calc.js` و `store.js` و `project-phases.js`.
-2. **Task 02 — Supplier & Contractor Statements & PDF Export**: بناء محرك كشف الحساب والخصومات ونظام الطباعة PDF باللغة العربية.
-3. **Task 03 — Financial Accounts Income Statistics**: إضافة كروت وشرائح إجمالي الواردات إلى صفحة الحسابات المالية `finance.html`.
-4. **Task 04 — Projects Financial Summary Header**: ربط وتجميع المؤشرات الخمسة في أعلى صفحة المشاريع `projects.html`.
-5. **Task 05 — Integration, Regression & Calculation Validation**: فحص الحسابات الدقيقة ومنع التكرار (Double Counting) واختبار السيناريوهات الحية.
+- README.md — Tech stack, API endpoints, deployment
+- TESTING_GUIDE.md — Full QA checklist (467 lines)
+- TEST_RESULTS.md — Previous bug history
+- COMMIT_TRACKING.md — Changelog
+- rontend/sw.js — Service Worker / offline caching
+- rontend/assets/js/sync/SyncEngine.js — Sync coordinator
+- rontend/assets/js/sync/ConnectivityMonitor.js — Online/offline detection
+- rontend/assets/js/sync/sync-queue.js — Persistent FIFO queue
+- rontend/assets/js/modules/store.js — In-memory + IndexedDB data layer
+- rontend/assets/js/db/db.js — Dexie.js schema
+- rontend/assets/js/modules/api.js — Fetch wrapper / API client
+- unctions/api/[[path]].js — Cloudflare Pages Function (full API)
 
 ---
 
-## 3. قائمة المهام الرئيسية (Master Task List)
+## Requirements from needs.md
 
-| الملف | المسمى الرئيسي | المسؤولية ونطاق العمل | الاعتماديات |
-|:---|:---|:---|:---|
-| **[task_01_project_stage_financial_tracking.md](file:///f:/%D9%86%D8%B3%D8%AE%D8%A9%20%D8%A7%D8%AC%D8%A7%D8%B2%D8%A9%20%D8%A7%D9%84%D8%B9%D9%8A%D8%AF/webDevelopmet/%D9%85%D9%88%D9%82%D8%B9%20%D8%A7%D9%84%D9%85%D9%82%D8%A7%D9%88%D9%85%D9%84%D8%A7%D8%AA/tasks/task_01_project_stage_financial_tracking.md)** | ربط المصروفات بمراحل المشروع وتحديث التكلفة | ربط الـ Quick Add والمصروفات بالـ `phase_id`، وحساب تكلفة كل مرحلة في `calc.js` وعرضها في سجل الحالات. | لا يوجد |
-| **[task_02_supplier_contractor_statements.md](file:///f:/%D9%86%D8%B3%D8%AE%D8%A9%20%D8%A7%D8%AC%D8%A7%D8%B2%D8%A9%20%D8%A7%D9%84%D8%B9%D9%8A%D8%AF/webDevelopmet/%D9%85%D9%88%D9%82%D8%B9%20%D8%A7%D9%84%D9%85%D9%82%D8%A7%D9%88%D9%85%D9%84%D8%A7%D8%AA/tasks/task_02_supplier_contractor_statements.md)** | كشف حساب الموردين والمقاولين والخصم وPDF | زر كشف الحساب، الفلترة بالتاريخ، تسجيل الخصم، وتوليد PDF احترافي يدعم اللغة العربية. | لا يوجد |
-| **[task_03_financial_accounts_income_stats.md](file:///f:/%D9%86%D8%B3%D8%AE%D8%A9%20%D8%A7%D8%AC%D8%A7%D8%B2%D8%A9%20%D8%A7%D9%84%D8%B9%D9%8A%D8%AF/webDevelopmet/%D9%85%D9%88%D9%82%D8%B9%20%D8%A7%D9%84%D9%85%D9%82%D8%A7%D9%88%D9%85%D9%84%D8%A7%D8%AA/tasks/task_03_financial_accounts_income_stats.md)** | إحصائيات إجمالي الواردات بالحسابات المالية | إضافة كروت إجمالي الواردات (اليوم، الأسبوع، الشهر) ومودال تفاصيل الواردات في `finance.html`. | لا يوجد |
-| **[task_04_projects_financial_summary.md](file:///f:/%D9%86%D8%B3%D8%AE%D8%A9%20%D8%A7%D8%AC%D8%A7%D8%B2%D8%A9%20%D8%A7%D9%84%D8%B9%D9%8A%D8%AF/webDevelopmet/%D9%85%D9%88%D9%82%D8%B9%20%D8%A7%D9%84%D9%85%D9%82%D8%A7%D9%88%D9%85%D9%84%D8%A7%D8%AA/tasks/task_04_projects_financial_summary.md)** | شريط المؤشرات المالية العلوية لصفحة المشاريع | كروت الوارد، الصادر، الفرق، الربح المتوقع، والربح الفعلي وتخزين الربح المتوقع. | Task 01, Task 03 |
-| **[task_05_integration_testing_and_validation.md](file:///f:/%D9%86%D8%B3%D8%AE%D8%A9%20%D8%A7%D8%AC%D8%A7%D8%B2%D8%A9%20%D8%A7%D9%84%D8%B9%D9%8A%D8%AF/webDevelopmet/%D9%85%D9%88%D9%82%D8%B9%20%D8%A7%D9%84%D9%85%D9%82%D8%A7%D9%88%D9%85%D9%84%D8%A7%D8%AA/tasks/task_05_integration_testing_and_validation.md)** | اختبارات التكامل ومنع التكرار والحسابات | مصفوفة التحقق الشامل، منع الـ Double-Counting، واختبار التوافقية العكسية. | Task 01 - 04 |
-
----
-
-## 4. الملاحظات المحاسبية الهامة (Accounting Logic Clarification)
-
-### توضيح معادلة "الربح الفعلي":
-المعادلة المطلوبة في المتطلبات هي:
-$$\text{الربح الفعلي} = \text{الربح المتوقع} + (\text{إجمالي الوارد} - \text{إجمالي الصادر})$$
-
-* **المنطق التطبيقي**:
-  - إذا كان الربح المتوقع لمشروع ما هو `200,000 ج.م`.
-  - وكان إجمالي الواردات المحصلة من العميل `1,000,000 ج.م` وإجمالي المصروفات الفعلية `850,000 ج.م`.
-  - فإن الفائض النقدي المحقق حتى الآن هو `150,000 ج.م`.
-  - فيكون مؤشر الربح الفعلي وفق هذه المعادلة هو `200,000 + 150,000 = 350,000 ج.م`.
-* **ملاحظة معمارية**: لمنع الـ Double-Counting والتأكد من وضوح الأرقام للمستخدم، يجب عرض مكونات المعادلة (الربح المتوقع، الوارد، الصادر، والفرق) بجانب بعضها مباشرة في الكروت الخمسة حتى يرى المستخدم بوضوح كيف تم استنتاج الرقم.
+| ID | Original (Arabic) | Translation |
+|---|---|---|
+| REQ-001 | المشروع معتش شغال اونلاين علي اللاب بيظهر بس الكروت ومعلومات اوليه كدا مش النظام كله | The project is not working online on the laptop — only cards and basic info show, not the full system |
+| REQ-002 | النظام معتش شغال كذلك علي التلفون | The system is also not working on the phone |
+| REQ-003 | لما بعمل حاجة اوفلاين علي التلفون واوصل الانترنت بيقعد معلق ويقولي بعمل مزامنة ومش بيتحرك من مكانة | When I do something offline on the phone and connect to the internet, it gets stuck saying "syncing" and never moves |
+| REQ-004 | اعمل اختبار لاي ايرور في اللابتو او الفون | Run a diagnostic test for any errors on the laptop or phone |
 
 ---
 
-## 5. قواعد الحفاظ على استقرار النظام (Regression Safety Rules)
-1. **عدم كسر العمليات القديمة**: أي مصروفات أو معاملات سابقة لا تحتوي على `phase_id` تظل تعمل وتظهر تحت "مصروفات عامة" دون أن تتسبب في أي خطأ برمجي.
-2. **الاعتماد على مصدر الحقيقة الوحيد (Single Source of Truth)**: جميع الإجماليات تُحسب عبر دوال مركزية في `calc.js` استناداً إلى المعاملات الأصلية المخزنة في `store.js`، ولا يتم تخزين أرقام إجمالية مكررة قد تتعارض.
-3. **منع التكرار (Zero Double-Counting)**: عند تعديل مصروف أو حذفه أو تغيير مرحلته، يُعاد احتساب تكاليف المراحل فوراً.
+## Requirements Coverage
+
+| Requirement | Task |
+|---|---|
+| REQ-001 | Task 01 — Online Rendering Fix (Laptop) |
+| REQ-002 | Task 02 — Mobile Compatibility Fix |
+| REQ-003 | Task 03 — Sync Stuck Fix |
+| REQ-004 | Task 04 — Error Diagnostic and Testing |
 
 ---
 
-## 6. Definition of Done (DoD)
+## Execution Order
 
-- [ ] تم تنفيذ جميع المهام الفرعية في ملفات Tasks الخمسة.
-- [ ] المصروفات المضافة ترتبط تلقائياً بالمرحلة وتُحدّث تكلفة المرحلة في سجل الحالات فوراً.
-- [ ] زر "كشف حساب" في المقاولين والموردين يعمل مع الفلترة بالتواريخ والخصومات والطباعة كـ PDF عربي سليم.
-- [ ] إجمالي الواردات معروض بدقة في صفحة الحسابات المالية.
-- [ ] الكروت الخمسة العلوية معروضة ومحسوبة بدقة في صفحة المشاريع.
-- [ ] جميع الاختبارات في `task_05_integration_testing_and_validation.md` اجتازت بنجاح.
+- [x] Task 01 — Online Rendering Fix (Laptop)
+- [x] Task 02 — Mobile Compatibility Fix
+- [x] Task 03 — Sync Stuck Fix
+- [x] Task 04 — Error Diagnostic and Testing
+
+---
+
+## Dependencies
+
+`
+Task 01 (Online Rendering Fix)
+  |
+  +--- Task 02 (Mobile Compatibility Fix)
+  |
+  +--- Task 03 (Sync Stuck Fix)
+        |
+        v
+      Task 04 (Error Diagnostic and Testing)
+`
+
+- Task 01 and Task 02 may be started in parallel if root causes are clearly different.
+- Task 03 depends on Tasks 01+02 being resolved first (online state detection must work).
+- Task 04 must be last — it validates all three previous fixes.
+
+---
+
+## Recommended Implementation Sequence
+
+1. **Task 01 first** — Diagnose why full system does not render online on laptop.  
+   This is the most fundamental issue. Investigation will reveal root cause (API failures, auth token issues, store init not awaited, snapshot fetch failing, or console errors blocking rendering).
+
+2. **Task 02 second** — Fix mobile after laptop is resolved.  
+   Mobile shares the same data pipeline. Once the online rendering root cause is understood, mobile-specific issues (PWA registration, Service Worker scope, viewport/layout) can be addressed on top.
+
+3. **Task 03 third** — Fix the sync-stuck bug.  
+   This is independent of rendering but requires online detection to work. Likely involves SyncEngine.triggerSync() deadlock, pi.pushSync() / pi.pullSync() returning an error silently swallowed, or the isSyncing lock never being released on error.
+
+4. **Task 04 last** — Run comprehensive diagnostic and regression tests.  
+   Confirms all three bugs are fixed and no new regressions exist.
+
+---
+
+## Global Acceptance Criteria
+
+After ALL tasks are completed, ALL of the following must be true:
+
+- [ ] Full Spark ERP renders correctly when online on a laptop (all pages, all data, full navigation)
+- [ ] Full Spark ERP works on a mobile phone (all pages functional, responsive layout correct)
+- [ ] Sync does NOT get permanently stuck after returning online from offline operation on a phone
+- [ ] After offline + reconnect: pending changes are pushed to the server and the sync badge shows 100% / "synced"
+- [ ] No JavaScript errors in the browser console on laptop or mobile
+- [ ] All existing features (dashboard, projects, finance, suppliers, contractors, reports, settings) continue working
+- [ ] Service Worker caching functions correctly on both laptop and phone
+- [ ] Arabic RTL layout is correct on mobile and desktop
+
+---
+
+## Final Testing
+
+- [ ] Verify all requirements from needs.md (REQ-001 through REQ-004)
+- [ ] Verify requirement traceability (each REQ maps to a completed task)
+- [ ] Verify data integrity (no data lost after sync)
+- [ ] Verify API behavior (/api/health, /api/data, /api/sync/push, /api/sync/pull)
+- [ ] Verify UI/UX on both desktop and mobile
+- [ ] Verify responsive behavior across screen sizes
+- [ ] Verify authentication/permissions are not broken
+- [ ] Verify existing functionality regression (run TESTING_GUIDE.md checklist)
+- [ ] Run full regression testing: node scripts/test-api.mjs
+- [ ] Run: node scripts/test-full-system.js
