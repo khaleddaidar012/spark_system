@@ -131,10 +131,34 @@ async function reconcileServerSnapshot(data) {
   try {
     for (const key of Object.keys(COLLECTIONS)) {
       const items = Array.isArray(data[key]) ? data[key] : [];
-      if (items.length > 0) {
-        if (PEOPLE_COLLECTIONS.includes(key)) {
-          await db.people.bulkPut(items.map((item) => ({ ...item, kind: key, syncStatus: "synced" })));
-        } else if (db[key]) {
+      const serverIdSet = new Set(items.map((x) => x && x.id).filter(Boolean));
+
+      if (PEOPLE_COLLECTIONS.includes(key)) {
+        if (db.people) {
+          // Remove local synced items that no longer exist on server
+          const currentPeople = await db.people
+            .filter((p) => (p.kind === key || (Array.isArray(p.roles) && p.roles.includes(COLLECTION_ROLE[key]))) && p.syncStatus === "synced" && !p.deletedAt)
+            .toArray();
+          for (const p of currentPeople) {
+            if (!serverIdSet.has(p.id)) {
+              await db.people.delete(p.id).catch(() => {});
+            }
+          }
+          if (items.length > 0) {
+            await db.people.bulkPut(items.map((item) => ({ ...item, kind: key, syncStatus: "synced" })));
+          }
+        }
+      } else if (db[key]) {
+        // Remove local synced items that no longer exist on server
+        const currentItems = await db[key]
+          .filter((x) => x.syncStatus === "synced" && !x.deletedAt)
+          .toArray();
+        for (const it of currentItems) {
+          if (!serverIdSet.has(it.id)) {
+            await db[key].delete(it.id).catch(() => {});
+          }
+        }
+        if (items.length > 0) {
           await db[key].bulkPut(items.map((item) => ({ ...item, syncStatus: "synced" })));
         }
       }
@@ -384,8 +408,9 @@ export async function seedDefaultData() {
     const existingNames = new Set(all("contractors").map((c) => c.name));
     for (const c of DEFAULT_CONTRACTORS) {
       if (!existingNames.has(c.name)) {
+        const id = "seed_c_" + encodeURIComponent(c.name.trim()).replace(/%/g, "_").toLowerCase();
         save("contractors", {
-          id: generateUUID(),
+          id,
           name: c.name,
           role: c.role,
           phone: "",
@@ -400,8 +425,9 @@ export async function seedDefaultData() {
     const existingNames = new Set(all("suppliers").map((s) => s.name));
     for (const s of DEFAULT_SUPPLIERS) {
       if (!existingNames.has(s.name)) {
+        const id = "seed_s_" + encodeURIComponent(s.name.trim()).replace(/%/g, "_").toLowerCase();
         save("suppliers", {
-          id: generateUUID(),
+          id,
           name: s.name,
           phone: "",
           notes: s.notes || "",

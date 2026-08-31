@@ -53,6 +53,19 @@ class SyncEngine {
       }
     });
 
+    /* Tab focus or visibility → auto-pull latest changes from other devices */
+    document.addEventListener("visibilitychange", () => {
+      if (!document.hidden && connectivityMonitor.isServerReachable && !this.isSyncing) {
+        this.triggerSync();
+      }
+    });
+
+    window.addEventListener("focus", () => {
+      if (connectivityMonitor.isServerReachable && !this.isSyncing) {
+        this.triggerSync();
+      }
+    });
+
     /* New data saved → debounced sync trigger */
     window.addEventListener("spark:queue-updated", () => {
       if (!connectivityMonitor.isServerReachable) return;
@@ -267,17 +280,48 @@ class SyncEngine {
       const res = await api.pullSync();
       if (res && res.ok && res.data) {
         const data = res.data;
-        let hadUpdates = false;
+        const allCollectionKeys = [
+          "projects",
+          "suppliers",
+          "contractors",
+          "clients",
+          "others",
+          "materials",
+          "moneyTransactions",
+          "materialTransactions",
+          "deductions",
+        ];
 
-        for (const [key, items] of Object.entries(data)) {
-          if (!Array.isArray(items) || items.length === 0) continue;
+        for (const key of allCollectionKeys) {
+          const serverItems = Array.isArray(data[key]) ? data[key] : [];
+          const serverIdSet = new Set(serverItems.map((x) => x && x.id).filter(Boolean));
+
           if (PEOPLE_KEYS.includes(key)) {
-            const records = items.map((item) => ({ ...item, kind: key, syncStatus: "synced" }));
-            await db.people.bulkPut(records);
-            hadUpdates = true;
+            if (db.people) {
+              const currentLocalPeople = await db.people
+                .filter((p) => (p.kind === key || (Array.isArray(p.roles) && p.roles.includes(key))) && p.syncStatus === "synced" && !p.deletedAt)
+                .toArray();
+              for (const p of currentLocalPeople) {
+                if (!serverIdSet.has(p.id)) {
+                  await db.people.delete(p.id).catch(() => {});
+                }
+              }
+              if (serverItems.length > 0) {
+                await db.people.bulkPut(serverItems.map((item) => ({ ...item, kind: key, syncStatus: "synced" })));
+              }
+            }
           } else if (db[key]) {
-            await db[key].bulkPut(items.map((item) => ({ ...item, syncStatus: "synced" })));
-            hadUpdates = true;
+            const currentLocalItems = await db[key]
+              .filter((x) => x.syncStatus === "synced" && !x.deletedAt)
+              .toArray();
+            for (const it of currentLocalItems) {
+              if (!serverIdSet.has(it.id)) {
+                await db[key].delete(it.id).catch(() => {});
+              }
+            }
+            if (serverItems.length > 0) {
+              await db[key].bulkPut(serverItems.map((item) => ({ ...item, syncStatus: "synced" })));
+            }
           }
         }
 
