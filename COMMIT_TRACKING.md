@@ -176,9 +176,9 @@
 - Rollback: `git reset --hard <commit_hash>`
 
 ## Commit 031
-- Commit: `PENDING`
+- Commit: `088a493`
 - Description: Fix online rendering on laptop/phone, resolve sync stuck deadlock on reconnection, add automatic background re-authentication for offline sessions, add request timeout to prevent hanging network calls, add deductions table to D1 backend and migrations, and bump Service Worker cache to v22.
-- Rollback: `git reset --hard <commit_hash>`
+- Rollback: `git reset --hard 088a493`
 
 ## Next Commit
 - Commit: `PENDING`
