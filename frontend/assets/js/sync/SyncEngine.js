@@ -13,7 +13,6 @@ import { connectivityMonitor } from "./ConnectivityMonitor.js";
 import { api } from "../modules/api.js";
 import { db } from "../db/db.js";
 import { generateUUID } from "../modules/uuid.js";
-import { isReconciling } from "../modules/store.js";
 
 const PEOPLE_KEYS = ["suppliers", "contractors", "clients", "others"];
 const PUSH_COLLECTIONS = [
@@ -44,6 +43,15 @@ class SyncEngine {
       this._watchdogTimer = null;
     }
     this._emitStatus("error", { error: "تمت إعادة تعيين المزامنة" });
+  }
+
+  forceSync() {
+    this.isSyncing = false;
+    if (this._watchdogTimer) {
+      clearTimeout(this._watchdogTimer);
+      this._watchdogTimer = null;
+    }
+    this.triggerSync();
   }
 
   init() {
@@ -277,7 +285,6 @@ class SyncEngine {
   }
 
   async pullRemoteChanges() {
-    if (isReconciling()) return;
     try {
       const res = await api.pullSync();
       if (res && res.ok && res.data) {

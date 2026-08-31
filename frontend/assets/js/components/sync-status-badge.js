@@ -28,6 +28,7 @@ function refs() {
     panelDetail:document.getElementById("syncPanelDetail"),
     panelClose: document.getElementById("syncPanelClose"),
     panelRetry: document.getElementById("syncPanelRetry"),
+    panelNow:   document.getElementById("syncPanelNow"),
   };
 }
 
@@ -114,7 +115,7 @@ async function updateBadge(state, detail = {}) {
 }
 
 function updateSyncPanel(state, detail = {}) {
-  const { panel, panelTitle, panelBar, panelPct, panelDetail, panelRetry } = refs();
+  const { panel, panelTitle, panelBar, panelPct, panelDetail, panelRetry, panelNow } = refs();
   if (!panel) return;
 
   const { percent = null, pushed = 0, total = 0 } = detail;
@@ -125,6 +126,7 @@ function updateSyncPanel(state, detail = {}) {
 
     panelTitle.textContent = "🔄 جاري المزامنة...";
     if (panelRetry) panelRetry.hidden = true;
+    if (panelNow) panelNow.hidden = true;
 
     const pct = percent != null ? Math.max(1, percent) : 1;
     if (panelBar)  panelBar.style.width  = `${pct}%`;
@@ -140,6 +142,7 @@ function updateSyncPanel(state, detail = {}) {
     if (panelTitle) panelTitle.textContent = "✅ تمت المزامنة بنجاح!";
     if (panelDetail) panelDetail.textContent = fmtLastSync(syncEngine.lastSyncAt);
     if (panelRetry) panelRetry.hidden = true;
+    if (panelNow) panelNow.hidden = false;
 
     /* Auto-close panel after 3 seconds on success */
     if (_panelVisible) {
@@ -150,6 +153,7 @@ function updateSyncPanel(state, detail = {}) {
     if (panelTitle) panelTitle.textContent = "⚠️ فشلت المزامنة";
     if (panelDetail) panelDetail.textContent = detail.error || "تحقق من اتصالك وأعد المحاولة";
     if (panelRetry) panelRetry.hidden = false;
+    if (panelNow) panelNow.hidden = false;
   }
 }
 
@@ -160,8 +164,7 @@ export function initSyncStatusBadge() {
   /* Badge click → manual sync trigger */
   r.badgeBtn.addEventListener("click", () => {
     if (navigator.onLine) {
-      syncEngine.forceResetSync();
-      syncEngine.triggerSync();
+      syncEngine.forceSync();
       showPanel();
     }
   });
@@ -171,8 +174,14 @@ export function initSyncStatusBadge() {
 
   /* Panel retry */
   r.panelRetry?.addEventListener("click", () => {
-    syncEngine.forceResetSync();
-    syncEngine.triggerSync();
+    syncEngine.forceSync();
+  });
+
+  /* Panel "Sync Now" button */
+  r.panelNow?.addEventListener("click", () => {
+    if (navigator.onLine) {
+      syncEngine.forceSync();
+    }
   });
 
   /* Connectivity changes */

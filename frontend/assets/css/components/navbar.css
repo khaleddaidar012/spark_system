@@ -205,6 +205,26 @@
   align-items: center;
 }
 
+.sync-panel-buttons {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.sync-panel-now {
+  font-size: 0.75rem;
+  gap: 4px;
+  display: inline-flex;
+  align-items: center;
+  background: var(--primary);
+  color: var(--primary-contrast);
+  border: 1px solid var(--primary);
+}
+
+.sync-panel-now:hover {
+  opacity: 0.85;
+}
+
 /* ============================================================
    Navbar Layout
    ============================================================ */

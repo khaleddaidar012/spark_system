@@ -46,7 +46,6 @@ const cache = {
 };
 
 let loaded = false;
-let _reconciling = false;
 
 export function uid() {
   return generateUUID();
@@ -95,7 +94,6 @@ export async function initStore({ force = false } = {}) {
 
   // 4. Fire-and-forget background API hydration — NEVER blocks page render
   if (navigator.onLine) {
-    _reconciling = true;
     Promise.resolve().then(async () => {
       try {
         const data = await api.snapshot();
@@ -106,8 +104,6 @@ export async function initStore({ force = false } = {}) {
         }
       } catch {
         /* Running on local IndexedDB — this is normal when offline */
-      } finally {
-        _reconciling = false;
       }
     });
   }
@@ -171,10 +167,6 @@ export async function reconcileServerSnapshot(data) {
   } catch (err) {
     console.warn("[Store] Error reconciling server snapshot:", err);
   }
-}
-
-export function isReconciling() {
-  return _reconciling;
 }
 
 export function isStoreLoaded() {
