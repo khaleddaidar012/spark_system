@@ -106,7 +106,7 @@ export const api = {
 
   /* sync */
   pushSync: (payload) => request("/sync/push", { method: "POST", body: payload }),
-  pullSync: () => request("/sync/pull"),
+  pullSync: (since = 0) => request(`/sync/pull${since > 0 ? `?since=${since}` : ""}`),
 
   /* backup */
   backup: (payload) => request("/backup", { method: "POST", body: payload }),

@@ -179,47 +179,48 @@ async function upsertItem(db, collection, item) {
   const table = COLLECTION_TABLE[collection];
   if (!table) return { ok: false, error: "unknown collection: " + collection };
 
+  const now = Date.now();
   const data = JSON.stringify(item);
   if (table === "people") {
     await db.prepare(
-      `INSERT INTO people (id, kind, name, roles, data) VALUES (?, ?, ?, ?, ?)
+      `INSERT INTO people (id, kind, name, roles, data, updated_at) VALUES (?, ?, ?, ?, ?, ?)
        ON CONFLICT(id) DO UPDATE SET
          kind = excluded.kind, name = excluded.name,
-         roles = excluded.roles, data = excluded.data`
-    ).bind(item.id, collection, String(item.name || ""), JSON.stringify(item.roles || []), data).run();
+         roles = excluded.roles, data = excluded.data, updated_at = excluded.updated_at`
+    ).bind(item.id, collection, String(item.name || ""), JSON.stringify(item.roles || []), data, now).run();
   } else if (table === "projects") {
     await db.prepare(
-      `INSERT INTO projects (id, name, type, status, created_at, data) VALUES (?, ?, ?, ?, ?, ?)
+      `INSERT INTO projects (id, name, type, status, created_at, data, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)
        ON CONFLICT(id) DO UPDATE SET
          name = excluded.name, type = excluded.type,
-         status = excluded.status, created_at = excluded.created_at, data = excluded.data`
-    ).bind(item.id, String(item.name || ""), item.type || "", item.status || "", item.createdAt || "", data).run();
+         status = excluded.status, created_at = excluded.created_at, data = excluded.data, updated_at = excluded.updated_at`
+    ).bind(item.id, String(item.name || ""), item.type || "", item.status || "", item.createdAt || "", data, now).run();
   } else if (table === "materials") {
     await db.prepare(
-      `INSERT INTO materials (id, name, data) VALUES (?, ?, ?)
-       ON CONFLICT(id) DO UPDATE SET name = excluded.name, data = excluded.data`
-    ).bind(item.id, String(item.name || ""), data).run();
+      `INSERT INTO materials (id, name, data, updated_at) VALUES (?, ?, ?, ?)
+       ON CONFLICT(id) DO UPDATE SET name = excluded.name, data = excluded.data, updated_at = excluded.updated_at`
+    ).bind(item.id, String(item.name || ""), data, now).run();
   } else if (table === "money_transactions") {
     await db.prepare(
-      `INSERT INTO money_transactions (id, direction, person_id, project_id, created_at, data) VALUES (?, ?, ?, ?, ?, ?)
+      `INSERT INTO money_transactions (id, direction, person_id, project_id, created_at, data, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)
        ON CONFLICT(id) DO UPDATE SET
          direction = excluded.direction, person_id = excluded.person_id,
-         project_id = excluded.project_id, created_at = excluded.created_at, data = excluded.data`
-    ).bind(item.id, item.direction || "", item.personId || null, item.projectId || null, item.createdAt || 0, data).run();
+         project_id = excluded.project_id, created_at = excluded.created_at, data = excluded.data, updated_at = excluded.updated_at`
+    ).bind(item.id, item.direction || "", item.personId || null, item.projectId || null, item.createdAt || 0, data, now).run();
   } else if (table === "deductions") {
     await db.prepare(
-      `INSERT INTO deductions (id, person_id, person_type, project_id, date, created_at, data) VALUES (?, ?, ?, ?, ?, ?, ?)
+      `INSERT INTO deductions (id, person_id, person_type, project_id, date, created_at, data, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
        ON CONFLICT(id) DO UPDATE SET
          person_id = excluded.person_id, person_type = excluded.person_type,
-         project_id = excluded.project_id, date = excluded.date, created_at = excluded.created_at, data = excluded.data`
-    ).bind(item.id, item.personId || null, item.personType || "contractor", item.projectId || null, item.date || "", item.createdAt || 0, data).run();
+         project_id = excluded.project_id, date = excluded.date, created_at = excluded.created_at, data = excluded.data, updated_at = excluded.updated_at`
+    ).bind(item.id, item.personId || null, item.personType || "contractor", item.projectId || null, item.date || "", item.createdAt || 0, data, now).run();
   } else {
     await db.prepare(
-      `INSERT INTO material_transactions (id, direction, project_id, created_at, data) VALUES (?, ?, ?, ?, ?)
+      `INSERT INTO material_transactions (id, direction, project_id, created_at, data, updated_at) VALUES (?, ?, ?, ?, ?, ?)
        ON CONFLICT(id) DO UPDATE SET
          direction = excluded.direction, project_id = excluded.project_id,
-         created_at = excluded.created_at, data = excluded.data`
-    ).bind(item.id, item.direction || "", item.projectId || null, item.createdAt || 0, data).run();
+         created_at = excluded.created_at, data = excluded.data, updated_at = excluded.updated_at`
+    ).bind(item.id, item.direction || "", item.projectId || null, item.createdAt || 0, data, now).run();
   }
   return { ok: true };
 }
@@ -252,6 +253,27 @@ async function snapshot(db) {
     readRows(db, "SELECT data FROM material_transactions ORDER BY rowid ASC"),
     readRows(db, "SELECT data FROM deductions ORDER BY rowid ASC"),
   ]);
+  return buildSnapshotResult(projects, people, materials, money, mat, ded);
+}
+
+async function snapshotSince(db, since) {
+  try {
+    const [projects, people, materials, money, mat, ded] = await Promise.all([
+      readRows(db, `SELECT data FROM projects WHERE updated_at > ${since} ORDER BY rowid ASC`),
+      readRows(db, `SELECT kind, data FROM people WHERE updated_at > ${since} ORDER BY rowid ASC`),
+      readRows(db, `SELECT data FROM materials WHERE updated_at > ${since} ORDER BY rowid ASC`),
+      readRows(db, `SELECT data FROM money_transactions WHERE updated_at > ${since} ORDER BY rowid ASC`),
+      readRows(db, `SELECT data FROM material_transactions WHERE updated_at > ${since} ORDER BY rowid ASC`),
+      readRows(db, `SELECT data FROM deductions WHERE updated_at > ${since} ORDER BY rowid ASC`),
+    ]);
+    return buildSnapshotResult(projects, people, materials, money, mat, ded);
+  } catch (err) {
+    // If updated_at column doesn't exist yet (migration not run), fallback to full snapshot
+    return snapshot(db);
+  }
+}
+
+function buildSnapshotResult(projects, people, materials, money, mat, ded) {
   const result = {
     projects: projects.map((r) => JSON.parse(r.data)),
     suppliers: [],
@@ -541,7 +563,8 @@ export async function onRequest(context) {
       }
 
       if (segments[1] === "pull" && method === "GET") {
-        const data = await snapshot(env.DB);
+        const since = Number(url.searchParams.get("since")) || 0;
+        const data = since > 0 ? await snapshotSince(env.DB, since) : await snapshot(env.DB);
         return json({ ok: true, serverTime: Date.now(), data });
       }
 

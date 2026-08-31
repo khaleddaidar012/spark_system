@@ -28,12 +28,11 @@ const PUSH_COLLECTIONS = [
   "deductions",
 ];
 
-/** Remove sync metadata before pushing to server */
 function cleanPayloadForServer(payload) {
   if (!payload || typeof payload !== "object") return payload;
   const cleaned = { ...payload };
   delete cleaned.syncStatus;
-  delete cleaned.deletedAt;
+  // Keep deletedAt so server/other devices know it's a delete operation, or handle it via operations
   return cleaned;
 }
 
@@ -97,12 +96,15 @@ class SyncEngine {
       this._pendingQueueSync = setTimeout(() => this.triggerSync(), 1500);
     });
 
-    /* Periodic sync every 60 seconds */
+    /* Periodic sync every 30 seconds */
     this.syncInterval = setInterval(() => {
       if (connectivityMonitor.isServerReachable && !this.isSyncing) {
-        this.triggerSync();
+        const timeSinceLastSync = Date.now() - (this.lastSyncAt || 0);
+        if (timeSinceLastSync > 25000) {
+          this.triggerSync();
+        }
       }
-    }, 60000);
+    }, 30000);
 
     /* Initial sync on load */
     if (navigator.onLine) {
@@ -294,6 +296,9 @@ class SyncEngine {
           this._emitStatus("syncing", { total, pushed, percent });
         } else {
           console.warn("[SyncEngine] Push returned non-OK:", res);
+          for (const op of pendingOps) {
+            await SyncQueueManager.markFailed(op.autoId, "server-rejected");
+          }
           break;
         }
       } catch (err) {
@@ -312,7 +317,8 @@ class SyncEngine {
 
   async pullRemoteChanges() {
     try {
-      const res = await api.pullSync();
+      const since = this.lastSyncAt || 0;
+      const res = await api.pullSync(since);
       if (res && res.ok && res.data) {
         const data = res.data;
         const allCollectionKeys = [

@@ -326,7 +326,6 @@ export async function wipeAll() {
     });
   } catch {}
   for (const key of Object.keys(cache)) cache[key] = [];
-  if (navigator.onLine) await api.reset().catch(() => {});
 }
 
 export async function deleteCategories({ projects = false, finance = false, suppliers = false, contractors = false } = {}) {
@@ -411,7 +410,10 @@ const DEFAULT_SUPPLIERS = [
 ];
 
 export async function seedDefaultData() {
-  if (!localStorage.getItem("spark_contractors_deleted")) {
+  const contractorCount = await db.people.where("kind").equals("contractors").count();
+  const supplierCount = await db.people.where("kind").equals("suppliers").count();
+  
+  if (contractorCount === 0 && !localStorage.getItem("spark_seed_done_v2")) {
     const existingNames = new Set(all("contractors").map((c) => c.name));
     for (const c of DEFAULT_CONTRACTORS) {
       if (!existingNames.has(c.name)) {
@@ -428,7 +430,7 @@ export async function seedDefaultData() {
     }
   }
 
-  if (!localStorage.getItem("spark_suppliers_deleted")) {
+  if (supplierCount === 0 && !localStorage.getItem("spark_seed_done_v2")) {
     const existingNames = new Set(all("suppliers").map((s) => s.name));
     for (const s of DEFAULT_SUPPLIERS) {
       if (!existingNames.has(s.name)) {
@@ -444,6 +446,7 @@ export async function seedDefaultData() {
         });
       }
     }
+    localStorage.setItem("spark_seed_done_v2", "1");
   }
 }
 
