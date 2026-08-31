@@ -1,14 +1,13 @@
 /* ============================================
    Spark ERP — Sync Status Badge & Panel
-   - Navbar progress bar with real % fill
-   - Pending count badge on sync button
-   - Sync Panel: shows on offline→online transition
-     with real progress %, detail text, retry btn
-   - Last sync time display
+   Uses SyncState for reliable state management.
+   Navbar progress bar with real % fill,
+   Pending count badge, sync panel with retry/Sync Now.
    ============================================ */
 
 import { SyncQueueManager } from "../sync/sync-queue.js";
 import { syncEngine } from "../sync/SyncEngine.js";
+import { SyncState } from "../modules/state.js";
 
 let _panelVisible = false;
 let _panelAutoCloseTimer = null;
@@ -70,7 +69,6 @@ function setNavbarProgress(percent, active) {
   progressWrap.classList.add("is-active");
 
   if (percent === null) {
-    /* No percent info yet — show shimmer */
     progressWrap.classList.add("is-indeterminate");
     if (progressFill) progressFill.style.width = "0%";
   } else {
@@ -79,83 +77,93 @@ function setNavbarProgress(percent, active) {
   }
 }
 
-async function updateBadge(state, detail = {}) {
+function deviceIcon() {
+  return SyncState.get().deviceType === "phone" ? "📱" : "💻";
+}
+
+function updateBadgeFromState(state) {
   const { iconEl, badgeBtn, countEl } = refs();
   if (!iconEl || !badgeBtn) return;
 
-  const pendingCount = await SyncQueueManager.getPendingCount();
-
-  /* Pending count pill */
-  if (countEl) {
-    if (pendingCount > 0 && state !== "synced") {
-      countEl.textContent = pendingCount > 99 ? "99+" : String(pendingCount);
-      countEl.hidden = false;
-    } else {
-      countEl.hidden = true;
+  SyncQueueManager.getPendingCount().then((pendingCount) => {
+    /* Pending count pill */
+    if (countEl) {
+      if (pendingCount > 0 && state.syncStatus !== "synced") {
+        countEl.textContent = pendingCount > 99 ? "99+" : String(pendingCount);
+        countEl.hidden = false;
+      } else {
+        countEl.hidden = true;
+      }
     }
-  }
 
-  if (state === "syncing") {
-    iconEl.textContent = "🟡";
-    badgeBtn.title = `جاري المزامنة... ${detail.percent != null ? detail.percent + "%" : ""}`;
-  } else if (state === "error") {
-    iconEl.textContent = "⚠️";
-    badgeBtn.title = "خطأ في المزامنة — انقر للمحاولة مجدداً";
-  } else if (!navigator.onLine) {
-    iconEl.textContent = "⚪";
-    badgeBtn.title = `غير متصل (${pendingCount} تغيير معلق)`;
-  } else if (pendingCount > 0) {
-    iconEl.textContent = "🟡";
-    badgeBtn.title = `${pendingCount} تغيير ينتظر المزامنة (انقر للمزامنة)`;
-  } else {
-    const lastSyncLabel = fmtLastSync(syncEngine.lastSyncAt);
-    iconEl.textContent = "🟢";
-    badgeBtn.title = lastSyncLabel ? `متصل ومتزامن — ${lastSyncLabel}` : "متصل ومتزامن";
-  }
+    const icon = deviceIcon();
+
+    if (state.syncStatus === "syncing") {
+      iconEl.textContent = `${icon} 🟡`;
+      badgeBtn.title = `جاري المزامنة...`;
+    } else if (state.syncStatus === "error") {
+      iconEl.textContent = `${icon} ⚠️`;
+      badgeBtn.title = "خطأ في المزامنة — انقر للمحاولة مجدداً";
+    } else if (!state.isOnline) {
+      iconEl.textContent = `${icon} ⚪`;
+      badgeBtn.title = `غير متصل (${pendingCount} تغيير معلق)`;
+    } else if (pendingCount > 0) {
+      iconEl.textContent = `${icon} 🟡`;
+      badgeBtn.title = `${pendingCount} تغيير ينتظر المزامنة (انقر للمزامنة)`;
+    } else {
+      const lastSyncLabel = fmtLastSync(state.lastSyncAt);
+      iconEl.textContent = `${icon} 🟢`;
+      badgeBtn.title = lastSyncLabel ? `متصل ومتزامن — ${lastSyncLabel}` : "متصل ومتزامن";
+    }
+  });
 }
 
-function updateSyncPanel(state, detail = {}) {
+function updateSyncPanelFromState(state) {
   const { panel, panelTitle, panelBar, panelPct, panelDetail, panelRetry, panelNow } = refs();
   if (!panel) return;
 
-  const { percent = null, pushed = 0, total = 0 } = detail;
-
-  if (state === "syncing") {
-    /* Only show panel if there are actual pending changes */
-    if (!_panelVisible && total > 0) showPanel();
-
+  if (state.syncStatus === "syncing") {
+    if (!_panelVisible) showPanel();
     panelTitle.textContent = "🔄 جاري المزامنة...";
     if (panelRetry) panelRetry.hidden = true;
     if (panelNow) panelNow.hidden = true;
-
-    const pct = percent != null ? Math.max(1, percent) : 1;
-    if (panelBar)  panelBar.style.width  = `${pct}%`;
-    if (panelPct)  panelPct.textContent  = `${pct}%`;
-    if (panelDetail) {
-      panelDetail.textContent = total > 0
-        ? `تم رفع ${pushed} من ${total} تغيير`
-        : "يتم التحقق من التحديثات...";
-    }
-  } else if (state === "synced") {
-    if (panelBar)  panelBar.style.width  = "100%";
-    if (panelPct)  panelPct.textContent  = "100%";
+    if (panelBar) panelBar.style.width = "50%";
+    if (panelPct) panelPct.textContent = "50%";
+    if (panelDetail) panelDetail.textContent = "يتم رفع التغييرات وحفظها في السيرفر...";
+  } else if (state.syncStatus === "synced") {
+    if (panelBar) panelBar.style.width = "100%";
+    if (panelPct) panelPct.textContent = "100%";
     if (panelTitle) panelTitle.textContent = "✅ تمت المزامنة بنجاح!";
-    if (panelDetail) panelDetail.textContent = fmtLastSync(syncEngine.lastSyncAt);
+    if (panelDetail) panelDetail.textContent = fmtLastSync(state.lastSyncAt);
     if (panelRetry) panelRetry.hidden = true;
     if (panelNow) panelNow.hidden = false;
-
-    /* Auto-close panel after 3 seconds on success */
     if (_panelVisible) {
       _panelAutoCloseTimer = setTimeout(() => hidePanel(), 3000);
     }
-
-  } else if (state === "error") {
+  } else if (state.syncStatus === "error") {
     if (panelTitle) panelTitle.textContent = "⚠️ فشلت المزامنة";
-    if (panelDetail) panelDetail.textContent = detail.error || "تحقق من اتصالك وأعد المحاولة";
+    if (panelDetail) panelDetail.textContent = state.error || "تحقق من اتصالك وأعد المحاولة";
     if (panelRetry) panelRetry.hidden = false;
     if (panelNow) panelNow.hidden = false;
+  } else if (!state.isOnline) {
+    if (panelTitle) panelTitle.textContent = "📡 وضع غير متصل";
+    if (panelDetail) panelDetail.textContent = "بياناتك محفوظة محلياً. ستتم المزامنة فجاءة الاتصال.";
+    if (panelRetry) panelRetry.hidden = true;
+    if (panelNow) panelNow.hidden = true;
   }
 }
+
+/* Subscribe to SyncState — primary state source */
+SyncState.subscribe((state) => {
+  updateBadgeFromState(state);
+  updateSyncPanelFromState(state);
+  if (state.syncStatus === "syncing" || state.syncStatus === "synced") {
+    setNavbarProgress(
+      state.syncStatus === "syncing" ? null : 100,
+      state.syncStatus === "syncing"
+    );
+  }
+});
 
 export function initSyncStatusBadge() {
   const r = refs();
@@ -184,33 +192,7 @@ export function initSyncStatusBadge() {
     }
   });
 
-  /* Connectivity changes */
-  window.addEventListener("spark:connectivity-changed", (e) => {
-    const online = e.detail && e.detail.isServerReachable;
-    updateBadge(online ? "online" : "offline");
-    setNavbarProgress(0, false);
-  });
-
-  /* Reconnection: check pending and show panel if needed */
-  window.addEventListener("spark:reconnected", async () => {
-    const count = await SyncQueueManager.getPendingCount();
-    if (count > 0) showPanel();
-  });
-
-  /* Real sync progress events from SyncEngine */
-  window.addEventListener("spark:sync-status", (e) => {
-    const { status, percent, pushed, total, error } = e.detail || {};
-    updateBadge(status, { percent });
-    updateSyncPanel(status, { percent, pushed, total, error });
-
-    if (status === "syncing") {
-      setNavbarProgress(percent, true);
-    } else {
-      /* Brief delay before hiding so 100% is visible */
-      setTimeout(() => setNavbarProgress(100, false), 600);
-    }
-  });
-
-  /* Initial badge state */
-  updateBadge("init");
+  /* Initial render */
+  updateBadgeFromState(SyncState.get());
+  updateSyncPanelFromState(SyncState.get());
 }

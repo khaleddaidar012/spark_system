@@ -92,21 +92,9 @@ export async function initStore({ force = false } = {}) {
     emitDataChanged();
   });
 
-  // 4. Fire-and-forget background API hydration — NEVER blocks page render
-  if (navigator.onLine) {
-    Promise.resolve().then(async () => {
-      try {
-        const data = await api.snapshot();
-        if (data && typeof data === "object") {
-          await reconcileServerSnapshot(data);
-          await loadCacheFromIndexedDB();
-          emitDataChanged();
-        }
-      } catch {
-        /* Running on local IndexedDB — this is normal when offline */
-      }
-    });
-  }
+  // 4. Sync is handled entirely by SyncEngine.triggerSync() —
+  //    it pulls from server and updates IndexedDB automatically.
+  //    No background snapshot needed here.
 }
 
 async function loadCacheFromIndexedDB() {
@@ -135,32 +123,47 @@ export async function reconcileServerSnapshot(data) {
 
       if (PEOPLE_COLLECTIONS.includes(key)) {
         if (db.people) {
-          const currentPeople = await db.people
-            .where("kind")
-            .equals(key)
-            .filter((p) => p.syncStatus === "synced" && !p.deletedAt)
-            .toArray();
-          for (const p of currentPeople) {
-            if (!serverIdSet.has(p.id)) {
+          const allLocalPeople = await db.people.toArray();
+
+          /* Remove local synced items that no longer exist on server */
+          for (const p of allLocalPeople) {
+            if (!serverIdSet.has(p.id) && p.syncStatus === "synced" && !p.deletedAt) {
               await db.people.delete(p.id).catch(() => {});
             }
           }
+
+          /* Merge server items with local pending items (conflict resolution) */
           if (items.length > 0) {
-            await db.people.bulkPut(items.map((item) => ({ ...item, kind: key, syncStatus: "synced" })));
+            const mergedItems = items.map((serverItem) => {
+              const localItem = allLocalPeople.find((p) => p.id === serverItem.id);
+              if (localItem && localItem.syncStatus === "pending" && localItem.updatedAt >= serverItem.updatedAt) {
+                return { ...localItem, kind: key, syncStatus: "synced" };
+              }
+              return { ...serverItem, kind: key, syncStatus: "synced" };
+            });
+            await db.people.bulkPut(mergedItems);
           }
         }
       } else if (db[key]) {
-        // Remove local synced items that no longer exist on server
-        const currentItems = await db[key]
-          .filter((x) => x.syncStatus === "synced" && !x.deletedAt)
-          .toArray();
-        for (const it of currentItems) {
-          if (!serverIdSet.has(it.id)) {
+        const allLocalItems = await db[key].toArray();
+
+        /* Remove local synced items that no longer exist on server */
+        for (const it of allLocalItems) {
+          if (!serverIdSet.has(it.id) && it.syncStatus === "synced" && !it.deletedAt) {
             await db[key].delete(it.id).catch(() => {});
           }
         }
+
+        /* Merge server items with local pending items (conflict resolution) */
         if (items.length > 0) {
-          await db[key].bulkPut(items.map((item) => ({ ...item, syncStatus: "synced" })));
+          const mergedItems = items.map((serverItem) => {
+            const localItem = allLocalItems.find((i) => i.id === serverItem.id);
+            if (localItem && localItem.syncStatus === "pending" && localItem.updatedAt >= serverItem.updatedAt) {
+              return { ...localItem, syncStatus: "synced" };
+            }
+            return { ...serverItem, syncStatus: "synced" };
+          });
+          await db[key].bulkPut(mergedItems);
         }
       }
     }
@@ -236,8 +239,6 @@ export async function save(name, item) {
     kind: PEOPLE_COLLECTIONS.includes(name) ? name : item.kind,
   };
 
-  emitDataChanged();
-
   try {
     const table = PEOPLE_COLLECTIONS.includes(name) ? db.people : db[name];
     if (table) {
@@ -254,6 +255,7 @@ export async function save(name, item) {
         });
       });
     }
+    emitDataChanged();
     window.dispatchEvent(new CustomEvent("spark:queue-updated"));
   } catch (err) {
     console.error("[Store] Dexie write error:", err);
@@ -262,12 +264,13 @@ export async function save(name, item) {
     } else {
       list[idx] = item;
     }
+    emitDataChanged();
   }
 
   return item;
 }
 
-export function remove(name, id) {
+export async function remove(name, id) {
   const list = cache[name];
   if (!list) return false;
   const idx = list.findIndex((x) => x.id === id);
@@ -276,34 +279,33 @@ export function remove(name, id) {
   list.splice(idx, 1);
 
   const now = Date.now();
-  (async () => {
-    try {
-      const table = PEOPLE_COLLECTIONS.includes(name) ? db.people : db[name];
-      if (table) {
-        await db.transaction("rw", [table, db.syncQueue], async () => {
-          const existing = await table.get(id);
-          if (existing) {
-            await table.put({ ...existing, deletedAt: now, syncStatus: "pending_delete" });
-          }
-          await db.syncQueue.add({
-            id: generateUUID(),
-            entity: name,
-            entityId: id,
-            operation: "delete",
-            payload: { id, deletedAt: now },
-            createdAt: now,
-            status: "pending",
-          });
+  try {
+    const table = PEOPLE_COLLECTIONS.includes(name) ? db.people : db[name];
+    if (table) {
+      await db.transaction("rw", [table, db.syncQueue], async () => {
+        const existing = await table.get(id);
+        if (existing) {
+          await table.put({ ...existing, deletedAt: now, syncStatus: "pending_delete" });
+        }
+        await db.syncQueue.add({
+          id: generateUUID(),
+          entity: name,
+          entityId: id,
+          operation: "delete",
+          payload: { id, deletedAt: now },
+          createdAt: now,
+          status: "pending",
         });
-      }
-      window.dispatchEvent(new CustomEvent("spark:queue-updated"));
-    } catch (err) {
-      console.error("[Store] Dexie remove error:", err);
-      list.splice(idx, 0, removedItem);
+      });
     }
-  })();
+    emitDataChanged();
+    window.dispatchEvent(new CustomEvent("spark:queue-updated"));
+  } catch (err) {
+    console.error("[Store] Dexie remove error:", err);
+    list.splice(idx, 0, removedItem);
+    emitDataChanged();
+  }
 
-  emitDataChanged();
   return true;
 }
 

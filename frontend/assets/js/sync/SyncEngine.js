@@ -13,6 +13,7 @@ import { connectivityMonitor } from "./ConnectivityMonitor.js";
 import { api } from "../modules/api.js";
 import { db } from "../db/db.js";
 import { generateUUID } from "../modules/uuid.js";
+import { SyncState, getDeviceId } from "../modules/state.js";
 
 const PEOPLE_KEYS = ["suppliers", "contractors", "clients", "others"];
 const PUSH_COLLECTIONS = [
@@ -55,8 +56,13 @@ class SyncEngine {
   }
 
   init() {
+    /* Track online/offline status */
+    window.addEventListener("online", () => SyncState.setOnline(true));
+    window.addEventListener("offline", () => SyncState.setOnline(false));
+
     /* Reconnection → trigger sync immediately */
     window.addEventListener("spark:connectivity-changed", (e) => {
+      SyncState.setOnline(e.detail && e.detail.isServerReachable);
       if (e.detail && e.detail.isServerReachable) {
         this.triggerSync();
       }
@@ -98,18 +104,21 @@ class SyncEngine {
   async triggerSync() {
     if (this.isSyncing) return;
     this.isSyncing = true;
+    SyncState.setSyncStatus("syncing");
 
     if (this._watchdogTimer) clearTimeout(this._watchdogTimer);
     this._watchdogTimer = setTimeout(() => {
       if (this.isSyncing) {
         console.warn("[SyncEngine] Watchdog timeout: auto-resetting stuck sync state");
         this.isSyncing = false;
+        SyncState.setError("انتهت مهلة المزامنة — انقر للإعادة");
         this._emitStatus("error", { error: "انتهت مهلة المزامنة — انقر للإعادة" });
       }
     }, 25000);
 
-    /* Check how many queue operations are pending */
+    /* Update pending count */
     const queueCount = await SyncQueueManager.getPendingCount();
+    SyncState.setPendingCount(queueCount);
 
     /* Collect all pending IndexedDB items (pending_delete + pending syncStatus) */
     const pendingItems = await this._getPendingIndexedDBItems();
@@ -130,12 +139,16 @@ class SyncEngine {
           const pct = Math.round((done / pendingItems.length) * 100);
           this._emitStatus("syncing", { total: pendingItems.length, pushed: done, percent: pct });
         });
+        /* Update pending count after direct push */
+        SyncQueueManager.getPendingCount().then((c) => SyncState.setPendingCount(c));
       }
 
       /* Pull remote changes to merge server-side updates */
       await this.pullRemoteChanges();
 
       this.lastSyncAt = Date.now();
+      SyncState.setLastSyncAt(this.lastSyncAt);
+      SyncState.setSyncStatus("synced");
       this._emitStatus("synced", {
         total,
         pushed,
@@ -144,6 +157,7 @@ class SyncEngine {
       });
     } catch (err) {
       console.warn("[SyncEngine] Sync cycle error:", err);
+      SyncState.setError(err.message);
       this._emitStatus("error", { error: err.message });
     } finally {
       if (this._watchdogTimer) {
@@ -264,6 +278,9 @@ class SyncEngine {
           pushed += pendingOps.length;
           batchNum++;
 
+          /* Update pending count after each batch */
+          SyncQueueManager.getPendingCount().then((c) => SyncState.setPendingCount(c));
+
           const percent = total > 0 ? Math.round((pushed / total) * 100) : 100;
           this._emitStatus("syncing", { total, pushed, percent });
         } else {
@@ -307,39 +324,53 @@ class SyncEngine {
 
           if (PEOPLE_KEYS.includes(key)) {
             if (db.people) {
-              const currentLocalPeople = await db.people
-                .where("kind")
-                .equals(key)
-                .filter((p) => p.syncStatus === "synced" && !p.deletedAt)
-                .toArray();
-              for (const p of currentLocalPeople) {
-                if (!serverIdSet.has(p.id)) {
+              const allLocalPeople = await db.people.toArray();
+
+              /* Remove local synced items that no longer exist on server */
+              for (const p of allLocalPeople) {
+                if (!serverIdSet.has(p.id) && p.syncStatus === "synced" && !p.deletedAt) {
                   await db.people.delete(p.id).catch(() => {});
                 }
               }
+
+              /* Merge server items with local pending items (conflict resolution) */
               if (serverItems.length > 0) {
-                await db.people.bulkPut(serverItems.map((item) => ({ ...item, kind: key, syncStatus: "synced" })));
+                const mergedItems = serverItems.map((serverItem) => {
+                  const localItem = allLocalPeople.find((p) => p.id === serverItem.id);
+                  if (localItem && localItem.syncStatus === "pending" && localItem.updatedAt >= serverItem.updatedAt) {
+                    return { ...localItem, kind: key, syncStatus: "synced" };
+                  }
+                  return { ...serverItem, kind: key, syncStatus: "synced" };
+                });
+                await db.people.bulkPut(mergedItems);
               }
             }
           } else if (db[key]) {
-            const currentLocalItems = await db[key]
-              .filter((x) => x.syncStatus === "synced" && !x.deletedAt)
-              .toArray();
-            for (const it of currentLocalItems) {
-              if (!serverIdSet.has(it.id)) {
+            const allLocalItems = await db[key].toArray();
+
+            /* Remove local synced items that no longer exist on server */
+            for (const it of allLocalItems) {
+              if (!serverIdSet.has(it.id) && it.syncStatus === "synced" && !it.deletedAt) {
                 await db[key].delete(it.id).catch(() => {});
               }
             }
+
+            /* Merge server items with local pending items (conflict resolution) */
             if (serverItems.length > 0) {
-              await db[key].bulkPut(serverItems.map((item) => ({ ...item, syncStatus: "synced" })));
+              const mergedItems = serverItems.map((serverItem) => {
+                const localItem = allLocalItems.find((i) => i.id === serverItem.id);
+                if (localItem && localItem.syncStatus === "pending" && localItem.updatedAt >= serverItem.updatedAt) {
+                  return { ...localItem, syncStatus: "synced" };
+                }
+                return { ...serverItem, syncStatus: "synced" };
+              });
+              await db[key].bulkPut(mergedItems);
             }
           }
         }
 
         await db.syncMetadata.put({ key: "lastSyncAt", value: res.serverTime || Date.now() });
 
-        /* Always notify store.js to refresh cache after a server pull,
-           so data added on other devices (phone/tablet) appears immediately */
         window.dispatchEvent(new CustomEvent("spark:remote-data-updated"));
       }
     } catch (err) {
