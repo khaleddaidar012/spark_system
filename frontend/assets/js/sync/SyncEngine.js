@@ -342,10 +342,12 @@ class SyncEngine {
               const allLocalPeople = await db.people.toArray();
 
               /* Remove local synced items that no longer exist on server */
-              for (const p of allLocalPeople) {
-                if (p.kind !== key) continue; /* Only process people of this category */
-                if (!serverIdSet.has(p.id) && p.syncStatus === "synced" && !p.deletedAt) {
-                  await db.people.delete(p.id).catch(() => {});
+              if (since === 0) {
+                for (const p of allLocalPeople) {
+                  if (p.kind !== key) continue; /* Only process people of this category */
+                  if (!serverIdSet.has(p.id) && p.syncStatus === "synced" && !p.deletedAt) {
+                    await db.people.delete(p.id).catch(() => {});
+                  }
                 }
               }
 
@@ -366,9 +368,11 @@ class SyncEngine {
             const allLocalItems = await db[key].toArray();
 
             /* Remove local synced items that no longer exist on server */
-            for (const it of allLocalItems) {
-              if (!serverIdSet.has(it.id) && it.syncStatus === "synced" && !it.deletedAt) {
-                await db[key].delete(it.id).catch(() => {});
+            if (since === 0) {
+              for (const it of allLocalItems) {
+                if (!serverIdSet.has(it.id) && it.syncStatus === "synced" && !it.deletedAt) {
+                  await db[key].delete(it.id).catch(() => {});
+                }
               }
             }
 
