@@ -73,6 +73,22 @@ export function recordMoney({
       person.paid = Math.max(0, num(person.paid) + (direction === "in" ? value : -value));
       save("clients", person);
     }
+  } else if (personType === "other") {
+    // If money out is paid to 'other' for a project, it's a general project expense
+    if (direction === "out" && projectId) {
+      const project = get("projects", projectId);
+      if (project) {
+        project.otherExpenses = project.otherExpenses || [];
+        project.otherExpenses.push({
+          id: uid(),
+          name: personName || "مصروف عام",
+          amount: value,
+          date: today(),
+          note: note || "",
+        });
+        save("projects", project);
+      }
+    }
   }
 
   notifyDataChanged();
@@ -171,10 +187,12 @@ export function addMaterialToProject(projectId, { name, supplierId, contractorId
   return item;
 }
 
-export function consumeMaterial(projectId, { name, quantity, unit, date }) {
+export function consumeMaterial(projectId, { name, quantity, unit, unitPrice, date }) {
   const project = get("projects", projectId);
   if (!project) return null;
   const qty = num(quantity);
+  const price = num(unitPrice);
+  const total = qty * price;
   const item = {
     id: uid(),
     name: String(name || "").trim(),
@@ -182,8 +200,8 @@ export function consumeMaterial(projectId, { name, quantity, unit, date }) {
     supplierName: "",
     quantity: qty,
     unit: unit || "",
-    unitPrice: 0,
-    total: 0,
+    unitPrice: price,
+    total: total,
     date: date || today(),
   };
 
@@ -218,44 +236,49 @@ export function addContractorToProject(projectId, { name, role, total, paid, con
   if (!project) return null;
   const totalV = num(total);
   const paidV = num(paid);
+  const finalName = String(name || "").trim();
 
-  const item = {
-    id: uid(),
-    name: String(name || "").trim(),
-    role: role || "other",
-    total: totalV,
-    paid: paidV,
-  };
-  if (contractorId) item.contractorId = contractorId;
+  let finalGlobalId = contractorId;
 
-  project.contractors = project.contractors || [];
-  project.contractors.push(item);
-  save("projects", project);
-
-  if (contractorId) {
-    const existing = all("contractors").find((c) => c.id === contractorId);
+  if (finalGlobalId) {
+    const existing = all("contractors").find((c) => c.id === finalGlobalId);
     if (existing) {
       existing.total = num(existing.total) + totalV;
       existing.paid = num(existing.paid) + paidV;
       save("contractors", existing);
     }
   } else {
-    const existing = all("contractors").find((c) => c.name === item.name);
+    const existing = all("contractors").find((c) => c.name === finalName);
     if (existing) {
       existing.total = num(existing.total) + totalV;
       existing.paid = num(existing.paid) + paidV;
       save("contractors", existing);
+      finalGlobalId = existing.id;
     } else {
+      finalGlobalId = uid();
       save("contractors", {
-        id: uid(),
-        name: item.name,
-        role: item.role,
+        id: finalGlobalId,
+        name: finalName,
+        role: role || "other",
         phone: "",
         total: totalV,
         paid: paidV,
       });
     }
   }
+
+  const item = {
+    id: uid(),
+    name: finalName,
+    role: role || "other",
+    total: totalV,
+    paid: paidV,
+  };
+  if (finalGlobalId) item.contractorId = finalGlobalId;
+
+  project.contractors = project.contractors || [];
+  project.contractors.push(item);
+  save("projects", project);
 
   notifyDataChanged();
 

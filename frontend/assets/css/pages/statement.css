@@ -313,6 +313,7 @@
 @media print {
   body {
     background: #fff;
+    color: #000 !important;
   }
 
   .statement-page {
@@ -328,7 +329,7 @@
     border-radius: 0;
     padding: 6mm 8mm;
     box-shadow: none;
-    overflow: hidden;
+    overflow: visible !important;
   }
 
   .statement-meta {
@@ -350,6 +351,7 @@
     border: none;
     padding: 0;
     background: transparent;
+    color: #000 !important;
     box-shadow: none;
     appearance: none;
     -webkit-appearance: none;
@@ -663,12 +665,12 @@
 
 /* Print Overrides for Person Statement */
 @media print {
-  body * {
+  body:not([data-page="statement"]) * {
     visibility: hidden;
   }
   
-  #personStatementModal,
-  #personStatementModal * {
+  body:not([data-page="statement"]) #personStatementModal,
+  body:not([data-page="statement"]) #personStatementModal * {
     visibility: visible;
   }
 
@@ -714,6 +716,61 @@
 
   .statement-kpi-val {
     color: #000 !important;
+  }
+
+  /* Force print checkboxes */
+  .statement-row-client {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    border: 1px solid #000 !important;
+    display: inline-block;
+    position: relative;
+    background: #fff;
+  }
+  .statement-row-client:checked::after {
+    content: "✔";
+    font-size: 16px;
+    font-weight: bold;
+    color: #000;
+    position: absolute;
+    top: -2px;
+    left: 2px;
+  }
+
+  /* Make inputs fully visible in print */
+  .statement-table input,
+  .statement-table select {
+    color: #000 !important;
+    background: transparent !important;
+    border: none !important;
+    -webkit-appearance: none;
+    appearance: none;
+    padding: 0 !important;
+    margin: 0 !important;
+    font-weight: 600;
+  }
+
+  /* Hide empty options in print */
+  .statement-table select option[value=""] {
+    display: none !important;
+  }
+
+  .workmanship-row {
+    flex-wrap: nowrap !important;
+    gap: 8px !important;
+  }
+  .workmanship-row input {
+    width: auto !important;
+    min-width: 60px !important;
+    flex: 1 !important;
+    text-align: right !important;
+  }
+
+  /* Hide the text of an empty select in print */
+  .statement-table select.is-empty {
+    visibility: hidden !important;
   }
 }
 

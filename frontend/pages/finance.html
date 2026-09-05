@@ -113,7 +113,27 @@
           </section>
 
           <section class="card detail-section detail-section-block">
-            <h2 class="detail-section-title" data-i18n="finance.history">Transaction History</h2>
+            <div class="detail-section-head">
+              <h2 class="detail-section-title" data-i18n="finance.history">Transaction History</h2>
+              <div style="display:flex; gap:8px;">
+                <button class="btn btn-outline btn-sm" id="fastAddIncomingBtn" type="button">
+                  <i data-lucide="arrow-down-circle" class="icon"></i>
+                  <span data-i18n="project.fastAddIncoming">وارد سريع</span>
+                </button>
+                <button class="btn btn-outline btn-sm" id="fastAddOutgoingBtn" type="button">
+                  <i data-lucide="arrow-up-circle" class="icon"></i>
+                  <span data-i18n="project.fastAddOutgoing">صادر سريع</span>
+                </button>
+                <button class="btn btn-outline btn-sm" id="fastAddMaterialBtn" type="button">
+                  <i data-lucide="package" class="icon"></i>
+                  <span data-i18n="project.fastAddMaterial">خامات سريع</span>
+                </button>
+                <button class="btn btn-outline btn-sm" id="fastMoneySplitBtn" type="button">
+                  <i data-lucide="split" class="icon"></i>
+                  <span data-i18n="project.fastMoneySplit">تقسيم أموال</span>
+                </button>
+              </div>
+            </div>
             <div id="financeList" class="rows-list"></div>
             <div id="financeEmpty" class="placeholder" hidden>
               <i data-lucide="wallet" class="icon"></i>

@@ -198,6 +198,21 @@
         <input class="form-input" id="qmPrice" name="unitPrice" type="number" min="0" step="0.01" required data-i18n-ph="quick.pricePh" placeholder="0" />
       </div>
 
+      <div class="form-field" id="qmTotalField">
+        <label class="form-label" for="qmTotal">الإجمالي / Total Cost</label>
+        <input class="form-input" id="qmTotal" name="total" type="text" readonly placeholder="0.00" style="background: var(--bg-alt); font-weight: bold; color: var(--text);" />
+      </div>
+
+      <div class="form-field" id="qmPayNowField" style="margin-top: -0.5rem;">
+        <label class="form-label" style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+          <input type="checkbox" id="qmPayNow" style="width: 1.25rem; height: 1.25rem;" />
+          <span style="font-weight: 600;">دفع الآن / Pay Now</span>
+        </label>
+        <div class="form-hint" style="font-size: 0.85rem; color: var(--text-dim); margin-top: 0.25rem;">
+          سيتم تسجيل الفلوس كمدفوعة من الخزنة للمورد/المقاول فوراً.
+        </div>
+      </div>
+
       <!-- Invoice Attachment -->
       <div class="invoice-upload-section">
         <span class="invoice-upload-label">فاتورة (اختياري) / Invoice (optional)</span>

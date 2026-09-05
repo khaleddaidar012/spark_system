@@ -65,7 +65,7 @@ function renderSuppliers() {
             </div>
             <div class="row-stat">
               <span class="row-stat-label">${translate("project.paid")}</span>
-              <span class="row-stat-value is-paid">${formatMoney(b.paid)}</span>
+              <span class="row-stat-value" style="color:var(--danger); direction:ltr; font-weight:bold;">-${formatMoney(b.paid)}</span>
             </div>
             <div class="row-stat">
               <span class="row-stat-label">${translate(direction.key)}</span>
@@ -172,7 +172,7 @@ function renderAccount() {
       </div>
       <div class="account-summary-item">
         <span class="account-summary-label">${translate("project.paid")}</span>
-        <span class="account-summary-value is-paid">${formatMoney(b.paid)}</span>
+        <span class="account-summary-value" style="color:var(--danger); direction:ltr; font-weight:bold;">-${formatMoney(b.paid)}</span>
       </div>
       <div class="account-summary-item">
         <span class="account-summary-label">${translate(direction.key)}</span>
@@ -193,12 +193,14 @@ function renderAccount() {
           <div class="row-item-title">${isIn ? translate("finance.totalIn") : translate("finance.totalOut")}</div>
           <div class="row-item-sub">${esc(t.date || "")}${projectPart}${t.note ? " · " + esc(t.note) : ""}</div>
         </div>
-        <div class="row-item-stats">
-          <div class="row-stat">
-            <span class="row-stat-label">${translate("quick.amount")}</span>
-            <span class="row-stat-value ${isIn ? "is-paid" : "is-remaining"}">${formatMoney(t.amount)}</span>
+          <div class="row-item-stats">
+            <div class="row-stat">
+              <span class="row-stat-label">${translate("quick.amount")}</span>
+              <span class="row-stat-value" style="direction:ltr; font-weight:bold; color: ${isIn ? 'var(--success)' : 'var(--danger)'}">
+                ${isIn ? '+' : '-'}${formatMoney(t.amount)}
+              </span>
+            </div>
           </div>
-        </div>
       </div>`;
   });
 

@@ -141,16 +141,33 @@ export function renderStatement() {
             invoiceCell = `
               <button class="btn btn-soft btn-xs statement-inv-btn is-has-invoice no-print" type="button" data-inv-data="${esc(invData)}" data-inv-type="${esc(invType)}" data-inv-name="${esc(invName)}" style="background:rgba(59,130,246,0.18);color:var(--primary);font-weight:700;">
                 <i data-lucide="eye" class="icon"></i>
-                <span>عرض الفاتورة</span>
+                <span>فاتورة</span>
               </button>
             `;
           } else {
             invoiceCell = `
-              <button class="btn btn-soft btn-xs statement-inv-btn is-upload-btn no-print" type="button" data-txn-id="${esc(r.id)}" data-txn-type="${esc(r.type)}" style="background:rgba(234,179,8,0.15);color:#b45309;font-weight:600;" title="انقر لإرفاق صورة أو ملف فاتورة لهذه العملية">
+              <button class="btn btn-soft btn-xs statement-inv-btn is-upload-btn no-print" type="button" data-txn-id="${esc(r.id)}" data-txn-type="${esc(r.type)}" style="background:rgba(234,179,8,0.15);color:#b45309;font-weight:600;" title="إرفاق فاتورة">
                 <i data-lucide="paperclip" class="icon"></i>
-                <span>إرفاق فاتورة</span>
+                <span>فاتورة</span>
               </button>
             `;
+          }
+
+          let cumLabel = "";
+          if (r.balance > 0) cumLabel = ' <span style="color:var(--danger);font-size:0.85em;font-weight:bold">(له)</span>';
+          else if (r.balance < 0) cumLabel = ' <span style="color:var(--success);font-size:0.85em;font-weight:bold">(عليه)</span>';
+          const cumDisplay = formatMoney(Math.abs(r.balance)) + cumLabel;
+
+          let paidOutDisplay = "—";
+          let paidInDisplay = "—";
+
+          if (r.paid > 0) {
+            paidOutDisplay = `<span style="color:var(--danger); direction:ltr; display:inline-block; font-weight:bold;">-${formatMoney(r.paid)}</span>`;
+          }
+          if (r.paid < 0) {
+            paidInDisplay = `<span style="color:var(--success); direction:ltr; display:inline-block; font-weight:bold;">+${formatMoney(Math.abs(r.paid))}</span>`;
+          } else if (r.deduction > 0) {
+            paidInDisplay = `<span style="color:var(--success); direction:ltr; display:inline-block; font-weight:bold;">+${formatMoney(r.deduction)}</span>`;
           }
 
           return `
@@ -160,10 +177,10 @@ export function renderStatement() {
               <td class="statement-desc-cell">${esc(r.desc || "—")}</td>
               <td>${esc(r.projectName || "—")}</td>
               <td class="num-cell ${r.due > 0 ? "is-due" : ""}">${r.due > 0 ? formatMoney(r.due) : "—"}</td>
-              <td class="num-cell ${r.paid > 0 ? "is-paid" : ""}">${r.paid > 0 ? formatMoney(r.paid) : "—"}</td>
-              <td class="num-cell ${r.deduction > 0 ? "is-deduction" : ""}">${r.deduction > 0 ? formatMoney(r.deduction) : "—"}</td>
+              <td class="num-cell" style="text-align:right;">${paidOutDisplay}</td>
+              <td class="num-cell" style="text-align:right;">${paidInDisplay}</td>
               <td class="no-print" style="text-align:center;">${invoiceCell}</td>
-              <td class="num-cell statement-balance-cell"><strong>${formatMoney(r.balance)}</strong></td>
+              <td class="num-cell statement-balance-cell" style="direction:ltr; text-align:right;"><strong>${cumDisplay}</strong></td>
             </tr>
           `;
         })
@@ -172,14 +189,22 @@ export function renderStatement() {
   }
 
   if (tfoot) {
+    let finalLabel = "";
+    if (statement.finalBalance > 0) finalLabel = ' <span style="color:var(--danger);font-size:0.85em;font-weight:bold">(له)</span>';
+    else if (statement.finalBalance < 0) finalLabel = ' <span style="color:var(--success);font-size:0.85em;font-weight:bold">(عليه)</span>';
+    const finalDisplay = formatMoney(Math.abs(statement.finalBalance)) + finalLabel;
+
+    const totalPaidOut = statement.rows.reduce((s, r) => s + (r.paid > 0 ? r.paid : 0), 0);
+    const totalPaidIn = statement.rows.reduce((s, r) => s + (r.paid < 0 ? Math.abs(r.paid) : 0) + (r.deduction > 0 ? r.deduction : 0), 0);
+
     tfoot.innerHTML = `
       <tr class="statement-total-row">
         <td colspan="4" class="text-start"><strong>الإجمالي الكلي للفترة</strong></td>
         <td class="num-cell"><strong>${formatMoney(statement.periodDues)}</strong></td>
-        <td class="num-cell"><strong>${formatMoney(statement.periodPaid)}</strong></td>
-        <td class="num-cell"><strong>${formatMoney(statement.periodDeductions)}</strong></td>
+        <td class="num-cell" style="color:var(--danger);"><strong>${formatMoney(totalPaidOut)}</strong></td>
+        <td class="num-cell" style="color:var(--success);"><strong>${formatMoney(totalPaidIn)}</strong></td>
         <td class="no-print"></td>
-        <td class="num-cell statement-final-cell"><strong>${formatMoney(statement.finalBalance)} ج.م</strong></td>
+        <td class="num-cell statement-final-cell" style="direction:ltr; text-align:right;"><strong>${finalDisplay}</strong></td>
       </tr>
     `;
   }

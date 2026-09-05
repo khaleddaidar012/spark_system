@@ -8,11 +8,12 @@
    person can later hold multiple roles.
    ============================================ */
 
-import { save, uid } from "./store.js";
+import { save, uid, all } from "./store.js";
 import { notifyDataChanged } from "./actions.js";
 import { showModal, hideModal } from "./modal.js";
 import { translate } from "./i18n.js";
 import { CONTRACTOR_SPECIALTIES } from "./person-roles.js";
+import { toast } from "./toast.js";
 
 const MODAL_ID = "quickAddPersonModal";
 const TITLE_ID = "qaPersonTitle";
@@ -153,6 +154,14 @@ function submit(e) {
   const nameEl = document.getElementById("qaPersonName");
   const name = nameEl.value.trim();
   if (!name) {
+    nameEl.focus();
+    return;
+  }
+
+  const collectionName = COLLECTION_BY_TYPE[currentType];
+  const existing = all(collectionName).find((p) => p.name.toLowerCase() === name.toLowerCase());
+  if (existing) {
+    toast(`يوجد شخص مسجل بهذا الاسم بالفعل!`, "danger");
     nameEl.focus();
     return;
   }

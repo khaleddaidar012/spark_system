@@ -60,10 +60,9 @@ export function personRolesLabel(person, lang) {
 export function contractorLabel(role, name, lang = "en") {
   const specialty = CONTRACTOR_SPECIALTIES.find((s) => s.value === role) || CONTRACTOR_SPECIALTIES[CONTRACTOR_SPECIALTIES.length - 1];
   const roleLabel = specialty[lang] || specialty.en;
-  const personName = String(name || "").trim();
   return lang === "ar"
-    ? `مقاول ${roleLabel} (${personName})`
-    : `${roleLabel} Contractor (${personName})`;
+    ? `مقاول ${roleLabel}`
+    : `${roleLabel} Contractor`;
 }
 
 export function contractorSpecialty(person) {

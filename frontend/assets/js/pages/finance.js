@@ -430,6 +430,21 @@ document.addEventListener("DOMContentLoaded", async () => {
   initIncomeCards();
   initExpenseCards();
   initInvoiceClicks();
+
+  // Bind Fast Add buttons
+  document.getElementById("fastAddIncomingBtn")?.addEventListener("click", () => {
+    if (window.openQuickMoney) window.openQuickMoney({ direction: "in" });
+  });
+  document.getElementById("fastAddOutgoingBtn")?.addEventListener("click", () => {
+    if (window.openQuickMoney) window.openQuickMoney({ direction: "out" });
+  });
+  document.getElementById("fastAddMaterialBtn")?.addEventListener("click", () => {
+    if (window.openQuickMaterials) window.openQuickMaterials();
+  });
+  document.getElementById("fastMoneySplitBtn")?.addEventListener("click", () => {
+    if (window.openQuickMoneySplit) window.openQuickMoneySplit();
+  });
+
   window.addEventListener("spark:data-changed", () => {
     renderSummary();
     renderIncomeCards();

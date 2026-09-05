@@ -113,10 +113,24 @@
           <section class="card detail-section detail-section-block">
             <div class="detail-section-head">
               <h2 class="detail-section-title" data-i18n="project.moneyTitle">Money</h2>
-              <button class="btn btn-primary btn-sm" id="addClientPaymentBtn" type="button">
-                <i data-lucide="plus" class="icon"></i>
-                <span data-i18n="project.addClientPayment">Add Client Payment</span>
-              </button>
+              <div style="display:flex; gap:8px;">
+                <button class="btn btn-outline btn-sm" id="fastAddIncomingBtn" type="button">
+                  <i data-lucide="arrow-down-circle" class="icon"></i>
+                  <span data-i18n="project.fastAddIncoming">وارد سريع</span>
+                </button>
+                <button class="btn btn-outline btn-sm" id="fastAddOutgoingBtn" type="button">
+                  <i data-lucide="arrow-up-circle" class="icon"></i>
+                  <span data-i18n="project.fastAddOutgoing">صادر سريع</span>
+                </button>
+                <button class="btn btn-outline btn-sm" id="fastMoneySplitBtn" type="button">
+                  <i data-lucide="split" class="icon"></i>
+                  <span data-i18n="project.fastMoneySplit">تقسيم أموال</span>
+                </button>
+                <button class="btn btn-primary btn-sm" id="addClientPaymentBtn" type="button">
+                  <i data-lucide="plus" class="icon"></i>
+                  <span data-i18n="project.addClientPayment">Add Client Payment</span>
+                </button>
+              </div>
             </div>
             <div class="finance-summary" aria-label="Project money summary">
               <div class="finance-card is-in">

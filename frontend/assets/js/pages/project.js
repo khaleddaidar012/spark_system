@@ -1047,6 +1047,17 @@ document.addEventListener("DOMContentLoaded", async () => {
   });
   document.getElementById("clientPaymentForm").addEventListener("submit", submitClientPayment);
 
+  // Bind Fast Add buttons
+  document.getElementById("fastAddIncomingBtn")?.addEventListener("click", () => {
+    if (window.openQuickMoney) window.openQuickMoney({ direction: "in", projectId: current.id });
+  });
+  document.getElementById("fastAddOutgoingBtn")?.addEventListener("click", () => {
+    if (window.openQuickMoney) window.openQuickMoney({ direction: "out", projectId: current.id });
+  });
+  document.getElementById("fastMoneySplitBtn")?.addEventListener("click", () => {
+    if (window.openQuickMoneySplit) window.openQuickMoneySplit();
+  });
+
   // Phase modals
   document.getElementById("addPhaseBtn").addEventListener("click", openAddPhaseModal);
   document.getElementById("addPhaseModalClose").addEventListener("click", closeAddPhaseModal);

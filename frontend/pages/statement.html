@@ -78,9 +78,8 @@
             <tr>
               <th data-i18n="statement.material">Material</th>
               <th data-i18n="statement.qty">Qty</th>
-              <th data-i18n="statement.cost">Cost</th>
-              <th data-i18n="statement.contractor">Contractor</th>
-              <th data-i18n="statement.workmanship">Workmanship</th>
+              <th>تكلفة الوحدة | الإجمالي</th>
+              <th>المصنعية</th>
               <th class="is-center" data-i18n="statement.clientBought">Purchased by the client</th>
               <th class="is-center no-print" data-i18n="statement.remove">Remove</th>
             </tr>
@@ -91,9 +90,11 @@
       </section>
 
       <section class="statement-workmanship">
-        <h2 class="statement-section-title" data-i18n="statement.workmanshipByContractor">Workmanship by Contractor</h2>
+        <h2 class="statement-section-title">المصنعية</h2>
         <div class="statement-contractor-lines" id="statementContractorLines"></div>
       </section>
+
+
 
       <section class="statement-summary">
         <div class="statement-summary-row">
@@ -103,8 +104,7 @@
         <div class="statement-summary-row">
           <span data-i18n="statement.workmanshipTotal">Workmanship Total</span>
           <span id="statementWorkmanshipTotal">0</span>
-        </div>
-        <div class="statement-summary-row">
+        </div>        <div class="statement-summary-row">
           <span data-i18n="statement.supervisionValue">Supervision Value</span>
           <input class="form-input statement-supervision-input" id="statementSupervision" type="number" min="0" step="0.01" value="0" />
         </div>

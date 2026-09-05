@@ -7,7 +7,7 @@
 
 import { all, get, save, peopleWithRole, findPersonById } from "./store.js";
 import { recordMoney, addMaterialToProject, consumeMaterial } from "./actions.js";
-import { contractorWorksOnProject } from "./calc.js";
+import { contractorWorksOnProject, num, formatMoney } from "./calc.js";
 import { translate } from "./i18n.js";
 import { toast } from "./toast.js";
 import { showModal, hideModal } from "./modal.js";
@@ -418,13 +418,41 @@ function resetQuickMoney() {
   fillPersonSelect();
 }
 
+export function openQuickMoney(options = {}) {
+  const { direction = "out", projectId = null } = options;
+  if (typeof closeFabMenu === "function") closeFabMenu(true);
+  openModal("quickMoneyModal");
+  resetQuickMoney();
+  
+  if (direction) {
+    const dir = document.getElementById("moneyDirection");
+    if (dir) {
+      dir.setAttribute("data-value-state", direction);
+      dir.querySelectorAll(".segmented-btn").forEach((b) =>
+        b.classList.toggle("is-active", b.dataset.value === direction)
+      );
+    }
+  }
+
+  if (projectId) {
+    const projSelect = document.getElementById("moneyProject");
+    if (projSelect) {
+      projSelect.value = projectId;
+      updateMoneyPhases();
+    }
+  }
+
+  const amount = document.getElementById("moneyAmount");
+  if (amount) amount.focus();
+}
+
+if (typeof window !== "undefined") {
+  window.openQuickMoney = openQuickMoney;
+}
+
 function initQuickMoney() {
   document.getElementById("fabMoney").addEventListener("click", () => {
-    closeFabMenu(true);
-    openModal("quickMoneyModal");
-    resetQuickMoney();
-    const amount = document.getElementById("moneyAmount");
-    if (amount) amount.focus();
+    openQuickMoney();
   });
 
   const moneyProjSelect = document.getElementById("moneyProject");
@@ -659,31 +687,40 @@ function fillContractorSelect() {
 
 function applyMaterialDirection(direction) {
   document.getElementById("qmSupplierField").hidden = direction === "out";
-  document.getElementById("qmPriceField").hidden = direction === "out";
+  // We keep qmPriceField visible so the user can enter the material's cost value for the project
+  document.getElementById("qmPriceField").hidden = false;
   document.getElementById("qmContractorField").hidden = direction === "out";
-  if (direction === "out") {
-    document.getElementById("qmPrice").value = "";
-  }
 }
 
-function initQuickMaterials() {
-  document.getElementById("fabMaterials").addEventListener("click", () => {
-    closeFabMenu(true);
-    if (!fillProjectSelect()) {
-      toast(translate("quick.noProjects"), "info");
-      return;
-    }
-    fillSupplierSelect();
-    fillContractorSelect();
-    fillMaterialSuggestions();
-    const modal = openModal("quickMatModal");
-    const dirBox = modal.querySelector("#matDirection");
+export function openQuickMaterials() {
+  if (typeof closeFabMenu === "function") closeFabMenu(true);
+  if (!fillProjectSelect()) {
+    toast(translate("quick.noProjects"), "info");
+    return;
+  }
+  fillSupplierSelect();
+  fillContractorSelect();
+  fillMaterialSuggestions();
+  const modal = openModal("quickMatModal");
+  const dirBox = modal.querySelector("#matDirection");
+  if (dirBox) {
     dirBox.setAttribute("data-value-state", "in");
     modal.querySelectorAll("#matDirection .segmented-btn").forEach((b) =>
       b.classList.toggle("is-active", b.dataset.value === "in")
     );
     applyMaterialDirection("in");
-    document.getElementById("qmName").focus();
+  }
+  const nameField = document.getElementById("qmName");
+  if (nameField) nameField.focus();
+}
+
+if (typeof window !== "undefined") {
+  window.openQuickMaterials = openQuickMaterials;
+}
+
+function initQuickMaterials() {
+  document.getElementById("fabMaterials").addEventListener("click", () => {
+    openQuickMaterials();
   });
 
   document.getElementById("matDirection").addEventListener("click", (e) => {
@@ -721,6 +758,19 @@ function initQuickMaterials() {
     applySupplierSupplies(e.target.value);
   });
 
+  const qmQty = document.getElementById("qmQty");
+  const qmPrice = document.getElementById("qmPrice");
+  const qmTotal = document.getElementById("qmTotal");
+
+  function updateQmTotal() {
+    const q = num(qmQty.value);
+    const p = num(qmPrice.value);
+    if (qmTotal) qmTotal.value = formatMoney(q * p);
+  }
+
+  if (qmQty) qmQty.addEventListener("input", updateQmTotal);
+  if (qmPrice) qmPrice.addEventListener("input", updateQmTotal);
+
   document.getElementById("quickMatForm").addEventListener("submit", (e) => {
     e.preventDefault();
     const direction = document.getElementById("matDirection").getAttribute("data-value-state") || "in";
@@ -746,35 +796,55 @@ function initQuickMaterials() {
         matData.invoiceType = matInvoice.type;
         matData.invoiceName = matInvoice.name;
       }
-      addMaterialToProject(projectId, matData);
+      const savedMat = addMaterialToProject(projectId, matData);
 
-      // Task 08: Link material transaction to active phases
-      const activePhases = getActivePhases(projectId);
-      const totalAmount = Number(matData.quantity) * Number(matData.unitPrice);
-      for (const ph of activePhases) {
-        addFinanceToPhaseLog(projectId, {
-          transactionId: "mat_" + Date.now(),
-          phaseId: ph.id,
-          subPhaseId: ph.activeSubPhaseId || null,
-          direction: "out",
-          amount: totalAmount,
-          note: `${name} (${matData.quantity} ${matData.unit})`,
-        });
+      const qmPayNow = document.getElementById("qmPayNow")?.checked;
+      if (qmPayNow && savedMat) {
+        let payPersonId = matData.supplierId;
+        let payPersonType = "supplier";
+        
+        if (!payPersonId && matData.contractorId) {
+          payPersonId = matData.contractorId;
+          payPersonType = "contractor";
+        }
+
+        if (payPersonId) {
+          const personInfo = findPersonById(payPersonId);
+          if (personInfo) {
+            recordMoney({
+              direction: "out",
+              personType: payPersonType,
+              personId: payPersonId,
+              personName: personInfo.person.name,
+              amount: savedMat.total,
+              projectId: projectId,
+              note: `سداد قيمة الخامات: ${name} (${matData.quantity} ${matData.unit})`,
+            });
+          }
+        }
       }
     } else {
       consumeMaterial(projectId, {
         name,
         quantity: document.getElementById("qmQty").value,
         unit: document.getElementById("qmUnit").value,
+        unitPrice: document.getElementById("qmPrice").value,
         date: new Date().toISOString().slice(0, 10),
       });
     }
 
-    // Reset invoice state
+    // Reset invoice and fields state
     matInvoice = null;
     clearInvoicePreview({ previewId: "matInvoicePreview", thumbId: "matInvoiceThumb", pdfIconId: "matInvoicePdfIcon", fileId: "matInvoiceFile", cameraId: "matInvoiceCamera" });
 
     document.getElementById("quickMatForm").reset();
+    if (qmTotal) qmTotal.value = "";
+    const dirBox = document.getElementById("matDirection");
+    dirBox.setAttribute("data-value-state", "in");
+    document.querySelectorAll("#matDirection .segmented-btn").forEach((b) =>
+      b.classList.toggle("is-active", b.dataset.value === "in")
+    );
+    applyMaterialDirection("in");
     closeModal("quickMatModal");
     toast(translate("common.saved"));
   });
@@ -875,6 +945,16 @@ function fillMoneySplitProjects() {
         row.querySelector(".split-project-amount").value = v.amount;
       }
     });
+    
+    // Add one empty row
+    const newIndex = savedValues.length;
+    container.insertAdjacentHTML("beforeend", `
+      <div class="split-project-row" data-index="${newIndex}">
+        <select class="form-input split-project-select" required>${projectOptions}</select>
+        <input class="form-input split-project-amount" type="number" min="0" step="0.01" placeholder="${translate("quick.amountPh")}" required />
+        <button type="button" class="btn btn-soft btn-icon split-project-remove" aria-label="${translate("quick.remove")}"><i data-lucide="trash-2" class="icon"></i></button>
+      </div>
+    `);
   } else {
     container.innerHTML = `
       <div class="split-project-row" data-index="0">
@@ -939,13 +1019,21 @@ function resetQuickMoneySplit() {
   fillMoneySplitProjects();
 }
 
+export function openQuickMoneySplit() {
+  if (typeof closeFabMenu === "function") closeFabMenu(true);
+  openModal("quickMoneySplitModal");
+  resetQuickMoneySplit();
+  const amount = document.getElementById("moneySplitTotalAmount");
+  if (amount) amount.focus();
+}
+
+if (typeof window !== "undefined") {
+  window.openQuickMoneySplit = openQuickMoneySplit;
+}
+
 function initQuickMoneySplit() {
-  document.getElementById("fabMoneySplit").addEventListener("click", () => {
-    closeFabMenu(true);
-    openModal("quickMoneySplitModal");
-    resetQuickMoneySplit();
-    const amount = document.getElementById("moneySplitTotalAmount");
-    if (amount) amount.focus();
+  document.getElementById("fabMoneySplit")?.addEventListener("click", () => {
+    openQuickMoneySplit();
   });
 
   document.getElementById("moneySplitPersonType").addEventListener("click", (e) => {
@@ -982,7 +1070,18 @@ function initQuickMoneySplit() {
   });
 
   document.getElementById("moneySplitAddProject").addEventListener("click", () => {
-    fillMoneySplitProjects();
+    const container = document.getElementById("moneySplitProjectsContainer");
+    const projects = all("projects");
+    const projectOptions = projects.map((p) => `<option value="${p.id}">${esc(p.name)}</option>`).join("");
+    const newIndex = container.querySelectorAll(".split-project-row").length;
+    container.insertAdjacentHTML("beforeend", `
+      <div class="split-project-row" data-index="${newIndex}">
+        <select class="form-input split-project-select" required>${projectOptions}</select>
+        <input class="form-input split-project-amount" type="number" min="0" step="0.01" placeholder="${translate("quick.amountPh")}" required />
+        <button type="button" class="btn btn-soft btn-icon split-project-remove" aria-label="${translate("quick.remove")}"><i data-lucide="trash-2" class="icon"></i></button>
+      </div>
+    `);
+    window.lucide?.createIcons();
   });
 
   document.getElementById("moneySplitProjectsContainer").addEventListener("input", (e) => {
@@ -1070,12 +1169,26 @@ function initQuickMoneySplit() {
       return;
     }
 
-    // Validate contractor on project if applicable
+    // Auto-add contractor to project if applicable
     if (type === "contractor" && personId) {
       for (const split of splits) {
-        if (!contractorWorksOnProject(personId, split.projectId)) {
-          toast(translate("quick.contractorNotOnProject").replace("{name}", personName), "info");
-          return;
+        const project = get("projects", split.projectId);
+        if (project) {
+          project.contractors = project.contractors || [];
+          let pCont = project.contractors.find((c) => c.id === personId);
+          if (!pCont) {
+            const personInfo = get("contractors", personId);
+            pCont = {
+              id: personId,
+              name: personName,
+              role: personInfo ? (personInfo.role || "contractor") : "contractor",
+              total: 0,
+              paid: 0,
+            };
+            project.contractors.push(pCont);
+            save("projects", project);
+            toast(`تمت إضافة المقاول ${personName} تلقائياً إلى المشروع`, "success");
+          }
         }
       }
     }

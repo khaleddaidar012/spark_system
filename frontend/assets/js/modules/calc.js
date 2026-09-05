@@ -154,29 +154,32 @@ export function contractorProjects(contractorId) {
     .filter(
       (p) =>
         (p.contractors || []).some((c) => c.id === contractorId || c.contractorId === contractorId) ||
-        (p.materials || []).some((m) => m.contractorId === contractorId)
+        (p.materials || []).some((m) => (m.workmanships || []).some(w => w.contractorId === contractorId))
     )
     .map((p) => ({
       project: p,
       contractor: (p.contractors || []).find((c) => c.id === contractorId || c.contractorId === contractorId) || null,
-      materials: (p.materials || []).filter((m) => m.contractorId === contractorId),
+      materials: (p.materials || []).filter((m) => (m.workmanships || []).some(w => w.contractorId === contractorId)),
     }));
 }
 
 export function contractorMaterials(project, contractorId) {
-  return (project.materials || []).filter((m) => m.contractorId === contractorId);
+  return (project.materials || []).filter((m) => (m.workmanships || []).some(w => w.contractorId === contractorId));
 }
 
 export function statementData(project) {
   const materials = (project.materials || []).map((m) => ({
     ...m,
-    workmanship: num(m.workmanship),
     clientBought: Boolean(m.clientBought),
   }));
   const materialTotal = materials
     .filter((m) => !m.clientBought)
     .reduce((s, m) => s + num(m.total), 0);
-  const workmanshipTotal = materials.reduce((s, m) => s + num(m.workmanship), 0);
+  
+  const workmanshipTotal = materials.reduce((sum, m) => {
+    return sum + (m.workmanships || []).reduce((ws, w) => ws + num(w.amount), 0);
+  }, 0);
+
   const supervisionAmount = num(project.supervisionAmount ?? project.supervisionPercent);
   return {
     materials,
@@ -490,6 +493,26 @@ export function personAccountStatement({ personId, personType, fromDate = "", to
           });
         }
       }
+      
+      // Dues from materials workmanship
+      for (const m of p.materials || []) {
+        for (const w of m.workmanships || []) {
+          if (w.contractorId === personId) {
+            rows.push({
+              id: "mat_work_" + (m.id || uid()),
+              date: m.date || (p.createdAt ? p.createdAt.slice(0, 10) : ""),
+              type: "work",
+              typeLabel: "مصنعية خامة",
+              desc: `مصنعية خامة: ${m.name || "خامة بدون اسم"}`,
+              projectId: p.id,
+              projectName: p.name,
+              due: num(w.amount),
+              paid: 0,
+              deduction: 0,
+            });
+          }
+        }
+      }
     }
   }
 
@@ -510,8 +533,8 @@ export function personAccountStatement({ personId, personType, fromDate = "", to
         desc: t.notes || (t.direction === "out" ? "سداد دفعة نقدية" : "استرداد"),
         projectId: t.projectId,
         projectName: getProjectName(t.projectId),
-        due: t.direction === "in" ? amount : 0,
-        paid: t.direction === "out" ? amount : 0,
+        due: 0,
+        paid: t.direction === "out" ? amount : -amount,
         deduction: 0,
         invoiceData: t.invoiceData,
         invoiceType: t.invoiceType,
